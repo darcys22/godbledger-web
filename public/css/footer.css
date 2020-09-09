@@ -1,0 +1,23 @@
+#footer {
+  height: 50px;
+}
+#footer p {
+  display: block;
+  float: left;
+  font-size: 0.9em;
+}
+#footer p a,
+#footer p a:Hover {
+  text-decoration: none;
+}
+#footer p a:Hover {
+  text-decoration: underline;
+}
+#footer .darcy {
+  padding: 45px 0px 0px 55px;
+}
+#footer .copyright {
+  float: right;
+  text-align: right;
+  padding: 45px 65px 0px 0px;
+}
