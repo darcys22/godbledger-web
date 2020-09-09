@@ -1,3 +1,10 @@
+$('#users a').editable({
+    type: 'text',
+    name: 'username',
+    url: '/post',
+    title: 'Enter username'
+});
+
 $('#addContractor').validator().on('submit', function (e) {
   if (e.isDefaultPrevented()) {
     // handle the invalid form...
