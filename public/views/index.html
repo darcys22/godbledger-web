@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>GoDBLedger Web GUI</title>
+    <meta name="description" content="Communicate with your GoDBLedger Server" />
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1, user-scalable=yes">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+    <!--<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.css">-->
+    <link href="css/footer.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <!--<link rel="stylesheet" href="css/pikaday.css">-->
+    <link rel='shortcut icon' type='image/x-icon' href='img/favicon.ico'/>
+  </head>
+  <body>
+		<nav class="navbar navbar-default">
+			<div class="container">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<div class="navbar-header">
+					<a class="navbar-brand" href="#">GoDBLedger.com</a>
+				</div>
+
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+					<ul class="nav navbar-nav navbar-right">
+            <li>
+                <li> <a href="https://www.taxsource.com.au" >Other Tools</a> </li>
+            </li>
+
+						<li> <a href="" data-toggle="modal" data-target="#instructionsModal">Instructions</a> </li>
+					</ul>
+				</div><!-- /.navbar-collapse -->
+			</div><!-- /.container-fluid -->
+		</nav>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-7">
+          <div class="page-header">
+            <h1>GoDBLedger Web</h1>
+            <h3 id="payername" ><small>Journal Entries</small></h3>
+          </div>
+          <div class="row">
+            <button type="button" id="new" class="btn btn-success btn-lg" data-toggle="modal" data-target="#contractorModal">
+              Add Journal
+            </button>
+            <button type="button" id="refresh" class="btn btn-default btn-lg" data-toggle="tooltip" title="Refresh the table to view journals" >
+              Refresh Table
+            </button>
+          </div>
+          <div class="help-block"></div>
+          <div class="row">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Journal ID</th>
+                  <th>Narration</th>
+                  <th>DR/CR</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="transactionstable">
+                <tr>
+                  <th>No Journals. Click "Add Journal" to add some.
+                  <th>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="col-md-3"></div>
+      </div>
+      <div class="help-block"></div>
+      <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-7">
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="contractorModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4>Journal Entry</h4>
+          </div>
+          <div class = "modal-body">
+            <form class="well form-horizontal" role="form" data-toggle="validator" action=" " method="post"  id="addContractor">
+              <fieldset>
+                <!-- Text input-->
+                <div class="form-group">
+                  <label class="col-md-2 control-label">Date</label>  
+                  <div class="col-md-10 inputGroupContainer">
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                      <input name="date" placeholder="Date" class="form-control"  type="text">
+                    </div>
+                  </div>
+                </div>
+                <!-- Text input-->
+                <div class="form-group">
+                  <label class="col-md-2 control-label">Narration</label>  
+                  <div class="col-md-10 inputGroupContainer">
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                      <textarea class="span10" rows="3" name="narration" placeholder="Journal Narration" class="form-control"  type="text"></textarea>
+                    </div>
+                  </div>
+                </div>
+                <br>
+								<div class="inputGroupContainer">
+                  <table id="users" class="table table-bordered table-condensed">
+                    <tr><th>#</th><th>Description</th><th>Account</th><th>Debit</th><th>Credit</th></tr>
+                    <tr>
+                        <td>1</td>
+                        <td><input type="text"></input></td>
+                        <td><a href="#" data-pk="1" class="nopad"><input type="text"></input></a></td>
+                        <td><input type="text"></input></td>
+                        <td><input type="text"></input></td>
+                    </tr>
+
+                    <tr>
+                        <td>2</td>
+                        <td><input type="text"></input></td>
+                        <td><a href="#" data-pk="2" class="nopad"><input type="text"></input></a></td>
+                        <td><input type="text"></input></td>
+                        <td><input type="text"></input></td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+                        <td><input type="text"></input></td>
+                        <td><a href="#" data-pk="3" class="nopad"><input type="text"></input></a></td>
+                        <td><input type="text"></input></td>
+                        <td><input type="text"></input></td>
+                    </tr>
+                    <tfoot>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td><span><input type="text" id="invoiceTotalDebit" readonly="" class="totalField" value="0.00"></span></td>
+                        <td><span><input type="text" id="invoiceTotalCredit" readonly="" class="totalField" value="0.00"></span></td>
+                    </tfoot>
+
+                </table>
+                </div>
+
+                <div class="totals">
+                <div class=" skip   button" id="addNewLineItemButton"><a href="#" onclick="Journal.addNewLineItem(); return false;" id="ext-gen63"><em class="icons add-row">&nbsp;</em><span class="text" data-automationid="Add a new line-button">Add a new line</span></a></div>
+                <div class="total" style="margin-right:30px;">
+                  <div class="first"><label>
+                                Subtotal
+                            </label><span><input type="text" id="subTotalDebit" readonly="" class="subTotalField" value="0.00"></span><span><input type="text" id="subTotalCredit" readonly="" class="subTotalField" value="0.00"></span></div>
+                  <div id="gstRows" style="display: none;"><div><label>GST</label><span><input type="text" readonly="" class="subTotalField" value="0.00"></span><span><input type="text" readonly="" class="subTotalField" value="0.00"></span></div></div>
+                  <div id="adjustmentRow" style="display:none;"><label>
+                          includes Adjustments to Tax
+                        </label><span><input type="text" id="AdjustmentsDebit" class="subTotalField" value="0.00" autocomplete="off" disabled=""><script type="text/javascript">
+                            new InputValidator("AdjustmentsDebit", 2, true, true);
+                          </script></span><span><input type="text" id="AdjustmentsCredit" class="subTotalField" value="0.00" autocomplete="off" disabled=""><script type="text/javascript">
+                          new InputValidator("AdjustmentsCredit", 2, true, true);
+                        </script></span></div>
+                  <div class="bottom-line"><label>
+                                TOTAL
+                            </label><span><input type="text" id="invoiceTotalDebit" readonly="" class="totalField" value="0.00"></span><span><input type="text" id="invoiceTotalCredit" readonly="" class="totalField" value="0.00"></span></div>
+                  <div id="totalOutByWarning" class="total-out-by" style="display: none;"><label>&nbsp;</label><span class="right red">
+                                Total is out by:
+                            </span><span><strong class="right red"><span id="totalOutByWarningAmount">0.00</span></strong></span></div>
+                </div>
+              </div>
+              <div class="actions">
+                <dl class="small blue select color-split list" id="ext-gen54">
+                  <dt id="ext-gen53">
+                    <div id="ext-gen57"><em>&nbsp;</em><a href="javascript:" onclick="Journal.save('SaveDraft'); return false;">
+                                        Save as draft
+                                    </a><div id="ext-gen56"><span>
+                                            &nbsp;
+                                        </span></div>
+                    </div>
+                  </dt>
+                  <dd id="ext-gen55">
+                    <ul>
+                      <li><a href="javascript:" onclick="Journal.save('SaveDraft'); return false;">
+                                            Save as draft
+                                        </a></li>
+                      <li><a href="javascript:" onclick="Journal.save('SaveDraftAndAdd'); return false;">
+                                            Save &amp; add another
+                                        </a></li>
+                    </ul>
+                  </dd>
+                </dl>
+                <div class="right">
+                  <dl class="large green select color-split list" id="ext-gen59">
+                    <dt id="ext-gen58">
+                      <div id="ext-gen62"><em>&nbsp;</em><a href="javascript:" onclick="Journal.save('Approve'); return false;">
+                                        Post
+                                    </a><div id="ext-gen61"><span>
+                                            &nbsp;
+                                        </span></div>
+                      </div>
+                    </dt>
+                    <dd id="ext-gen60">
+                      <ul>
+                        <li><a href="javascript:" onclick="Journal.save('Approve'); return false;">
+                                            Post
+                                        </a></li>
+                        <li><a href="javascript:" onclick="Journal.save('ApproveAndAdd'); return false;">
+                                            Post &amp; add another
+                                        </a></li>
+                      </ul>
+                    </dd>
+                  </dl>
+                  <div class="medium gray   button" id="ext-gen64"><a href="#" onclick="
+                                  SubmitAction('Cancel', '')
+                              ; return false;" id="ext-gen65"><em class="none">&nbsp;</em><span class="text" data-automationid="Cancel-button">Cancel</span></a></div>
+                </div>
+              </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="instructions modal">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h2>GoDBLedger Web</h2>
+          </div>
+          <div class = "modal-body">
+            <h4><em>Using GoDBLedger and GoDBLedger-Web</em></h4>
+            <p>GoDBLedger needs to be running on the same server as GoDBLedger-Web. The web gui provided by GoDBLedger-Web will allow you to send transactions to GoDBLedger</p>
+            <br>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/locale/en-au.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/validate.js/0.10.0/validate.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
+    <!--<script src="https://unpkg.com/bootstrap-table@1.17.1/dist/bootstrap-table.min.js"></script>-->
+    <script src="app/papaparse.min.js"></script>
+    <script type="text/javascript" src="app/main.js"></script> 
+  </body>
+  <div id="footer">
+    <p class="darcy">
+      GoDBLedger-Web
+      <br>
+      <a href="" data-toggle="modal" data-target="#instructionsModal">Instructions</a>
+    </p>
+    <p class="copyright">
+      Copyright © 2020
+      <a rel="author" href="http://www.darcyfinancial.com" target="_blank"><strong>Sean Darcy</strong></a>
+      <br>
+      Email:
+      <a href="mailto:sean@darcyfinancial.com">sean@darcyfinancial.com</a>
+    </p>
+  </div>
+</html>
