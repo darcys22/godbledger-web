@@ -95,7 +95,7 @@
                 <!-- Text input-->
                 <div class="form-group">
                   <label class="col-md-2 control-label">Date</label>  
-                  <div class="col-md-10 inputGroupContainer">
+                  <div class="col-md-3 inputGroupContainer">
                     <div class="input-group">
                       <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
                       <input name="date" placeholder="Date" class="form-control"  type="text">
@@ -108,7 +108,7 @@
                   <div class="col-md-10 inputGroupContainer">
                     <div class="input-group">
                       <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-                      <textarea class="span10" rows="3" name="narration" placeholder="Journal Narration" class="form-control"  type="text"></textarea>
+                      <textarea name="narration" placeholder="Journal Narration" class="form-control"  type="text"></textarea>
                     </div>
                   </div>
                 </div>
@@ -151,73 +151,12 @@
                 </div>
 
                 <div class="totals">
-                <div class=" skip   button" id="addNewLineItemButton"><a href="#" onclick="Journal.addNewLineItem(); return false;" id="ext-gen63"><em class="icons add-row">&nbsp;</em><span class="text" data-automationid="Add a new line-button">Add a new line</span></a></div>
-                <div class="total" style="margin-right:30px;">
-                  <div class="first"><label>
-                                Subtotal
-                            </label><span><input type="text" id="subTotalDebit" readonly="" class="subTotalField" value="0.00"></span><span><input type="text" id="subTotalCredit" readonly="" class="subTotalField" value="0.00"></span></div>
-                  <div id="gstRows" style="display: none;"><div><label>GST</label><span><input type="text" readonly="" class="subTotalField" value="0.00"></span><span><input type="text" readonly="" class="subTotalField" value="0.00"></span></div></div>
-                  <div id="adjustmentRow" style="display:none;"><label>
-                          includes Adjustments to Tax
-                        </label><span><input type="text" id="AdjustmentsDebit" class="subTotalField" value="0.00" autocomplete="off" disabled=""><script type="text/javascript">
-                            new InputValidator("AdjustmentsDebit", 2, true, true);
-                          </script></span><span><input type="text" id="AdjustmentsCredit" class="subTotalField" value="0.00" autocomplete="off" disabled=""><script type="text/javascript">
-                          new InputValidator("AdjustmentsCredit", 2, true, true);
-                        </script></span></div>
-                  <div class="bottom-line"><label>
-                                TOTAL
-                            </label><span><input type="text" id="invoiceTotalDebit" readonly="" class="totalField" value="0.00"></span><span><input type="text" id="invoiceTotalCredit" readonly="" class="totalField" value="0.00"></span></div>
-                  <div id="totalOutByWarning" class="total-out-by" style="display: none;"><label>&nbsp;</label><span class="right red">
-                                Total is out by:
-                            </span><span><strong class="right red"><span id="totalOutByWarningAmount">0.00</span></strong></span></div>
+                  <button class="btn btn-primary" id="addNewLineItemButton" onclick="Journal.addNewLineItem(); return false;"><span class="text" data-automationid="Add a new line-button">Add a new line</span></button>
                 </div>
-              </div>
-              <div class="actions">
-                <dl class="small blue select color-split list" id="ext-gen54">
-                  <dt id="ext-gen53">
-                    <div id="ext-gen57"><em>&nbsp;</em><a href="javascript:" onclick="Journal.save('SaveDraft'); return false;">
-                                        Save as draft
-                                    </a><div id="ext-gen56"><span>
-                                            &nbsp;
-                                        </span></div>
-                    </div>
-                  </dt>
-                  <dd id="ext-gen55">
-                    <ul>
-                      <li><a href="javascript:" onclick="Journal.save('SaveDraft'); return false;">
-                                            Save as draft
-                                        </a></li>
-                      <li><a href="javascript:" onclick="Journal.save('SaveDraftAndAdd'); return false;">
-                                            Save &amp; add another
-                                        </a></li>
-                    </ul>
-                  </dd>
-                </dl>
-                <div class="right">
-                  <dl class="large green select color-split list" id="ext-gen59">
-                    <dt id="ext-gen58">
-                      <div id="ext-gen62"><em>&nbsp;</em><a href="javascript:" onclick="Journal.save('Approve'); return false;">
-                                        Post
-                                    </a><div id="ext-gen61"><span>
-                                            &nbsp;
-                                        </span></div>
-                      </div>
-                    </dt>
-                    <dd id="ext-gen60">
-                      <ul>
-                        <li><a href="javascript:" onclick="Journal.save('Approve'); return false;">
-                                            Post
-                                        </a></li>
-                        <li><a href="javascript:" onclick="Journal.save('ApproveAndAdd'); return false;">
-                                            Post &amp; add another
-                                        </a></li>
-                      </ul>
-                    </dd>
-                  </dl>
-                  <div class="medium gray   button" id="ext-gen64"><a href="#" onclick="
-                                  SubmitAction('Cancel', '')
-                              ; return false;" id="ext-gen65"><em class="none">&nbsp;</em><span class="text" data-automationid="Cancel-button">Cancel</span></a></div>
-                </div>
+                <div class="actions">
+                  <div class="right">
+                    <button class="btn btn-success" id="saveJournalButton" onclick="Journal.save(); return false;" ><span class="text" data-automationid="Save-button">Post</span></button>
+                    <button class="btn btn-light" id="cancelJournalButton" onclick="SubmitAction('Cancel',''); return false;"><span class="text" data-automationid="Cancel-button">Cancel</span></button>
               </div>
         </div>
       </div>
