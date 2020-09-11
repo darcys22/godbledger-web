@@ -119,7 +119,8 @@
                     <tr>
                         <td>1</td>
                         <td><input type="text"></input></td>
-                        <td><a href="#" data-pk="1" class="nopad"><input type="text"></input></a></td>
+                        <!--TODO(sean): this is from http://vitalets.github.io/x-editable/demo.html?c=inline Select, remote array, no buttons-->
+                        <td><a href="#" id="group" data-type="select" data-pk="1" data-value="5" data-source="/api/accounts/list" data-title="Select group" class="editable editable-click" style="display: inline;">Admin</a></td>
                         <td><input type="text"></input></td>
                         <td><input type="text"></input></td>
                     </tr>
@@ -151,12 +152,12 @@
                 </div>
 
                 <div class="totals">
-                  <button class="btn btn-primary" id="addNewLineItemButton" onclick="Journal.addNewLineItem(); return false;"><span class="text" data-automationid="Add a new line-button">Add a new line</span></button>
+                  <button class="btn btn-primary" id="addNewLineItemButton" onclick=""><span class="text" data-automationid="Add a new line-button">Add a new line</span></button>
                 </div>
-                <div class="actions">
+                <div class="actions text-right">
                   <div class="right">
-                    <button class="btn btn-success" id="saveJournalButton" onclick="Journal.save(); return false;" ><span class="text" data-automationid="Save-button">Post</span></button>
-                    <button class="btn btn-light" id="cancelJournalButton" onclick="SubmitAction('Cancel',''); return false;"><span class="text" data-automationid="Cancel-button">Cancel</span></button>
+                    <button class="btn btn-light btn-sm" id="cancelJournalButton" onclick="SubmitAction('Cancel',''); return false;"><span class="text" data-automationid="Cancel-button">Cancel</span></button>
+                    <button class="btn btn-success" id="saveJournalButton" onclick="" ><span class="text" data-automationid="Save-button">Post Journal</span></button>
               </div>
         </div>
       </div>

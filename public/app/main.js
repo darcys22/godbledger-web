@@ -1,8 +1,63 @@
+function Journal()
+{
+    this.instanceData = "Display Me";
+
+    this.DisplayData = function()
+    {
+        alert(this.instanceData);
+    }
+
+    this.addNewLineItem = function()
+    {
+        alert(this.instanceData);
+    }
+
+    this.save = function()
+    {
+        alert(this.instanceData);
+    }
+  
+}
+
+var journal = new Journal();
+
+// ...and hook up the save journal button
+var saveJournalButton = document.getElementById("saveJournalButton");
+if (saveJournalButton.addEventListener) {
+    saveJournalButton.addEventListener('click', function() {
+        journal.save();
+    }, false);
+}
+else if (saveJournalButton.attachEvent) {
+    saveJournalButton.attachEvent('onclick', function() {
+        journal.save();
+    });
+}
+else {
+    // Very old browser, complain
+}
+
+// ...and hook up the add new line item button
+var newLineItemButton = document.getElementById("addNewLineItemButton");
+if (newLineItemButton.addEventListener) {
+    newLineItemButton.addEventListener('click', function() {
+        journal.addNewLineItem();
+    }, false);
+}
+else if (newLineItemButton.attachEvent) {
+    newLineItemButton.attachEvent('onclick', function() {
+        journal.addNewLineItem();
+    });
+}
+else {
+    // Very old browser, complain
+}
+
 $('#users a').editable({
     type: 'text',
     name: 'username',
     url: '/post',
-    title: 'Enter username'
+    title: 'Enter Account'
 });
 
 $('#addContractor').validator().on('submit', function (e) {
@@ -132,7 +187,7 @@ function tableCreate() {
         tr.appendChild(td)
         var td = document.createElement('td');
         var btn = document.createElement('button');
-        btn.className = 'btn btn-warning';
+        btn.className = 'btn btn-warning btn-rounded btn-sm';
         btn.setAttribute('data-param', i);
         //btn.onclick = function () {editContractor(this.getAttribute('data-param'));}; 
         btn.innerHTML = "Edit";
@@ -140,7 +195,7 @@ function tableCreate() {
         tr.appendChild(td)
         var td = document.createElement('td');
         var btn = document.createElement('button');
-        btn.className = 'btn btn-danger';
+        btn.className = 'btn btn-danger btn-rounded btn-sm';
         btn.setAttribute('data-param', i);
         btn.onclick = function () {deleteContractor(this.getAttribute('data-param'));}; 
         btn.innerHTML = "Delete";

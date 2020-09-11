@@ -19,5 +19,7 @@ func Register(r *macaron.Macaron) {
 	r.Get("/api/journals", GetJournals)
 	r.Post("/api/journals", binding.Bind(m.PostJournalCommand{}, PostJournal))
 
+	r.Get("/api/accounts/list", GetAccountListing)
+
 	r.NotFound(NotFound)
 }
