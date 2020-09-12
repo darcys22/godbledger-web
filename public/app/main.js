@@ -53,11 +53,21 @@ else {
     // Very old browser, complain
 }
 
-$('#users a').editable({
-    type: 'text',
-    name: 'username',
-    url: '/post',
-    title: 'Enter Account'
+$(document).ready(function() {
+    $('.js-example-basic-single').select2({
+      theme: "bootstrap",
+      ajax: {
+        url: '/api/accounts/list',
+        dataType: 'json',
+        //processResults: function (data) {
+          //// Transforms the top-level key of the response object from 'items' to 'results'
+          //return {
+            //results: data.items
+          //};
+        //}
+        // Additional AJAX parameters go here; see the end of this chapter for the full code of this example
+      }
+    });
 });
 
 $('#addContractor').validator().on('submit', function (e) {
