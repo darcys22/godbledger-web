@@ -56,6 +56,7 @@ else {
 $(document).ready(function() {
     $('.js-example-basic-single').select2({
       theme: "bootstrap",
+      placeholder: "Select Account",
       ajax: {
         url: '/api/accounts/list',
         dataType: 'json',
@@ -70,17 +71,16 @@ $(document).ready(function() {
     });
 });
 
-$('#addContractor').validator().on('submit', function (e) {
+$('#addJournal').validator().on('submit', function (e) {
   if (e.isDefaultPrevented()) {
     // handle the invalid form...
   } else {
     e.preventDefault();
-		window.transactions.push($('#addContractor').serializeObject());
-		$('#addContractor')[0].reset();
+		window.transactions.push($('#addJournal').serializeObject());
+		$('#addJournal')[0].reset();
 		$("#fybox").val(window.endFY.format("YYYY"));
 		tableCreate();
-    $('#contractorModal').modal('toggle');
-    openvalidate();
+    $('#journalModal').modal('toggle');
   }
 })
 
@@ -98,36 +98,22 @@ refreshButton.addEventListener('click', async _ => {
 } catch { error => console.error(error)
 }});
 
-//Todo(sean):
-function openvalidate() {
-  var validatebutton = document.getElementById('convert');
-  if (window.transactions.length > 0 && !jQuery.isEmptyObject(window.payer)) {
-    validatebutton.title = "Validate before creating TPAR File"
-    validatebutton.disabled = false
-    validatebutton.onclick = function() {validateTPAR()};
-  } else {
-    validatebutton.title = "Please add a Contractor and Payer details to create file"
-    validatebutton.disabled = true
-    validatebutton.onclick = function(){};
-  }
-}
-function editContractor(index) {
-  var contractor = window.transactions[index];
-  deleteContractor(index) 
-  for (var key in contractor) {
+function editJournal(index) {
+  var journal = window.transactions[index];
+  deleteJournal(index) 
+  for (var key in journal) {
     try {
-      document.getElementById("addContractor").elements[key].value = contractor[key]
+      document.getElementById("addJournal").elements[key].value = journal[key]
     } catch(err){
     }
   }
-  $("#contractorModal").modal() 
-  //$('#addContractor').validator()
+  $("#journalModal").modal() 
+  //$('#addJournal').validator()
 
 }
-function deleteContractor(index) {
+function deleteJournal(index) {
   window.transactions.splice(index, 1);
   tableCreate();
-  openvalidate();
 }
 
 function stripwhitecommas(str) {
@@ -199,7 +185,7 @@ function tableCreate() {
         var btn = document.createElement('button');
         btn.className = 'btn btn-warning btn-rounded btn-sm';
         btn.setAttribute('data-param', i);
-        //btn.onclick = function () {editContractor(this.getAttribute('data-param'));}; 
+        //btn.onclick = function () {editJournal(this.getAttribute('data-param'));}; 
         btn.innerHTML = "Edit";
         td.appendChild(btn)
         tr.appendChild(td)
@@ -207,7 +193,7 @@ function tableCreate() {
         var btn = document.createElement('button');
         btn.className = 'btn btn-danger btn-rounded btn-sm';
         btn.setAttribute('data-param', i);
-        btn.onclick = function () {deleteContractor(this.getAttribute('data-param'));}; 
+        btn.onclick = function () {deleteJournal(this.getAttribute('data-param'));}; 
         btn.innerHTML = "Delete";
         td.appendChild(btn)
         tr.appendChild(td)

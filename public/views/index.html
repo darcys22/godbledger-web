@@ -54,7 +54,7 @@
 			<div class="container">
 				<h2>Journal Entries</h2>
 				<p>
-					<button type="button" id="new" class="btn btn-primary my-2" data-toggle="modal" data-target="#contractorModal">
+					<button type="button" id="new" class="btn btn-primary my-2" data-toggle="modal" data-target="#journalModal">
 						Add Journal
 					</button>
 					<button type="button" id="refresh" class="btn btn-secondary my-w" data-toggle="tooltip" title="Refresh the table to view journals" >
@@ -72,7 +72,7 @@
 							<th>Date</th>
 							<th>Journal ID</th>
 							<th>Narration</th>
-							<th>DR/CR</th>
+							<th>Amount</th>
 							<th></th>
 							<th></th>
 						</tr>
@@ -87,7 +87,7 @@
 			</div>
 
 		</div>
-    <div class="modal fade" id="contractorModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+    <div class="modal fade" id="journalModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
 					<div class="modal-header">
@@ -97,7 +97,7 @@
 						</button>
 					</div>
           <div class = "modal-body">
-            <form class="well form-horizontal" role="form" data-toggle="validator" action=" " method="post"  id="addContractor">
+            <form class="well form-horizontal" role="form" data-toggle="validator" action=" " method="post"  id="addJournal">
               <fieldset>
                 <!-- Text input-->
                 <div class="form-group">
@@ -125,29 +125,35 @@
                     <tr><th>#</th><th>Description</th><th>Account</th><th>Debit</th><th>Credit</th></tr>
                     <tr>
                         <td>1</td>
-                        <td><input type="text"></input></td>
+                        <td><input type="text" data-lpignore="true"></input></td>
                         <td>
-                          <select class="js-example-basic-single" name="state">
+                          <select class="js-example-basic-single" name="account">
                           </select>
                         </td>
-                        <td><input type="text"></input></td>
-                        <td><input type="text"></input></td>
+                        <td><input type="text" data-lpignore="true"></input></td>
+                        <td><input type="text" data-lpignore="true"></input></td>
                     </tr>
 
                     <tr>
                         <td>2</td>
-                        <td><input type="text"></input></td>
-                        <td><a href="#" data-pk="2" class="nopad"><input type="text"></input></a></td>
-                        <td><input type="text"></input></td>
-                        <td><input type="text"></input></td>
+                        <td><input type="text" data-lpignore="true"></input></td>
+                        <td>
+                          <select class="js-example-basic-single" name="account">
+                          </select>
+                        </td>
+                        <td><input type="text" data-lpignore="true"></input></td>
+                        <td><input type="text" data-lpignore="true"></input></td>
                     </tr>
 
                     <tr>
                         <td>3</td>
-                        <td><input type="text"></input></td>
-                        <td><a href="#" data-pk="3" class="nopad"><input type="text"></input></a></td>
-                        <td><input type="text"></input></td>
-                        <td><input type="text"></input></td>
+                        <td><input type="text" data-lpignore="true"></input></td>
+                        <td>
+                          <select class="js-example-basic-single" name="account">
+                          </select>
+                        </td>
+                        <td><input type="text" data-lpignore="true"></input></td>
+                        <td><input type="text" data-lpignore="true"></input></td>
                     </tr>
                     <tfoot>
                         <td></td>
@@ -203,7 +209,7 @@
     <p class="darcy">
       GoDBLedger-Web
       <br>
-      <a href="" data-toggle="modal" data-target="#instructionsModal">Instructions</a>
+      <a href="https://www.patreon.com/Darcys22">Support me on Patreon</a>
     </p>
     <p class="copyright">
       Copyright © 2020
