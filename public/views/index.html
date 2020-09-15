@@ -97,7 +97,7 @@
 						</button>
 					</div>
           <div class = "modal-body">
-            <form class="well form-horizontal" role="form" data-toggle="validator" action=" " method="post"  id="addJournal">
+            <form class="well form-horizontal" role="form" data-toggle="validator" id="addJournal">
               <fieldset>
                 <!-- Text input-->
                 <div class="form-group">
@@ -125,7 +125,7 @@
                     <tr><th>#</th><th>Description</th><th>Account</th><th>Debit</th><th>Credit</th></tr>
                     <tr>
                         <td>1</td>
-                        <td><input type="text" data-lpignore="true"></input></td>
+                        <td><input type="text" data-lpignore="true" class="form-control" name="line-item[0][narration]"></input></td>
                         <td>
                           <select class="js-example-basic-single" name="account">
                           </select>
@@ -167,14 +167,17 @@
                 </div>
 
                 <div class="totals">
+
                   <button class="btn btn-primary" id="addNewLineItemButton" onclick=""><span class="text" data-automationid="Add a new line-button">Add a new line</span></button>
                 </div>
                 <div class="actions text-right">
                   <div class="right">
-                    <button class="btn btn-light btn-sm" id="cancelJournalButton" onclick="SubmitAction('Cancel',''); return false;"><span class="text" data-automationid="Cancel-button">Cancel</span></button>
-                    <button class="btn btn-success" id="saveJournalButton" onclick="" ><span class="text" data-automationid="Save-button">Post Journal</span></button>
-              </div>
-        </div>
+                    <button class="btn btn-light btn-sm"  data-dismiss="modal"><span class="text" data-automationid="Cancel-button">Cancel</span></button>
+                    <button type="submit" class="btn btn-success" id="saveJournalButton"><span class="text" data-automationid="Save-button">Post Journal</span></button>
+                  </div>
+                </div>
+          </fieldset>
+        </form>
       </div>
     </div>
 </div>

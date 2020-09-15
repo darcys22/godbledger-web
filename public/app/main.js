@@ -1,41 +1,28 @@
-function Journal()
-{
-    this.instanceData = "Display Me";
-
-    this.DisplayData = function()
-    {
-        alert(this.instanceData);
+class Journal {
+    constructor() {
+      this.date = new Date();
+      this.narration = "Display Me";
+      this.lineitems = [];
+      
     }
 
-    this.addNewLineItem = function()
-    {
-        alert(this.instanceData);
+    DisplayData() {
+        alert(this.narration);
     }
 
-    this.save = function()
-    {
-        alert(this.instanceData);
+    addNewLineItem() {
+        alert(this.narration);
     }
+
+    save(journalForm) {
+      this.narration = journalForm.narration;
+      console.log(journalForm)
+    }
+
   
 }
 
 var journal = new Journal();
-
-// ...and hook up the save journal button
-var saveJournalButton = document.getElementById("saveJournalButton");
-if (saveJournalButton.addEventListener) {
-    saveJournalButton.addEventListener('click', function() {
-        journal.save();
-    }, false);
-}
-else if (saveJournalButton.attachEvent) {
-    saveJournalButton.attachEvent('onclick', function() {
-        journal.save();
-    });
-}
-else {
-    // Very old browser, complain
-}
 
 // ...and hook up the add new line item button
 var newLineItemButton = document.getElementById("addNewLineItemButton");
@@ -60,26 +47,20 @@ $(document).ready(function() {
       ajax: {
         url: '/api/accounts/list',
         dataType: 'json',
-        //processResults: function (data) {
-          //// Transforms the top-level key of the response object from 'items' to 'results'
-          //return {
-            //results: data.items
-          //};
-        //}
-        // Additional AJAX parameters go here; see the end of this chapter for the full code of this example
       }
     });
 });
 
-$('#addJournal').validator().on('submit', function (e) {
+//$('#addJournal').validator().on('submit', function (e) {
+$('#addJournal').on('submit', function (e) {
   if (e.isDefaultPrevented()) {
     // handle the invalid form...
   } else {
     e.preventDefault();
-		window.transactions.push($('#addJournal').serializeObject());
-		$('#addJournal')[0].reset();
-		$("#fybox").val(window.endFY.format("YYYY"));
-		tableCreate();
+
+    window.journal.save($('#addJournal').serializeObject());
+    $('#addJournal')[0].reset();
+		//tableCreate();
     $('#journalModal').modal('toggle');
   }
 })
@@ -113,7 +94,7 @@ function editJournal(index) {
 }
 function deleteJournal(index) {
   window.transactions.splice(index, 1);
-  tableCreate();
+  //tableCreate();
 }
 
 function stripwhitecommas(str) {
@@ -209,6 +190,32 @@ function formatdate(element) {
   element.value = moment(element.value, ["DDMMYYYY","DDMMMMYYYY", "DoMMMMYYYY", "DoMMYYYY"], false).format('Do MMMM YYYY');
 }
 
+$.fn.serializeObject = function()
+{
+    var o = {};
+    var a = this.serializeArray();
+    $.each(a, function() {
+        if (o[this.name] !== undefined) {
+            if (!o[this.name].push) {
+                o[this.name] = "";
+            }
+            o[this.name] = this.value || '';
+        } else {
+          if (this.name.includes("[")){
+            var separators = ['\\\[', '\\\]'];
+            var tokens = this.name.split(new RegExp(separators.join('|'), 'g'));
+            var filtered = tokens.filter(function (el) {
+              return el != "";
+            });
+            console.log(filtered[0]);
+            //o[filtered[0]][filtered[1]][filtered[2]] = this.value || '';
+          } else {
+            o[this.name] = this.value || '';
+          }
+        }
+    });
+    return o;
+};
 
 function main() {
   window.transactions = [];
