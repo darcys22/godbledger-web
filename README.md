@@ -4,7 +4,12 @@ Webserver GUI for GoDBLedger
 Still very much in Alpha
 
 ## How to Use
-run the webserver on the same server that is hosting a GoDBLedger server.
+
+Build the server using
+```
+make
+````
+then run the webserver on the same host as a GoDBLedger server.
 ```
 make run
 ```
