@@ -1,3 +1,40 @@
+class LineItem {
+    constructor() {
+      //this.date = new Date();
+      this._date = "datestring";
+      this._description = "something";
+      this._account = "something";
+      this._amount = 0;
+    }
+
+    set amount(amount) {
+      this._amount = amount;
+    }
+    get amount() {
+      return this._amount;
+    }
+
+    set account(account) {
+      this._account = account;
+    }
+    get account() {
+      return this._account;
+    }
+
+    set description(description) {
+      this._description = description;
+    }
+    get description() {
+      return this._description;
+    }
+
+    set date(date) {
+        this._date = date;
+    }
+    get date() {
+        return this._date;
+    }
+}
 class Journal {
     constructor() {
       this.date = new Date();
@@ -15,8 +52,40 @@ class Journal {
     }
 
     save(journalForm) {
+      var lineitemKeys = Object.keys(journalForm).filter(function(name) {
+        return name.includes("line-item");;
+      });
+      var i = 0;
+      for (i = 0; i < lineitemKeys.length; i++) {
+        if (lineitemKeys[i].includes("[")){
+          var separators = ['\\\[', '\\\]'];
+          var tokens = lineitemKeys[i].split(new RegExp(separators.join('|'), 'g'));
+          var filtered = tokens.filter(function (el) {
+            return el != "";
+          });
+          if (this.lineitems[parseInt(filtered[1], 10)] != undefined) {
+            var lineitem = this.lineitems[parseInt(filtered[1], 10)];
+          } else {
+            var lineitem = new LineItem();
+          }
+          switch(filtered[2]) {
+            case "narration":
+              lineitem.description = journalForm[lineitemKeys[i]]
+              break;
+            case "account":
+              lineitem.account = journalForm[lineitemKeys[i]]
+              break;
+            default:
+              console.log("could not identify" + lineitemKeys[i])
+          }
+
+          this.lineitems[parseInt(filtered[1], 10)] = lineitem;
+          //o[filtered[0]][filtered[1]][filtered[2]] = this.value || '';
+        }
+      }
       this.narration = journalForm.narration;
-      console.log(journalForm)
+      //console.log(journalForm)
+      console.log(this)
     }
 
   
@@ -201,17 +270,7 @@ $.fn.serializeObject = function()
             }
             o[this.name] = this.value || '';
         } else {
-          if (this.name.includes("[")){
-            var separators = ['\\\[', '\\\]'];
-            var tokens = this.name.split(new RegExp(separators.join('|'), 'g'));
-            var filtered = tokens.filter(function (el) {
-              return el != "";
-            });
-            console.log(filtered[0]);
-            //o[filtered[0]][filtered[1]][filtered[2]] = this.value || '';
-          } else {
             o[this.name] = this.value || '';
-          }
         }
     });
     return o;
