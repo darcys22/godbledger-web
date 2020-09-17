@@ -1,9 +1,9 @@
 class LineItem {
     constructor() {
       //this.date = new Date();
-      this._date = "datestring";
-      this._description = "something";
-      this._account = "something";
+      this._date = "";
+      this._description = "";
+      this._account = "";
       this._amount = 0;
     }
 
@@ -90,7 +90,6 @@ class Journal {
           }
 
           this.lineitems[parseInt(filtered[1], 10)] = lineitem;
-          //o[filtered[0]][filtered[1]][filtered[2]] = this.value || '';
         }
       }
       this.narration = journalForm.narration;
@@ -282,14 +281,14 @@ $.fn.serializeObject = function()
               o[this.name] = $(this).find(':selected').text() || '';
               console.log($(this).select2('data'));
             } else {
-              o[this.name] = $(this).value || '';
+              o[this.name] = this.value || '';
             }
         } else {
             if ($(this).is("select")) {
               o[this.name] = $(this).find(':selected').text() || '';
               console.log($(this).select2('data'));
             } else {
-              o[this.name] = $(this).value || '';
+              o[this.name] = this.value || '';
             }
         }
     });
