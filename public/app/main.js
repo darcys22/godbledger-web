@@ -70,10 +70,20 @@ class Journal {
           }
           switch(filtered[2]) {
             case "narration":
-              lineitem.description = journalForm[lineitemKeys[i]]
+              lineitem.description = journalForm[lineitemKeys[i]];
               break;
             case "account":
-              lineitem.account = journalForm[lineitemKeys[i]]
+              lineitem.account = journalForm[lineitemKeys[i]];
+              break;
+            case "debit":
+              if (lineitem.amount == 0 && journalForm[lineitemKeys[i]]) {
+                lineitem.amount = parseInt(journalForm[lineitemKeys[i]],10) * 1;
+              }
+              break;
+            case "credit":
+              if (lineitem.amount == 0 && journalForm[lineitemKeys[i]]) {
+                lineitem.amount = parseInt(journalForm[lineitemKeys[i]],10) * -1;
+              }
               break;
             default:
               console.log("could not identify" + lineitemKeys[i])
@@ -268,9 +278,19 @@ $.fn.serializeObject = function()
             if (!o[this.name].push) {
                 o[this.name] = "";
             }
-            o[this.name] = this.value || '';
+            if ($(this).is("select")) {
+              o[this.name] = $(this).find(':selected').text() || '';
+              console.log($(this).select2('data'));
+            } else {
+              o[this.name] = $(this).value || '';
+            }
         } else {
-            o[this.name] = this.value || '';
+            if ($(this).is("select")) {
+              o[this.name] = $(this).find(':selected').text() || '';
+              console.log($(this).select2('data'));
+            } else {
+              o[this.name] = $(this).value || '';
+            }
         }
     });
     return o;
