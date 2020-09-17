@@ -279,14 +279,12 @@ $.fn.serializeObject = function()
             }
             if ($(this).is("select")) {
               o[this.name] = $(this).find(':selected').text() || '';
-              console.log($(this).select2('data'));
             } else {
               o[this.name] = this.value || '';
             }
         } else {
             if ($(this).is("select")) {
               o[this.name] = $(this).find(':selected').text() || '';
-              console.log($(this).select2('data'));
             } else {
               o[this.name] = this.value || '';
             }
