@@ -40,20 +40,27 @@ class Journal {
       this.date = new Date();
       this.narration = "Display Me";
       this.lineitems = [];
-      
+      this._lineItemCount = 0;
+
+      var i;
+      for (i = 0; i < 3; i++) {
+        this.addNewLineItem();
+      } 
     }
 
     addNewLineItem() {
-        alert(this.narration);
+      this._lineItemCount += 1;
+      addLineItem(this._lineItemCount);
     }
 
     save(journalForm) {
       var lineitemKeys = Object.keys(journalForm).filter(function(name) {
-        return name.includes("line-item");;
+        return name.includes("line-item");
       });
       var i = 0;
       for (i = 0; i < lineitemKeys.length; i++) {
         if (lineitemKeys[i].includes("[")){
+          //TODO make this .val
           var separators = ['\\\[', '\\\]'];
           var tokens = lineitemKeys[i].split(new RegExp(separators.join('|'), 'g'));
           var filtered = tokens.filter(function (el) {
@@ -69,7 +76,7 @@ class Journal {
               lineitem.description = journalForm[lineitemKeys[i]];
               break;
             case "account":
-              lineitem.account = journalForm[lineitemKeys[i]];
+              lineitem.account = $(`select[name ="${lineitemKeys[i]}"]`).text();
               break;
             case "debit":
               if (lineitem.amount == 0 && journalForm[lineitemKeys[i]]) {
@@ -90,7 +97,8 @@ class Journal {
       }
       this.narration = journalForm.narration;
       //console.log(journalForm)
-      //console.log(this)
+      console.log(this)
+      $.post( "/api/journals", this);
     }
 }
 
@@ -101,15 +109,13 @@ var newLineItemButton = document.getElementById("addNewLineItemButton");
 if (newLineItemButton.addEventListener) {
     newLineItemButton.addEventListener('click', function(e) {
         e.preventDefault();
-        //journal.addNewLineItem();
-        addLineItem();
+        journal.addNewLineItem();
     }, false);
 }
 else if (newLineItemButton.attachEvent) {
     newLineItemButton.attachEvent('onclick', function(e) {
         e.preventDefault();
-        //journal.addNewLineItem();
-        addLineItem();
+        journal.addNewLineItem();
     });
 }
 else {
@@ -221,19 +227,19 @@ function moneyNumber(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-function addLineItem() {
+function addLineItem(index) {
   var tbdy = document.getElementById('journal');
   var tr = document.createElement('tr');
   var td = document.createElement('td');
   //ID of the Journal
-  td.appendChild(document.createTextNode("4"));
+  td.appendChild(document.createTextNode(index));
   tr.appendChild(td);
   //Input for Narration of line item
   var td = document.createElement('td');
   var input  = document.createElement('input');
   input.className = 'form-control';
   input.setAttribute('data-lpignore', "true");
-  input.name = "line-item[4][narration]";
+  input.name = `line-item[${index}][narration]`;
   input.type = "text";
   td.appendChild(input);
   tr.appendChild(td);
@@ -241,7 +247,7 @@ function addLineItem() {
   var td = document.createElement('td');
   var select = document.createElement('select');
   select.className = 'js-example-basic-single form-control';
-  select.name = "line-item[4][account]";
+  select.name = `line-item[${index}][account]`;
 
   td.appendChild(select);
   tr.appendChild(td);
@@ -250,7 +256,7 @@ function addLineItem() {
   var input  = document.createElement('input');
   input.className = 'form-control';
   input.setAttribute('data-lpignore', "true");
-  input.name = "line-item[4][debit]";
+  input.name = `line-item[${index}][debit]`;
   input.type = "text";
   td.appendChild(input);
   tr.appendChild(td);
@@ -259,14 +265,14 @@ function addLineItem() {
   var input  = document.createElement('input');
   input.className = 'form-control';
   input.setAttribute('data-lpignore', "true");
-  input.name = "line-item[4][credit]";
+  input.name = `line-item[${index}][credit]`;
   input.type = "text";
   td.appendChild(input);
   tr.appendChild(td);
   //Append the Row to the Table
   tbdy.appendChild(tr);
 
-  $('select[name ="line-item[4][account]"]').select2({
+  $(`select[name ="line-item[${index}][account]"]`).select2({
     theme: "bootstrap",
     placeholder: "Select Account",
     ajax: {

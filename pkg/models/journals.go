@@ -48,36 +48,38 @@ func (dash *Dashboard) GetTags() []string {
 	return b
 }
 
-// GetDashboardModel turns the command into the savable model
-//func (cmd *SaveDashboardCommand) GetDashboardModel() *Dashboard {
-//dash := &Dashboard{}
-//dash.Data = cmd.Dashboard
-//dash.Title = dash.Data["title"].(string)
-//dash.OrgId = cmd.OrgId
-
-//if dash.Data["id"] != nil {
-//dash.Id = int64(dash.Data["id"].(float64))
-
-//if dash.Data["version"] != nil {
-//dash.Version = int(dash.Data["version"].(float64))
-//}
-//} else {
-//dash.Data["version"] = 0
-//}
-
-//return dash
-//}
-
 //
 // COMMANDS
 //
 
-type PostJournalCommand struct {
-	Dashboard map[string]interface{} `json:"dashboard" binding:"Required"`
-	Overwrite bool                   `json:"overwrite"`
-	OrgId     int64                  `json:"-"`
+//class LineItem {
+//constructor() {
+////this.date = new Date();
+//this._date = "";
+//this._description = "";
+//this._account = "";
+//this._amount = 0;
+//}
 
-	Result *Dashboard
+//class Journal {
+//constructor() {
+//this.date = new Date();
+//this.narration = "Display Me";
+//this.lineitems = [];
+//this._lineItemCount = 0;
+
+type LineItem struct {
+	Date        string `json:"date" binding:"Required"`
+	Description string `json:"description" binding:"Required"`
+	Account     string `json:"Account" binding:"Required"`
+	Amount      string `json:"Amount" binding:"Required"`
+}
+
+type PostJournalCommand struct {
+	Date          string     `json:"date" binding:"Required"`
+	Narration     string     `json:"narration" binding:"Required"`
+	LineItemCount string     `json:"lineItemCount" binding:"Required"`
+	LineItems     []LineItem `json:"lineItems" binding:"Required"`
 }
 
 //

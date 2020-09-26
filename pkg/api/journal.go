@@ -11,6 +11,8 @@ func GetJournals(c *middleware.Context) {
 	c.JSON(200, journallisting)
 }
 
-func PostJournal(c *middleware.Context, cmd m.PostJournalCommand) {
-	c.JSON(200, journallisting)
+func PostJournal(c *middleware.Context, cmd m.PostJournalCommand) string {
+	console.log(cmd)
+	return "Accepted"
+	//c.JSON(200, journallisting)
 }
