@@ -43,10 +43,6 @@ class Journal {
       
     }
 
-    DisplayData() {
-        alert(this.narration);
-    }
-
     addNewLineItem() {
         alert(this.narration);
     }
@@ -94,10 +90,8 @@ class Journal {
       }
       this.narration = journalForm.narration;
       //console.log(journalForm)
-      console.log(this)
+      //console.log(this)
     }
-
-  
 }
 
 var journal = new Journal();
@@ -105,13 +99,17 @@ var journal = new Journal();
 // ...and hook up the add new line item button
 var newLineItemButton = document.getElementById("addNewLineItemButton");
 if (newLineItemButton.addEventListener) {
-    newLineItemButton.addEventListener('click', function() {
-        journal.addNewLineItem();
+    newLineItemButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        //journal.addNewLineItem();
+        addLineItem();
     }, false);
 }
 else if (newLineItemButton.attachEvent) {
-    newLineItemButton.attachEvent('onclick', function() {
-        journal.addNewLineItem();
+    newLineItemButton.attachEvent('onclick', function(e) {
+        e.preventDefault();
+        //journal.addNewLineItem();
+        addLineItem();
     });
 }
 else {
@@ -221,6 +219,62 @@ function makeJSON() {
 
 function moneyNumber(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function addLineItem() {
+  var tbdy = document.getElementById('journal');
+  var tr = document.createElement('tr');
+  var td = document.createElement('td');
+  //ID of the Journal
+  td.appendChild(document.createTextNode("4"));
+  tr.appendChild(td);
+  //Input for Narration of line item
+  var td = document.createElement('td');
+  var input  = document.createElement('input');
+  input.className = 'form-control';
+  input.setAttribute('data-lpignore', "true");
+  input.name = "line-item[4][narration]";
+  input.type = "text";
+  td.appendChild(input);
+  tr.appendChild(td);
+  //Select element for Account of line item
+  var td = document.createElement('td');
+  var select = document.createElement('select');
+  select.className = 'js-example-basic-single form-control';
+  select.name = "line-item[4][account]";
+
+  td.appendChild(select);
+  tr.appendChild(td);
+  //Input for Debit Amount of line item
+  var td = document.createElement('td');
+  var input  = document.createElement('input');
+  input.className = 'form-control';
+  input.setAttribute('data-lpignore', "true");
+  input.name = "line-item[4][debit]";
+  input.type = "text";
+  td.appendChild(input);
+  tr.appendChild(td);
+  //Input for Credit Amount of line item
+  var td = document.createElement('td');
+  var input  = document.createElement('input');
+  input.className = 'form-control';
+  input.setAttribute('data-lpignore', "true");
+  input.name = "line-item[4][credit]";
+  input.type = "text";
+  td.appendChild(input);
+  tr.appendChild(td);
+  //Append the Row to the Table
+  tbdy.appendChild(tr);
+
+  $('select[name ="line-item[4][account]"]').select2({
+    theme: "bootstrap",
+    placeholder: "Select Account",
+    ajax: {
+      url: '/api/accounts/list',
+      dataType: 'json',
+    }
+  });
+
 }
 
 function tableCreate() {
