@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/darcys22/godbledger-web/pkg/middleware"
+	"github.com/gin-gonic/gin"
 )
 
 type Results struct {
@@ -17,7 +17,7 @@ type Account struct {
 
 const accountListing = `{"results": [{"id": 0, "text": "Guest"},{"id": 1, "text": "Service"}]}`
 
-func GetAccountListing(c *middleware.Context) {
+func GetAccountListing(c *gin.Context) {
 	arr := Results{}
 	err := json.Unmarshal([]byte(accountListing), &arr)
 	if err != nil {

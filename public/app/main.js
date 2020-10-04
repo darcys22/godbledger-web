@@ -96,9 +96,16 @@ class Journal {
         }
       }
       this.narration = journalForm.narration;
-      //console.log(journalForm)
-      console.log(this)
-      $.post( "/api/journals", this);
+      //console.log(journalForm);
+      console.log(JSON.stringify(this));
+      $.ajax({
+          type: 'POST',
+          url: '/api/journals',
+          data: '{"name":"hello"}', // or JSON.stringify ({name: 'jonas'}),
+          success: function(data) { alert('data: ' + data); },
+          contentType: "application/json",
+          dataType: 'json'
+      });
     }
 }
 

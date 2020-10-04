@@ -16,13 +16,14 @@ import (
 	"time"
 
 	"github.com/darcys22/godbledger-web/pkg/api"
-	httpstatic "github.com/darcys22/godbledger-web/pkg/api/static"
-	"github.com/darcys22/godbledger-web/pkg/middleware"
+	//httpstatic "github.com/darcys22/godbledger-web/pkg/api/static"
+	//"github.com/darcys22/godbledger-web/pkg/middleware"
 	"github.com/darcys22/godbledger-web/pkg/registry"
 	"github.com/darcys22/godbledger-web/pkg/setting"
 
 	"github.com/sirupsen/logrus"
-	"gopkg.in/macaron.v1"
+	//"gopkg.in/macaron.v1"
+	"github.com/gin-gonic/gin"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -147,7 +148,7 @@ func (s *Server) Run() (err error) {
 	if err = s.init(nil); err != nil {
 		return
 	}
-	m := newMacaron()
+	m := newGin()
 	api.Register(m)
 
 	//if setting.ReportingEnabled {
@@ -333,15 +334,16 @@ func (s *Server) notifySystemd(state string) {
 	}
 }
 
-func newMacaron() *macaron.Macaron {
-	macaron.Env = setting.Env
+func newGin() *gin.Engine {
+	//gin.Env = setting.Env
+	//macaron.Env = setting.Env
 
-	m := macaron.New()
+	m := gin.Default()
 	//m.Use(middleware.Logger())
-	m.Use(macaron.Recovery())
-	if setting.EnableGzip {
-		//m.Use(macaron.Gziper())
-	}
+	//m.Use(macaron.Recovery())
+	//if setting.EnableGzip {
+	//m.Use(macaron.Gziper())
+	//}
 
 	mapStatic(m, "", "public")
 	mapStatic(m, "app", "app")
@@ -350,36 +352,38 @@ func newMacaron() *macaron.Macaron {
 	//mapStatic(m, "fonts", "fonts")
 
 	//m.Use(session.Sessioner(setting.SessionOptions))
+	m.LoadHTMLGlob(path.Join(setting.StaticRootPath, "views/*.html"))
 
-	m.Use(macaron.Renderer(macaron.RenderOptions{
-		Directory:  path.Join(setting.StaticRootPath, "views"),
-		IndentJSON: macaron.Env != macaron.PROD,
-		Delims:     macaron.Delims{Left: "[[", Right: "]]"},
-	}))
+	//m.Use(macaron.Renderer(macaron.RenderOptions{
+	//Directory:  path.Join(setting.StaticRootPath, "views"),
+	//IndentJSON: macaron.Env != macaron.PROD,
+	//Delims:     macaron.Delims{Left: "[[", Right: "]]"},
+	//}))
 
-	m.Use(middleware.GetContextHandler())
+	//m.Use(middleware.GetContextHandler())
 	return m
 }
 
-func mapStatic(m *macaron.Macaron, dir string, prefix string) {
-	headers := func(c *macaron.Context) {
-		c.Resp.Header().Set("Cache-Control", "public, max-age=3600")
-	}
+func mapStatic(m *gin.Engine, dir string, prefix string) {
+	//headers := func(c *macaron.Context) {
+	//c.Resp.Header().Set("Cache-Control", "public, max-age=3600")
+	//}
 
-	if setting.Env == setting.DEV {
-		headers = func(c *macaron.Context) {
-			c.Resp.Header().Set("Cache-Control", "max-age=0, must-revalidate, no-cache")
-		}
-	}
+	//if setting.Env == setting.DEV {
+	//headers = func(c *macaron.Context) {
+	//c.Resp.Header().Set("Cache-Control", "max-age=0, must-revalidate, no-cache")
+	//}
+	//}
 
-	m.Use(httpstatic.Static(
-		path.Join(setting.StaticRootPath, dir),
-		httpstatic.StaticOptions{
-			SkipLogging: true,
-			Prefix:      prefix,
-			AddHeaders:  headers,
-		},
-	))
+	m.Static(prefix, path.Join(setting.StaticRootPath, dir))
+	//m.Use(httpstatic.Static(
+	//path.Join(setting.StaticRootPath, dir),
+	//httpstatic.StaticOptions{
+	//SkipLogging: true,
+	//Prefix:      prefix,
+	//AddHeaders:  headers,
+	//},
+	//))
 }
 
 // writePIDFile retrieves the current process ID and writes it to file.
@@ -404,14 +408,3 @@ func (s *Server) writePIDFile() {
 
 	log.Info("Writing PID file", "path", s.pidFile, "pid", pid)
 }
-
-//func initRuntime(c *cli.Context) {
-//setting.NewConfigContext(c.GlobalString("config"))
-
-//log.Info("Starting Grafana")
-//log.Info("Version: %v, Commit: %v, Build date: %v", setting.BuildVersion, setting.BuildCommit, time.Unix(setting.BuildStamp, 0))
-//setting.LogLoadedConfigFiles()
-
-//sqlstore.NewEngine()
-//sqlstore.EnsureAdminUser()
-//}

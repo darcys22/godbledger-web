@@ -1,10 +1,11 @@
 package api
 
 import (
-	"github.com/darcys22/godbledger-web/pkg/middleware"
+	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-func setIndexViewData(c *middleware.Context) error {
+func setIndexViewData(c *gin.Context) error {
 	//settings, err := getFrontendSettingsMap(c)
 	//if err != nil {
 	//return err
@@ -39,25 +40,25 @@ func setIndexViewData(c *middleware.Context) error {
 //return nil
 //}
 
-func Index(c *middleware.Context) {
+func Index(c *gin.Context) {
 	//if err := setIndexViewData(c); err != nil {
 	//c.Handle(500, "Failed to get settings", err)
 	//return
 	//}
 
-	c.HTML(200, "index")
+	c.HTML(http.StatusOK, "index.html", nil)
 }
 
-func NotFound(c *middleware.Context) {
-	if c.IsApiRequest() {
-		c.JsonApiErr(404, "Not found", nil)
-		return
-	}
+func NotFound(c *gin.Context) {
+	//if c.IsApiRequest() {
+	//c.JsonApiErr(404, "Not found", nil)
+	//return
+	//}
 
-	if err := setIndexViewData(c); err != nil {
-		c.Handle(500, "Failed to get settings", err)
-		return
-	}
+	//if err := setIndexViewData(c); err != nil {
+	//c.Handle(500, "Failed to get settings", err)
+	//return
+	//}
 
-	c.HTML(404, "index")
+	c.HTML(404, "index.html", nil)
 }
