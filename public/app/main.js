@@ -96,12 +96,13 @@ class Journal {
         }
       }
       this.narration = journalForm.narration;
+      this.lineitems.splice(0, 1);
       //console.log(journalForm);
       console.log(JSON.stringify(this));
       $.ajax({
           type: 'POST',
           url: '/api/journals',
-          data: '{"name":"hello"}', // or JSON.stringify ({name: 'jonas'}),
+          data: JSON.stringify(this),
           success: function(data) { alert('data: ' + data); },
           contentType: "application/json",
           dataType: 'json'

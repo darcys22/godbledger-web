@@ -2,11 +2,8 @@ package api
 
 import (
 	//"fmt"
-	//m "github.com/darcys22/godbledger-web/pkg/models"
-	//"github.com/go-macaron/binding"
-	//"gopkg.in/macaron.v1"
 	"github.com/gin-gonic/gin"
-	"net/http"
+	//"net/http"
 )
 
 // Register adds http routes
@@ -19,17 +16,16 @@ func Register(r *gin.Engine) {
 
 	r.GET("/", Index)
 
-	type ContactForm struct {
-		Name string `json:"name" binding:"Required"`
-	}
+	//type ContactForm struct {
+	//Name string `json:"name" binding:"required"`
+	//}
+	//r.POST("/api/journals", func(c *gin.Context) {
+	//c.Bind(&ContactForm{})
+	//c.String(http.StatusOK, "ok")
+	//})
 
 	r.GET("/api/journals", GetJournals)
-	r.POST("/api/journals", func(c *gin.Context) {
-		c.Bind(&ContactForm{})
-		c.String(http.StatusOK, "ok")
-	})
+	r.POST("/api/journals", PostJournal)
 
 	r.GET("/api/accounts/list", GetAccountListing)
-
-	//r.NotFound(NotFound)
 }

@@ -1,7 +1,7 @@
 package api
 
 import (
-	//m "github.com/darcys22/godbledger-web/pkg/models"
+	m "github.com/darcys22/godbledger-web/pkg/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -14,6 +14,11 @@ func GetJournals(c *gin.Context) {
 
 func PostJournal(c *gin.Context) {
 	//console.log(cmd)
-	c.String(http.StatusOK, "ok")
+	//c.Bind(&m.PostJournalCommand{})
+	//c.String(http.StatusOK, "ok")
 	//c.JSON(200, journallisting)
+	if err := c.ShouldBindJSON(&m.PostJournalCommand{}); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 }

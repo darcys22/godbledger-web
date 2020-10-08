@@ -2,10 +2,6 @@ package models
 
 import ()
 
-//
-// COMMANDS
-//
-
 //class LineItem {
 //constructor() {
 ////this.date = new Date();
@@ -23,29 +19,15 @@ import ()
 //this._lineItemCount = 0;
 
 type LineItem struct {
-	Date        string `json:"date" binding:"Required"`
-	Description string `json:"description" binding:"Required"`
-	Account     string `json:"Account" binding:"Required"`
-	Amount      string `json:"Amount" binding:"Required"`
+	Date        string `json:"_date" binding:"required"`
+	Description string `json:"_description"`
+	Account     string `json:"_account" binding:"required"`
+	Amount      int    `json:"_amount" binding:"required"`
 }
 
-//type PostJournalCommand struct {
-//Date          string     `json:"date" binding:"Required"`
-//Narration     string     `json:"narration" binding:"Required"`
-//LineItemCount string     `json:"lineItemCount" binding:"Required"`
-//LineItems     []LineItem `json:"lineItems" binding:"Required"`
-//}
 type PostJournalCommand struct {
-	Date string `json:"date" binding:"Required"`
+	Date          string     `json:"date" binding:"required"`
+	Narration     string     `json:"narration"`
+	LineItemCount int        `json:"_lineItemCount" binding:"required"`
+	LineItems     []LineItem `json:"lineItems" binding:"required"`
 }
-
-//
-// QUERIES
-//
-
-//type GetDashboardQuery struct {
-//Slug  string
-//OrgId int64
-
-//Result *Dashboard
-//}

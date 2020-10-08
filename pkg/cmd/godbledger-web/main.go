@@ -3,15 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	//"net/http"
 	_ "net/http/pprof"
 	"os"
-	//"os/signal"
-	//"runtime"
-	//"runtime/trace"
+	"os/signal"
 	"strconv"
-	//"syscall"
+	"syscall"
 	"time"
+
+	"github.com/sirupsen/logrus"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 
 	"github.com/darcys22/godbledger-web/pkg/server"
 	"github.com/darcys22/godbledger-web/pkg/setting"
@@ -23,11 +23,14 @@ var buildBranch = "master"
 var buildstamp string
 
 func main() {
+	customFormatter := new(prefixed.TextFormatter)
+	customFormatter.TimestampFormat = "2006-01-02 15:04:05"
+	customFormatter.FullTimestamp = true
+	logrus.SetFormatter(customFormatter)
 	var (
 		configFile = flag.String("config", "", "path to config file")
 		homePath   = flag.String("homepath", "", "path to grafana install/home path, defaults to working directory")
 		pidFile    = flag.String("pidfile", "", "path to pid file")
-		//packaging  = flag.String("packaging", "unknown", "describes the way Grafana was installed")
 
 		v = flag.Bool("v", false, "prints current version and exits")
 	)
@@ -48,7 +51,6 @@ func main() {
 	setting.BuildCommit = commit
 	setting.BuildStamp = buildstampInt64
 	setting.BuildBranch = buildBranch
-	//setting.Packaging = validPackaging(*packaging)
 
 	s, err := server.New(server.Config{
 		ConfigFile: *configFile, HomePath: *homePath, PidFile: *pidFile,
@@ -59,12 +61,26 @@ func main() {
 		os.Exit(1)
 	}
 
+	go listenToSystemSignals(s)
+
 	err = s.Run()
 	code := 0
 	if err != nil {
 		code = s.ExitCode(err)
 	}
-	//log.Close()
 
 	os.Exit(code)
+}
+
+func listenToSystemSignals(s *server.Server) {
+	signalChan := make(chan os.Signal, 1)
+
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
+
+	for {
+		select {
+		case sig := <-signalChan:
+			s.Shutdown(fmt.Sprintf("System signal: %s", sig))
+		}
+	}
 }

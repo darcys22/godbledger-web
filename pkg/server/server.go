@@ -16,14 +16,12 @@ import (
 	"time"
 
 	"github.com/darcys22/godbledger-web/pkg/api"
-	//httpstatic "github.com/darcys22/godbledger-web/pkg/api/static"
-	//"github.com/darcys22/godbledger-web/pkg/middleware"
 	"github.com/darcys22/godbledger-web/pkg/registry"
 	"github.com/darcys22/godbledger-web/pkg/setting"
 
-	"github.com/sirupsen/logrus"
-	//"gopkg.in/macaron.v1"
+	"github.com/gin-gonic/contrib/gzip"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -86,7 +84,7 @@ type Server struct {
 	commit      string
 	buildBranch string
 
-	//HTTPServer *api.HTTPServer `inject:""`
+	httpSrv *http.Server
 }
 
 // init initializes the server and its services.
@@ -103,34 +101,6 @@ func (s *Server) init(cfg *Config) error {
 	s.writePIDFile()
 
 	//login.Init()
-	//social.NewOAuthService()
-
-	services := registry.GetServices()
-	if err := s.buildServiceGraph(services); err != nil {
-		return err
-	}
-
-	// Initialize services.
-	//for _, service := range services {
-	//if registry.IsDisabled(service.Instance) {
-	//continue
-	//}
-
-	//if cfg != nil {
-	//if httpS, ok := service.Instance.(*api.HTTPServer); ok {
-	//// Configure the api.HTTPServer if necessary
-	//// Hopefully we can find a better solution, maybe with a more advanced DI framework, f.ex. Dig?
-	//if cfg.Listener != nil {
-	//log.Debug("Using provided listener for HTTP server")
-	//httpS.Listener = cfg.Listener
-	//}
-	//}
-	//}
-	//if err := service.Instance.Init(); err != nil {
-	////return err("Service init failed %s", err)
-	//return err
-	//}
-	//}
 
 	return nil
 }
@@ -139,35 +109,8 @@ func (s *Server) init(cfg *Config) error {
 // exited. To initiate shutdown, call the Shutdown method in another goroutine.
 func (s *Server) Run() (err error) {
 
-	//social.NewOAuthService()
-	//eventpublisher.Init()
-	//plugins.Init()
-
-	//var err error
-
 	if err = s.init(nil); err != nil {
 		return
-	}
-	m := newGin()
-	api.Register(m)
-
-	//if setting.ReportingEnabled {
-	//go metrics.StartUsageReportLoop()
-	//}
-
-	listenAddr := fmt.Sprintf("%s:%s", setting.HttpAddr, setting.HttpPort)
-	log.Infof("Listen: %v://%s%s", setting.Protocol, listenAddr, setting.AppSubUrl)
-	switch setting.Protocol {
-	case setting.HTTP:
-		err = http.ListenAndServe(listenAddr, m)
-	case setting.HTTPS:
-		err = http.ListenAndServeTLS(listenAddr, setting.CertFile, setting.KeyFile, m)
-	default:
-		log.Fatalf("Invalid protocol: %s", setting.Protocol)
-	}
-
-	if err != nil {
-		log.Fatal(4, "Fail to start server: %v", err)
 	}
 
 	services := registry.GetServices()
@@ -222,11 +165,48 @@ func (s *Server) Run() (err error) {
 
 	s.notifySystemd("READY=1")
 
+	m := newGin()
+	api.Register(m)
+
+	listenAddr := fmt.Sprintf("%s:%s", setting.HttpAddr, setting.HttpPort)
+	log.Infof("Listen: %v://%s%s", setting.Protocol, listenAddr, setting.AppSubUrl)
+
+	s.httpSrv = &http.Server{
+		Addr:    listenAddr,
+		Handler: m,
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	// handle http shutdown on server context done
+	go func() {
+		defer wg.Done()
+
+		<-s.context.Done()
+		if err := s.httpSrv.Shutdown(context.Background()); err != nil {
+			log.WithField("err", err).Error("Failed to shutdown server", "error", err)
+		}
+	}()
+
+	switch setting.Protocol {
+	case setting.HTTP:
+		if err := s.httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	case setting.HTTPS:
+		if err := s.httpSrv.ListenAndServeTLS(setting.CertFile, setting.KeyFile); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	default:
+		log.Fatalf("Invalid protocol: %s", setting.Protocol)
+	}
+
 	return nil
 }
 
 func (s *Server) Shutdown(reason string) {
-	log.Info("Shutdown started", "reason", reason)
+	log.WithField("reason", reason).Info("Shutdown started")
 	s.shutdownReason = reason
 	s.shutdownInProgress = true
 
@@ -234,8 +214,9 @@ func (s *Server) Shutdown(reason string) {
 	s.shutdownFn()
 
 	// wait for child routines
+
 	if err := s.childRoutines.Wait(); err != nil && !errors.Is(err, context.Canceled) {
-		log.Error("Failed waiting for services to shutdown", "err", err)
+		log.WithField("err", err).Error("Failed waiting for services to shutdown", "error", err)
 	}
 }
 
@@ -253,38 +234,6 @@ func (s *Server) ExitCode(reason error) int {
 	return code
 }
 
-// buildServiceGraph builds a graph of services and their dependencies.
-func (s *Server) buildServiceGraph(services []*registry.Descriptor) error {
-	// Specify service dependencies.
-	//objs := []interface{}{
-	//bus.GetBus(),
-	//s.cfg,
-	//routing.NewRouteRegister(middleware.RequestMetrics, middleware.RequestTracing),
-	//localcache.New(5*time.Minute, 10*time.Minute),
-	//s,
-	//}
-
-	//for _, service := range services {
-	//objs = append(objs, service.Instance)
-	//}
-
-	//var serviceGraph inject.Graph
-
-	// Provide services and their dependencies to the graph.
-	//for _, obj := range objs {
-	//if err := serviceGraph.Provide(&inject.Object{Value: obj}); err != nil {
-	//return errutil.Wrapf(err, "Failed to provide object to the graph")
-	//}
-	//}
-
-	// Resolve services and their dependencies.
-	//if err := serviceGraph.Populate(); err != nil {
-	//return errutil.Wrapf(err, "Failed to populate service dependency")
-	//}
-
-	return nil
-}
-
 // loadConfiguration loads settings and configuration from config files.
 func (s *Server) loadConfiguration() {
 	args := &setting.CommandLineArgs{
@@ -294,7 +243,7 @@ func (s *Server) loadConfiguration() {
 	}
 
 	if err := s.cfg.Load(args); err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to start grafana. error: %s\n", err.Error())
+		fmt.Fprintf(os.Stderr, "Failed to start godbledger-web. error: %s\n", err.Error())
 		os.Exit(1)
 	}
 
@@ -304,8 +253,6 @@ func (s *Server) loadConfiguration() {
 		"branch":   s.buildBranch,
 		"compiled": time.Unix(setting.BuildStamp, 0),
 	}).Infof("Starting %s", setting.ApplicationName)
-
-	//s.cfg.LogConfigSources()
 }
 
 // notifySystemd sends state notifications to systemd.
@@ -340,50 +287,40 @@ func newGin() *gin.Engine {
 
 	m := gin.Default()
 	//m.Use(middleware.Logger())
-	//m.Use(macaron.Recovery())
-	//if setting.EnableGzip {
-	//m.Use(macaron.Gziper())
-	//}
+	m.Use(gin.Recovery())
+	if setting.EnableGzip {
+		m.Use(gzip.Gzip(gzip.DefaultCompression))
+	}
 
 	mapStatic(m, "", "public")
 	mapStatic(m, "app", "app")
 	mapStatic(m, "css", "css")
 	mapStatic(m, "img", "img")
-	//mapStatic(m, "fonts", "fonts")
 
-	//m.Use(session.Sessioner(setting.SessionOptions))
 	m.LoadHTMLGlob(path.Join(setting.StaticRootPath, "views/*.html"))
 
-	//m.Use(macaron.Renderer(macaron.RenderOptions{
-	//Directory:  path.Join(setting.StaticRootPath, "views"),
-	//IndentJSON: macaron.Env != macaron.PROD,
-	//Delims:     macaron.Delims{Left: "[[", Right: "]]"},
-	//}))
-
-	//m.Use(middleware.GetContextHandler())
 	return m
 }
 
 func mapStatic(m *gin.Engine, dir string, prefix string) {
-	//headers := func(c *macaron.Context) {
-	//c.Resp.Header().Set("Cache-Control", "public, max-age=3600")
-	//}
+	headers := func() gin.HandlerFunc {
+		return func(c *gin.Context) {
+			c.Writer.Header().Set("Cache-Control", "public, max-age=3600")
+			c.Next()
+		}
+	}
 
-	//if setting.Env == setting.DEV {
-	//headers = func(c *macaron.Context) {
-	//c.Resp.Header().Set("Cache-Control", "max-age=0, must-revalidate, no-cache")
-	//}
-	//}
+	if setting.Env == setting.DEV {
+		headers = func() gin.HandlerFunc {
+			return func(c *gin.Context) {
+				c.Writer.Header().Set("Cache-Control", "max-age=0, must-revalidate, no-cache")
+				c.Next()
+			}
+		}
+	}
 
 	m.Static(prefix, path.Join(setting.StaticRootPath, dir))
-	//m.Use(httpstatic.Static(
-	//path.Join(setting.StaticRootPath, dir),
-	//httpstatic.StaticOptions{
-	//SkipLogging: true,
-	//Prefix:      prefix,
-	//AddHeaders:  headers,
-	//},
-	//))
+	m.Use(headers())
 }
 
 // writePIDFile retrieves the current process ID and writes it to file.
