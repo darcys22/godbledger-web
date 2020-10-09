@@ -10,3 +10,7 @@ td a input {
     width: 100%;
     box-sizing: border-box;
 }
+
+.select2-dropdown {
+  width: 300px !important;
+}
