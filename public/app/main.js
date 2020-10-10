@@ -37,9 +37,10 @@ class LineItem {
 }
 class Journal {
     constructor() {
-      this.date = new Date();
-      this.narration = "Display Me";
-      this.lineitems = [];
+      this._date = new Date();
+      this.id = "";
+      this._narration = "Display Me";
+      this._lineitems = [];
       this._lineItemCount = 0;
 
       var i;
@@ -66,38 +67,41 @@ class Journal {
           var filtered = tokens.filter(function (el) {
             return el != "";
           });
-          if (this.lineitems[parseInt(filtered[1], 10)] != undefined) {
-            var lineitem = this.lineitems[parseInt(filtered[1], 10)];
+          if (this._lineitems[parseInt(filtered[1], 10)] != undefined) {
+            var lineitem = this._lineitems[parseInt(filtered[1], 10)];
           } else {
             var lineitem = new LineItem();
           }
           switch(filtered[2]) {
             case "narration":
-              lineitem.description = journalForm[lineitemKeys[i]];
+              lineitem._description = journalForm[lineitemKeys[i]];
               break;
             case "account":
-              lineitem.account = $(`select[name ="${lineitemKeys[i]}"]`).text();
+              lineitem._account = $(`select[name ="${lineitemKeys[i]}"]`).text();
               break;
             case "debit":
-              if (lineitem.amount == 0 && journalForm[lineitemKeys[i]]) {
-                lineitem.amount = parseInt(journalForm[lineitemKeys[i]],10) * 1;
+              if (lineitem._amount == 0 && journalForm[lineitemKeys[i]]) {
+                lineitem._amount = parseInt(journalForm[lineitemKeys[i]],10) * 1;
               }
               break;
             case "credit":
-              if (lineitem.amount == 0 && journalForm[lineitemKeys[i]]) {
-                lineitem.amount = parseInt(journalForm[lineitemKeys[i]],10) * -1;
+              if (lineitem._amount == 0 && journalForm[lineitemKeys[i]]) {
+                lineitem._amount = parseInt(journalForm[lineitemKeys[i]],10) * -1;
               }
               break;
             default:
               console.log("could not identify" + lineitemKeys[i])
           }
 
-          this.lineitems[parseInt(filtered[1], 10)] = lineitem;
+          this._lineitems[parseInt(filtered[1], 10)] = lineitem;
         }
       }
-      this.narration = journalForm.narration;
-      this.lineitems.splice(0, 1);
+      this._narration = journalForm.narration;
+      this._lineitems.splice(0, 1);
       //console.log(journalForm);
+      for (i = 0; i < this._lineitems.length; i++) {
+          window.transactions.unshift( {"id":"","_date":this._date,"_description":this._narration,"_account":this._lineitems[i]._account,"_amount":this._lineitems[i]._amount,"_currency":"USD"})
+      }
       console.log(JSON.stringify(this));
       $.ajax({
           type: 'POST',
@@ -150,7 +154,7 @@ $('#addJournal').on('submit', function (e) {
 
     window.journal.save($('#addJournal').serializeObject());
     $('#addJournal')[0].reset();
-		//tableCreate();
+    tableCreate();
     $('#journalModal').modal('toggle');
   }
 })
@@ -364,5 +368,14 @@ $.fn.serializeObject = function()
 function main() {
   window.transactions = [];
   window.now = moment();
+  try {
+    fetch('/api/journals/')
+    .then(response => response.json())
+    .then(data => {
+      window.transactions = data.Journals;
+      tableCreate()
+    })
+    .catch(error => console.error(error))
+  } catch { error => console.error(error) }
 }
 main();
