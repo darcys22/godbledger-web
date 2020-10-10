@@ -162,7 +162,7 @@ refreshButton.addEventListener('click', async _ => {
     fetch('/api/journals/')
     .then(response => response.json())
     .then(data => {
-      window.transactions = JSON.parse(data);
+      window.transactions = data.Journals;
       tableCreate()
     })
     .catch(error => console.error(error))
@@ -297,16 +297,16 @@ function tableCreate() {
     for (var i = 0; i < window.transactions.length; i++) {
         var tr = document.createElement('tr');
         var td = document.createElement('td');
-        td.appendChild(document.createTextNode(window.transactions[i].date))
+        td.appendChild(document.createTextNode(window.transactions[i]._date))
         tr.appendChild(td)
         var td = document.createElement('td');
         td.appendChild(document.createTextNode(window.transactions[i].id))
         tr.appendChild(td)
         var td = document.createElement('td');
-        td.appendChild(document.createTextNode(window.transactions[i].desc))
+        td.appendChild(document.createTextNode(window.transactions[i]._description))
         tr.appendChild(td)
         var td = document.createElement('td');
-        td.appendChild(document.createTextNode("$" + moneyNumber(window.transactions[i].amount)));
+        td.appendChild(document.createTextNode("$" + moneyNumber(window.transactions[i]._amount)));
         tr.appendChild(td)
         var td = document.createElement('td');
         var btn = document.createElement('button');
