@@ -40,10 +40,8 @@ func GetAccountListing(c *gin.Context) {
 
 	queryDB := `
 	SELECT 
-		@rownum := @rownum +1 as idx, 
 		accounts.name 
 	FROM accounts 
-		CROSS JOIN (SELECT @rownum := 0) r
 	;`
 
 	log.Debug("Querying Database")
@@ -56,10 +54,13 @@ func GetAccountListing(c *gin.Context) {
 	arr := Results{}
 	arr.Results = []Account{}
 
+	index := 0
+
 	for rows.Next() {
 		//Scan one account record
-		var t Account
-		if err := rows.Scan(&t.ID, &t.Text); err != nil {
+		index++
+		t := Account{ID: index}
+		if err := rows.Scan(&t.Text); err != nil {
 			log.Errorf("Could not scan rows of query (%v)", err)
 		}
 		arr.Results = append(arr.Results, t)
