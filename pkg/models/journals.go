@@ -18,18 +18,23 @@ var log = logrus.WithField("prefix", "JournalsModel")
 
 type LineItem struct {
 	ID          string `json:"id"`
-	Date        string `json:"_date" binding:"required"`
+	Date        string `json:"_date"`
 	Description string `json:"_description"`
-	Account     string `json:"_account" binding:"required"`
-	Amount      int    `json:"_amount" binding:"required"`
-	Currency    string `json:"_currency" binding:"required"`
+	Account     string `json:"_account"`
+	Amount      int    `json:"_amount"`
+	Currency    string `json:"_currency"`
+	//Date        string `json:"_date" binding:"required"`
+	//Description string `json:"_description"`
+	//Account     string `json:"_account" binding:"required"`
+	//Amount      int    `json:"_amount" binding:"required"`
+	//Currency    string `json:"_currency" binding:"required"`
 }
 
 type PostJournalCommand struct {
-	Date          string     `json:"date" binding:"required"`
+	Date          string     `json:"_date" binding:"required"`
 	Narration     string     `json:"narration"`
 	LineItemCount int        `json:"_lineItemCount" binding:"required"`
-	LineItems     []LineItem `json:"lineItems" binding:"required"`
+	LineItems     []LineItem `json:"_lineItems" binding:"required"`
 }
 
 type GetJournals struct {

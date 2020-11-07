@@ -1,7 +1,6 @@
 class LineItem {
     constructor() {
-      //this.date = new Date();
-      this._date = "";
+      this._date = moment().format();
       this._description = "";
       this._account = "";
       this._amount = 0;
@@ -29,7 +28,7 @@ class LineItem {
     }
 
     set date(date) {
-        this._date = date;
+        this._date = moment(date).format();
     }
     get date() {
         return this._date;
@@ -37,7 +36,7 @@ class LineItem {
 }
 class Journal {
     constructor() {
-      this._date = new Date();
+      this._date = moment().format();
       this.id = "";
       this._narration = "Display Me";
       this._lineitems = [];
@@ -55,9 +54,12 @@ class Journal {
     }
 
     save(journalForm) {
+
       var lineitemKeys = Object.keys(journalForm).filter(function(name) {
         return name.includes("line-item");
       });
+      console.log(journalForm.date);
+      var journalDate = moment(journalForm.date, "YYYY-MM-DD").format();
       var i = 0;
       for (i = 0; i < lineitemKeys.length; i++) {
         if (lineitemKeys[i].includes("[")){
@@ -71,6 +73,7 @@ class Journal {
             var lineitem = this._lineitems[parseInt(filtered[1], 10)];
           } else {
             var lineitem = new LineItem();
+            lineitem._date = journalDate;
           }
           switch(filtered[2]) {
             case "narration":
@@ -98,16 +101,17 @@ class Journal {
       }
       this._narration = journalForm.narration;
       this._lineitems.splice(0, 1);
-      //console.log(journalForm);
       for (i = 0; i < this._lineitems.length; i++) {
-          window.transactions.unshift( {"id":"","_date":this._date,"_description":this._narration,"_account":this._lineitems[i]._account,"_amount":this._lineitems[i]._amount,"_currency":"USD"})
+          window.transactions.unshift( {"id":"","_date":this._lineitems[i]._date,"_description":this._narration,"_account":this._lineitems[i]._account,"_amount":this._lineitems[i]._amount,"_currency":"USD"})
       }
+
+      this._date = new moment().format();
       console.log(JSON.stringify(this));
       $.ajax({
           type: 'POST',
           url: '/api/journals',
           data: JSON.stringify(this),
-          success: function(data) { alert('data: ' + data); },
+          success: function(data) {},
           contentType: "application/json",
           dataType: 'json'
       });
@@ -151,6 +155,7 @@ $('#addJournal').on('submit', function (e) {
     // handle the invalid form...
   } else {
     e.preventDefault();
+    
 
     window.journal.save($('#addJournal').serializeObject());
     $('#addJournal')[0].reset();
@@ -301,10 +306,13 @@ function tableCreate() {
     for (var i = 0; i < window.transactions.length; i++) {
         var tr = document.createElement('tr');
         var td = document.createElement('td');
-        td.appendChild(document.createTextNode(window.transactions[i]._date))
+        td.appendChild(document.createTextNode(formatdate(window.transactions[i]._date)))
         tr.appendChild(td)
         var td = document.createElement('td');
-        td.appendChild(document.createTextNode(window.transactions[i].id))
+        var span = document.createElement('span');
+        span.appendChild(document.createTextNode(truncate(window.transactions[i].id,12)))
+        span.title=window.transactions[i].id;
+        td.appendChild(span)
         tr.appendChild(td)
         var td = document.createElement('td');
         td.appendChild(document.createTextNode(window.transactions[i]._description))
@@ -336,8 +344,23 @@ function formatcomma(element) {
   return element.toString().replace(/ /g,'').replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
+var truncate = function (fullStr, strLen, separator) {
+    if (fullStr.length <= strLen) return fullStr;
+
+    separator = separator || '...';
+
+    var sepLen = separator.length,
+        charsToShow = strLen - sepLen,
+        frontChars = Math.ceil(charsToShow/2),
+        backChars = Math.floor(charsToShow/2);
+
+    return fullStr.substr(0, frontChars) +
+           separator +
+           fullStr.substr(fullStr.length - backChars);
+};
+
 function formatdate(element) {
-  element.value = moment(element.value, ["DDMMYYYY","DDMMMMYYYY", "DoMMMMYYYY", "DoMMYYYY"], false).format('Do MMMM YYYY');
+  return moment(element).format('Do MMMM YYYY');
 }
 
 $.fn.serializeObject = function()

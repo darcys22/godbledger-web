@@ -16,14 +16,6 @@ func Register(r *gin.Engine) {
 
 	r.GET("/", Index)
 
-	//type ContactForm struct {
-	//Name string `json:"name" binding:"required"`
-	//}
-	//r.POST("/api/journals", func(c *gin.Context) {
-	//c.Bind(&ContactForm{})
-	//c.String(http.StatusOK, "ok")
-	//})
-
 	r.GET("/api/journals", GetJournals)
 	r.POST("/api/journals", PostJournal)
 
