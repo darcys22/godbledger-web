@@ -33,6 +33,10 @@ class LineItem {
     get date() {
         return this._date;
     }
+
+    isEmpty() {
+			return ((!this._account || 0 === this._account.length) || !this._account.trim()) && (!this._amount || this._amount === 0);
+    }
 }
 class Journal {
     constructor() {
@@ -58,7 +62,6 @@ class Journal {
       var lineitemKeys = Object.keys(journalForm).filter(function(name) {
         return name.includes("line-item");
       });
-      console.log(journalForm.date);
       var journalDate = moment(journalForm.date, "YYYY-MM-DD").format();
       var i = 0;
       for (i = 0; i < lineitemKeys.length; i++) {
@@ -101,6 +104,10 @@ class Journal {
       }
       this._narration = journalForm.narration;
       this._lineitems.splice(0, 1);
+      this._lineitems = this._lineitems.filter(function (el) {
+        return !el.isEmpty();
+      });
+      this._lineItemCount = this._lineitems.length;
       for (i = 0; i < this._lineitems.length; i++) {
           window.transactions.unshift( {"id":"","_date":this._lineitems[i]._date,"_description":this._narration,"_account":this._lineitems[i]._account,"_amount":this._lineitems[i]._amount,"_currency":"USD"})
       }
