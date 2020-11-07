@@ -118,3 +118,62 @@ func (j *GetJournals) SearchJournals() error {
 
 	return nil
 }
+
+func (j *PostJournalCommand) Save(transaction) error {
+	set := flag.NewFlagSet("PostJournal", 0)
+	set.String("config", "", "doc")
+
+	ctx := cli.NewContext(nil, set, nil)
+	err, cfg := cmd.MakeConfig(ctx)
+	if err != nil {
+		return fmt.Errorf("Could not make config (%v)", err)
+	}
+
+	address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
+	log.WithField("address", address).Info("GRPC Dialing on port")
+	opts := []grpc.DialOption{}
+
+	if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
+		tlsCredentials, err := loadTLSCredentials(cfg)
+		if err != nil {
+			return fmt.Errorf("Could not load TLS credentials (%v)", err)
+		}
+		opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
+	} else {
+		opts = append(opts, grpc.WithInsecure())
+	}
+
+	conn, err := grpc.Dial(address, opts...)
+	if err != nil {
+		return fmt.Errorf("Could not connect to GRPC (%v)", err)
+	}
+	defer conn.Close()
+	client := pb.NewTransactorClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	transactionLines := make([]*pb.LineItem, transaction.lineitemcount)
+
+	for i, accChange := range transaction.lineitems {
+		amountInt64 := accChange.Balance.Num().Int64() * int64(100) / accChange.Balance.Denom().Int64()
+		transactionLines[i] = &pb.LineItem{
+			Accountname: accChange.Name,
+			Description: accChange.Description,
+			Amount:      amountInt64,
+			Currency:    accChange.Currency,
+		}
+	}
+
+	req := &pb.TransactionRequest{
+		Date:        t.Date.Format("2006-01-02"),
+		Description: t.Payee,
+		Lines:       transactionLines,
+	}
+	r, err := client.AddTransaction(ctx, req)
+	if err != nil {
+		return fmt.Errorf("Could not call Add Transaction Method (%v)", err)
+	}
+	log.Infof("Add Transaction Response: %s", r.GetMessage())
+	return nil
+}
