@@ -17,6 +17,7 @@ require (
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
+	google.golang.org/grpc v1.30.0
 	gopkg.in/ini.v1 v1.61.0
 	gopkg.in/macaron.v1 v1.3.9
 )

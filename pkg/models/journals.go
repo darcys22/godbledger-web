@@ -1,14 +1,22 @@
 package models
 
 import (
+	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	//"math"
 	//"strconv"
 	"time"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/ledger"
+	pb "github.com/darcys22/godbledger/proto"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
@@ -21,7 +29,7 @@ type LineItem struct {
 	Date        string `json:"_date" binding:"required"`
 	Description string `json:"_description"`
 	Account     string `json:"_account" binding:"required"`
-	Amount      int    `json:"_amount" binding:"required"`
+	Amount      int64  `json:"_amount" binding:"required"`
 	Currency    string `json:"_currency" binding:"required"`
 }
 
@@ -119,7 +127,7 @@ func (j *GetJournals) SearchJournals() error {
 	return nil
 }
 
-func (j *PostJournalCommand) Save(transaction) error {
+func (j *PostJournalCommand) Save() error {
 	set := flag.NewFlagSet("PostJournal", 0)
 	set.String("config", "", "doc")
 
@@ -150,30 +158,61 @@ func (j *PostJournalCommand) Save(transaction) error {
 	defer conn.Close()
 	client := pb.NewTransactorClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	transactionLines := make([]*pb.LineItem, transaction.lineitemcount)
+	transactionLines := make([]*pb.LineItem, j.LineItemCount)
 
-	for i, accChange := range transaction.lineitems {
-		amountInt64 := accChange.Balance.Num().Int64() * int64(100) / accChange.Balance.Denom().Int64()
+	for i, accChange := range j.LineItems {
 		transactionLines[i] = &pb.LineItem{
-			Accountname: accChange.Name,
+			Accountname: accChange.Account,
 			Description: accChange.Description,
-			Amount:      amountInt64,
+			Amount:      accChange.Amount,
 			Currency:    accChange.Currency,
 		}
 	}
 
+	layout := "2006-01-02T15:04:05-0700"
+	t, err := time.Parse(layout, j.Date)
+	if err != nil {
+		return fmt.Errorf("Could not parse date", err)
+	}
 	req := &pb.TransactionRequest{
-		Date:        t.Date.Format("2006-01-02"),
-		Description: t.Payee,
+		Date:        t.Format("2006-01-02"),
+		Description: j.Narration,
 		Lines:       transactionLines,
 	}
-	r, err := client.AddTransaction(ctx, req)
+	r, err := client.AddTransaction(ctxTimeout, req)
 	if err != nil {
 		return fmt.Errorf("Could not call Add Transaction Method (%v)", err)
 	}
 	log.Infof("Add Transaction Response: %s", r.GetMessage())
 	return nil
+}
+
+func loadTLSCredentials(cfg *cmd.LedgerConfig) (credentials.TransportCredentials, error) {
+	// Load certificate of the CA who signed server's certificate
+	pemServerCA, err := ioutil.ReadFile(cfg.CACert)
+	if err != nil {
+		return nil, err
+	}
+
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(pemServerCA) {
+		return nil, fmt.Errorf("failed to add server CA's certificate")
+	}
+
+	// Load client's certificate and private key
+	clientCert, err := tls.LoadX509KeyPair(cfg.Cert, cfg.Key)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create the credentials and return it
+	config := &tls.Config{
+		Certificates: []tls.Certificate{clientCert},
+		RootCAs:      certPool,
+	}
+
+	return credentials.NewTLS(config), nil
 }
