@@ -172,7 +172,7 @@ func (j *PostJournalCommand) Save() error {
 		}
 	}
 
-	layout := "2006-01-02T15:04:05-0700"
+	layout := "2006-01-02T15:04:05-07:00"
 	t, err := time.Parse(layout, j.Date)
 	if err != nil {
 		return fmt.Errorf("Could not parse date", err)

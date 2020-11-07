@@ -26,6 +26,8 @@ func PostJournal(c *gin.Context) {
 		return
 	}
 
-	journal.Save()
+	if err := journal.Save(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
 	c.JSON(200, journal)
 }
