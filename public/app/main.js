@@ -167,6 +167,7 @@ $('#addJournal').on('submit', function (e) {
     window.journal.save($('#addJournal').serializeObject());
     $('#addJournal')[0].reset();
     tableCreate();
+    //TODO: Reset Journal Object?
     $('#journalModal').modal('toggle');
   }
 })
@@ -255,9 +256,11 @@ function addLineItem(index) {
   var tbdy = document.getElementById('journal');
   var tr = document.createElement('tr');
   var td = document.createElement('td');
+
   //ID of the Journal
   td.appendChild(document.createTextNode(index));
   tr.appendChild(td);
+
   //Input for Narration of line item
   var td = document.createElement('td');
   var input  = document.createElement('input');
@@ -267,14 +270,15 @@ function addLineItem(index) {
   input.type = "text";
   td.appendChild(input);
   tr.appendChild(td);
+
   //Select element for Account of line item
   var td = document.createElement('td');
   var select = document.createElement('select');
   select.className = 'js-example-basic-single form-control';
   select.name = `line-item[${index}][account]`;
-
   td.appendChild(select);
   tr.appendChild(td);
+
   //Input for Debit Amount of line item
   var td = document.createElement('td');
   var input  = document.createElement('input');
@@ -282,8 +286,10 @@ function addLineItem(index) {
   input.setAttribute('data-lpignore', "true");
   input.name = `line-item[${index}][debit]`;
   input.type = "text";
+  input.setAttribute("onchange", "updateTotal();");;
   td.appendChild(input);
   tr.appendChild(td);
+
   //Input for Credit Amount of line item
   var td = document.createElement('td');
   var input  = document.createElement('input');
@@ -291,8 +297,10 @@ function addLineItem(index) {
   input.setAttribute('data-lpignore', "true");
   input.name = `line-item[${index}][credit]`;
   input.type = "text";
+  input.setAttribute("onchange", "updateTotal();");;
   td.appendChild(input);
   tr.appendChild(td);
+
   //Append the Row to the Table
   tbdy.appendChild(tr);
 
@@ -305,6 +313,22 @@ function addLineItem(index) {
     }
   });
 
+}
+
+function updateTotal()
+{
+  var DRTotal = 0;
+  var CRTotal = 0;
+
+  for (var i = 1; i <= journal._lineItemCount; i++) {
+    var DRAmount = parseInt(document.getElementsByName(`line-item[${i}][debit]`)[0].value);
+    if (!isNaN(DRAmount)) { DRTotal += DRAmount; }
+    var CRAmount = parseInt(document.getElementsByName(`line-item[${i}][credit]`)[0].value);
+    if (!isNaN(CRAmount)) { CRTotal += CRAmount; }
+  }
+
+  document.getElementById('invoiceTotalDebit').value = DRTotal;
+  document.getElementById('invoiceTotalCredit').value = CRTotal;
 }
 
 function tableCreate() {
