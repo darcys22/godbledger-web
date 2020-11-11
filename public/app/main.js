@@ -167,7 +167,7 @@ $('#addJournal').on('submit', function (e) {
     window.journal.save($('#addJournal').serializeObject());
     $('#addJournal')[0].reset();
     tableCreate();
-    //TODO: Reset Journal Object?
+    journal = new Journal();
     $('#journalModal').modal('toggle');
   }
 })
@@ -199,9 +199,16 @@ function editJournal(index) {
   //$('#addJournal').validator()
 
 }
+
 function deleteJournal(index) {
-  window.transactions.splice(index, 1);
-  //tableCreate();
+  $.ajax({
+      type: 'DELETE',
+      url: `/api/journals/${index}`,
+      success: function(data) {
+        window.transactions.splice(index, 1);
+        tableCreate();
+      },
+  });
 }
 
 function stripwhitecommas(str) {
@@ -363,7 +370,8 @@ function tableCreate() {
         var btn = document.createElement('button');
         btn.className = 'btn btn-danger btn-rounded btn-sm';
         btn.setAttribute('data-param', i);
-        btn.onclick = function () {deleteJournal(this.getAttribute('data-param'));}; 
+        btn.setAttribute('data-id', window.transactions[i].id);
+        btn.onclick = function () {deleteJournal(this.getAttribute('data-id'));}; 
         btn.innerHTML = "Delete";
         td.appendChild(btn)
         tr.appendChild(td)
