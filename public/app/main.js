@@ -156,7 +156,6 @@ $(document).ready(function() {
     });
 });
 
-//$('#addJournal').validator().on('submit', function (e) {
 $('#addJournal').on('submit', function (e) {
   if (e.isDefaultPrevented()) {
     // handle the invalid form...
@@ -196,7 +195,6 @@ function editJournal(index) {
     }
   }
   $("#journalModal").modal() 
-  //$('#addJournal').validator()
 
 }
 
@@ -292,8 +290,10 @@ function addLineItem(index) {
   input.className = 'form-control';
   input.setAttribute('data-lpignore', "true");
   input.name = `line-item[${index}][debit]`;
-  input.type = "text";
-  input.setAttribute("onchange", "updateTotal();");;
+  input.type = "number";
+    var DRAmount = parseInt();
+  input.setAttribute("onchange", `document.getElementsByName("line-item[${index}][credit]")[0].value="";updateTotal();`);;
+  input.setAttribute("min", 0);;
   td.appendChild(input);
   tr.appendChild(td);
 
@@ -303,8 +303,9 @@ function addLineItem(index) {
   input.className = 'form-control';
   input.setAttribute('data-lpignore', "true");
   input.name = `line-item[${index}][credit]`;
-  input.type = "text";
-  input.setAttribute("onchange", "updateTotal();");;
+  input.type = "number";
+  input.setAttribute("onchange", `document.getElementsByName("line-item[${index}][debit]")[0].value="";updateTotal();`);;
+  input.setAttribute("min", 0);;
   td.appendChild(input);
   tr.appendChild(td);
 
@@ -318,20 +319,47 @@ function addLineItem(index) {
       url: '/api/accounts/list',
       dataType: 'json',
     }
+  }).on("change",function(){
+    updateTotal()
   });
-
 }
 
 function updateTotal()
 {
+  $('#saveJournalButton').prop('disabled', false);
   var DRTotal = 0;
   var CRTotal = 0;
 
   for (var i = 1; i <= journal._lineItemCount; i++) {
     var DRAmount = parseInt(document.getElementsByName(`line-item[${i}][debit]`)[0].value);
-    if (!isNaN(DRAmount)) { DRTotal += DRAmount; }
-    var CRAmount = parseInt(document.getElementsByName(`line-item[${i}][credit]`)[0].value);
-    if (!isNaN(CRAmount)) { CRTotal += CRAmount; }
+    if (!isNaN(DRAmount) && DRAmount >=0) { 
+      DRTotal += DRAmount; 
+              
+      if (!$(`select[name ="line-item[${i}][account]"]`).text()) {
+        $('#saveJournalButton').prop('disabled', true);
+        //console.log("DR has no account")
+      }
+    } else if (document.getElementsByName(`line-item[${i}][debit]`)[0].value) {
+      $('#saveJournalButton').prop('disabled', true);
+      //console.log("DR has value but no integer")
+    } else {
+      var CRAmount = parseInt(document.getElementsByName(`line-item[${i}][credit]`)[0].value);
+      if (!isNaN(CRAmount) && CRAmount >=0) { 
+        CRTotal += CRAmount; 
+        if (!$(`select[name ="line-item[${i}][account]"]`).text()) {
+          $('#saveJournalButton').prop('disabled', true);
+          //console.log("CR has no account")
+        }
+      } else if (document.getElementsByName(`line-item[${i}][credit]`)[0].value) {
+        $('#saveJournalButton').prop('disabled', true);
+        //console.log("CR has value but no integer")
+      }
+    }
+  }
+
+  if ((Math.abs(DRTotal - CRTotal) >= 0.01) && (DRTotal > 0)) {
+    $('#saveJournalButton').prop('disabled', true);
+    //console.log("Does not balance")
   }
 
   document.getElementById('invoiceTotalDebit').value = DRTotal;
@@ -428,6 +456,9 @@ $.fn.serializeObject = function()
 };
 
 function main() {
+  $('#addJournal')[0].reset();
+  updateTotal()
+  $('#saveJournalButton').prop('disabled', true);
   window.transactions = [];
   window.now = moment();
   try {
