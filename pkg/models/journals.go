@@ -7,8 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	//"math"
-	//"strconv"
 	"time"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
@@ -187,6 +185,52 @@ func (j *PostJournalCommand) Save() error {
 		return fmt.Errorf("Could not call Add Transaction Method (%v)", err)
 	}
 	log.Infof("Add Transaction Response: %s", r.GetMessage())
+	return nil
+}
+
+func DeleteJournalCommand(id string) error {
+	set := flag.NewFlagSet("DeleteJournal", 0)
+	set.String("config", "", "doc")
+
+	ctx := cli.NewContext(nil, set, nil)
+	err, cfg := cmd.MakeConfig(ctx)
+	if err != nil {
+		return fmt.Errorf("Could not make config (%v)", err)
+	}
+
+	address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
+	log.WithField("address", address).Info("GRPC Dialing on port")
+	opts := []grpc.DialOption{}
+
+	if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
+		tlsCredentials, err := loadTLSCredentials(cfg)
+		if err != nil {
+			return fmt.Errorf("Could not load TLS credentials (%v)", err)
+		}
+		opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
+	} else {
+		opts = append(opts, grpc.WithInsecure())
+	}
+
+	conn, err := grpc.Dial(address, opts...)
+	if err != nil {
+		return fmt.Errorf("Could not connect to GRPC (%v)", err)
+	}
+	defer conn.Close()
+	client := pb.NewTransactorClient(conn)
+
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	req := &pb.DeleteRequest{
+		Identifier: id,
+	}
+	r, err := client.DeleteTransaction(ctxTimeout, req)
+	if err != nil {
+		return fmt.Errorf("Could not call Delete Transaction Method (%v)", err)
+	}
+	log.Infof("Delete Transaction Response: %s", r.GetMessage())
+
 	return nil
 }
 

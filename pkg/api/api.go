@@ -18,6 +18,7 @@ func Register(r *gin.Engine) {
 
 	r.GET("/api/journals", GetJournals)
 	r.POST("/api/journals", PostJournal)
+	r.DELETE("/api/journals/:id", DeleteJournal)
 
 	r.GET("/api/accounts/list", GetAccountListing)
 }
