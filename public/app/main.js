@@ -183,16 +183,45 @@ refreshButton.addEventListener('click', async _ => {
 } catch { error => console.error(error)
 }});
 
-function editJournal(index) {
-  var journal = window.transactions[index];
-  deleteJournal(index) 
-  for (var key in journal) {
-    try {
-      document.getElementById("addJournal").elements[key].value = journal[key]
-    } catch(err){
-    }
+function getJournal(index) {  
+  try {
+    fetch('/api/journals/index')
+    .then(response => response.json())
+    .then(data => {
+      window.journal = data;
+      for (var key in journal) {
+        try {
+          document.getElementById("addJournal").elements[key].value = journal[key]
+        } catch(err){
+        }
+      }
+      $("#journalModal").modal() 
+    })
+    .catch(error => console.error(error))
+  } catch { error => console.error(error)
   }
-  $("#journalModal").modal() 
+}
+
+function editJournal(index) {  
+  try {
+    fetch('/api/journals/index')
+    .then(response => response.json())
+    .then(data => {
+      var journal = window.transactions[index];
+      deleteJournal(index) 
+      for (var key in journal) {
+        try {
+          document.getElementById("addJournal").elements[key].value = journal[key]
+        } catch(err){
+        }
+      }
+      $("#journalModal").modal() 
+      window.transactions = data.Journals;
+      tableCreate()
+    })
+    .catch(error => console.error(error))
+  } catch { error => console.error(error)
+  }
 
 }
 

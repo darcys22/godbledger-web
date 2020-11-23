@@ -38,3 +38,34 @@ func DeleteJournal(c *gin.Context) {
 	}
 	c.String(http.StatusOK, "Success")
 }
+
+func GetJournal(c *gin.Context) {
+	id := c.Params.ByName("id")
+
+	journal, err := m.GetJournalCommand(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	c.JSON(200, journal)
+}
+
+func EditJournal(c *gin.Context) {
+	id := c.Params.ByName("id")
+	var journal m.PostJournalCommand
+
+	if err := c.BindJSON(&journal); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := journal.Save(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	if err := m.DeleteJournalCommand(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	c.JSON(200, journal)
+}

@@ -224,6 +224,70 @@ func DeleteJournalCommand(id string) error {
 	return nil
 }
 
+func GetJournalCommand(id string) (PostJournalCommand, error) {
+	j := PostJournalCommand{}
+	j.LineItems = []LineItem{}
+
+	set := flag.NewFlagSet("getJournal", 0)
+	set.String("config", "", "doc")
+
+	ctx := cli.NewContext(nil, set, nil)
+	err, cfg := cmd.MakeConfig(ctx)
+	if err != nil {
+		return j, fmt.Errorf("Could not make config (%v)", err)
+	}
+
+	ledger, err := ledger.New(ctx, cfg)
+	if err != nil {
+		return j, fmt.Errorf("Could not make new ledger (%v)", err)
+	}
+
+	queryDB := `
+		SELECT
+			transactions.transaction_id,
+			splits.split_date,
+			splits.description,
+			splits.currency,
+			currency.decimals,
+			splits.amount,
+			split_accounts.account_id,
+			transactions.brief
+		FROM
+			splits
+			JOIN split_accounts ON splits.split_id = split_accounts.split_id
+			JOIN transactions on splits.transaction_id = transactions.transaction_id
+			JOIN currencies AS currency ON splits.currency = currency.NAME
+		WHERE
+			transactions.transaction_id = ?
+		LIMIT 50
+	;`
+
+	log.Debug("Querying Database")
+	rows, err := ledger.LedgerDb.Query(queryDB, id)
+
+	if err != nil {
+		return j, fmt.Errorf("Could not query database (%v)", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var t LineItem
+		var decimals float64
+		var narration string
+		if err := rows.Scan(&t.ID, &t.Date, &t.Description, &t.Currency, &decimals, &t.Amount, &t.Account, &narration); err != nil {
+			return j, fmt.Errorf("Could not scan rows of query (%v)", err)
+		}
+		j.LineItems = append(j.LineItems, t)
+		j.Narration = narration
+		j.Date = t.Date
+	}
+	if rows.Err() != nil {
+		return j, fmt.Errorf("rows errored with (%v)", rows.Err())
+	}
+
+	return j, nil
+}
+
 func loadTLSCredentials(cfg *cmd.LedgerConfig) (credentials.TransportCredentials, error) {
 	// Load certificate of the CA who signed server's certificate
 	pemServerCA, err := ioutil.ReadFile(cfg.CACert)
