@@ -108,9 +108,7 @@ class Journal {
         return !el.isEmpty();
       });
       this._lineItemCount = this._lineitems.length;
-      for (i = 0; i < this._lineitems.length; i++) {
-          window.transactions.unshift( {"id":"","_date":this._lineitems[i]._date,"_description":this._narration,"_account":this._lineitems[i]._account,"_amount":this._lineitems[i]._amount,"_currency":"USD"})
-      }
+      window.transactions.unshift( {"id":"","_date":this._lineitems[0]._date,"_description":this._narration,"_amount":this._lineitems[1]._amount})
 
       this._date = new moment().format();
       console.log(JSON.stringify(this));
