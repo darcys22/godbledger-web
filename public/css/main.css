@@ -11,6 +11,10 @@ td a input {
     box-sizing: border-box;
 }
 
+.money {
+  text-align: right;
+}
+
 .select2-dropdown {
   width: 300px !important;
 }

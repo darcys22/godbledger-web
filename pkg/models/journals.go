@@ -70,17 +70,13 @@ func (j *GetJournals) SearchJournals() error {
 	queryDB := `
 		SELECT
 			transactions.transaction_id,
-			splits.split_date,
-			splits.description,
-			splits.currency,
-			currency.decimals,
-			splits.amount,
-			split_accounts.account_id
+			max(splits.split_date),
+			transactions.brief,
+			sum(case when splits.amount > 0 then splits.amount else 0 end)
 		FROM
 			splits
 			JOIN split_accounts ON splits.split_id = split_accounts.split_id
 			JOIN transactions on splits.transaction_id = transactions.transaction_id
-			JOIN currencies AS currency ON splits.currency = currency.NAME
 		WHERE
 			splits.split_date >= ?
 			AND splits.split_date <= ?
@@ -93,6 +89,7 @@ func (j *GetJournals) SearchJournals() error {
 				WHERE
 					tt.transaction_id = splits.transaction_id
 			)
+		GROUP BY transactions.transaction_id
 		LIMIT 50
 	;`
 
@@ -105,17 +102,10 @@ func (j *GetJournals) SearchJournals() error {
 	defer rows.Close()
 
 	for rows.Next() {
-		// Scan one customer record
 		var t LineItem
-		var decimals float64
-		if err := rows.Scan(&t.ID, &t.Date, &t.Description, &t.Currency, &decimals, &t.Amount, &t.Account); err != nil {
+		if err := rows.Scan(&t.ID, &t.Date, &t.Description, &t.Amount); err != nil {
 			return fmt.Errorf("Could not scan rows of query (%v)", err)
 		}
-		//centsAmount := float64(t.Amount)
-		//if err != nil {
-		//return fmt.Errorf("Could not process the amount as a float (%v)", err)
-		//}
-		//t.Amount = fmt.Sprintf("%.2f", centsAmount/math.Pow(10, decimals))
 		j.Journals = append(j.Journals, t)
 	}
 	if rows.Err() != nil {

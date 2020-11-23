@@ -287,7 +287,7 @@ function addLineItem(index) {
   //Input for Debit Amount of line item
   var td = document.createElement('td');
   var input  = document.createElement('input');
-  input.className = 'form-control';
+  input.className = 'form-control money';
   input.setAttribute('data-lpignore', "true");
   input.name = `line-item[${index}][debit]`;
   input.type = "number";
@@ -300,7 +300,7 @@ function addLineItem(index) {
   //Input for Credit Amount of line item
   var td = document.createElement('td');
   var input  = document.createElement('input');
-  input.className = 'form-control';
+  input.className = 'form-control money';
   input.setAttribute('data-lpignore', "true");
   input.name = `line-item[${index}][credit]`;
   input.type = "number";
