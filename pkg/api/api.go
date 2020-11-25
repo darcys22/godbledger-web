@@ -15,6 +15,7 @@ func Register(r *gin.Engine) {
 	//bind := binding.Bind
 
 	r.GET("/", Index)
+	r.GET("/reports", Reports)
 
 	r.GET("/api/journals", GetJournals)
 	r.POST("/api/journals", PostJournal)

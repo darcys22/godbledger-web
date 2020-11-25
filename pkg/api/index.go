@@ -9,6 +9,10 @@ func Index(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.html", nil)
 }
 
+func Reports(c *gin.Context) {
+	c.HTML(http.StatusOK, "reports.html", nil)
+}
+
 func NotFound(c *gin.Context) {
 
 	c.HTML(http.StatusNotFound, "index.html", nil)
