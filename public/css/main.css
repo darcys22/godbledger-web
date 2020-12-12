@@ -21,6 +21,8 @@ td a input {
 .clipboard {
   display: inline-block;
   margin: 0px 6px;
+  text-align: center;
+  line-height: 50%;
 }
 
 .select2-dropdown {
