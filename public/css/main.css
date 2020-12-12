@@ -2,6 +2,9 @@ table {
     border-collapse:collapse;
     margin: auto;
 }
+.txntable {
+  vertical-align: middle !important;
+}
 td input {
     width: 100%;
     box-sizing: border-box;
@@ -13,6 +16,11 @@ td a input {
 
 .money {
   text-align: right;
+}
+
+.clipboard {
+  display: inline-block;
+  margin: 0px 6px;
 }
 
 .select2-dropdown {
