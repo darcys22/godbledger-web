@@ -185,7 +185,7 @@ refreshButton.addEventListener('click', async _ => {
 
 function getJournal(index) {  
   try {
-    fetch('/api/journals/index')
+    fetch('/api/journals/'+index)
     .then(response => response.json())
     .then(data => {
       window.journal = data;
@@ -202,16 +202,18 @@ function getJournal(index) {
   }
 }
 
-function editJournal(index) {  
+function editJournal(index,id) {  
   try {
-    fetch('/api/journals/index')
+    fetch('/api/journals/'+id)
     .then(response => response.json())
     .then(data => {
       var journal = window.transactions[index];
-      deleteJournal(index) 
+      console.log(data)
+      //deleteJournal(index) 
       for (var key in journal) {
         try {
-          document.getElementById("addJournal").elements[key].value = journal[key]
+          document.getElementsByName("date")[0].value = formatdate(data._date);
+          document.getElementsByName("narration")[0].value = data.narration;
         } catch(err){
         }
       }
@@ -439,8 +441,9 @@ function tableCreate() {
         td.className = 'txntable';
         var btn = document.createElement('button');
         btn.className = 'btn btn-warning btn-rounded btn-sm';
-        btn.setAttribute('data-param', i);
-        btn.onclick = function () {editJournal(this.getAttribute('data-param'));}; 
+        btn.setAttribute('data-param-index', i);
+        btn.setAttribute('data-param-id',window.transactions[i].id);
+        btn.onclick = function () {editJournal(this.getAttribute('data-param-index'),this.getAttribute('data-param-id'));}; 
         btn.innerHTML = "Edit";
         td.appendChild(btn)
         tr.appendChild(td)
