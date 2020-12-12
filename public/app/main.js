@@ -440,7 +440,7 @@ function tableCreate() {
         var btn = document.createElement('button');
         btn.className = 'btn btn-warning btn-rounded btn-sm';
         btn.setAttribute('data-param', i);
-        //btn.onclick = function () {editJournal(this.getAttribute('data-param'));}; 
+        btn.onclick = function () {editJournal(this.getAttribute('data-param'));}; 
         btn.innerHTML = "Edit";
         td.appendChild(btn)
         tr.appendChild(td)
