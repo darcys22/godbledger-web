@@ -164,6 +164,7 @@ $('#addJournal').on('submit', function (e) {
     window.journal.save($('#addJournal').serializeObject());
     $('#addJournal')[0].reset();
     tableCreate();
+    clearJournalLineItems();
     journal = new Journal();
     $('#journalModal').modal('toggle');
   }
@@ -207,19 +208,34 @@ function editJournal(index,id) {
     fetch('/api/journals/'+id)
     .then(response => response.json())
     .then(data => {
-      var journal = window.transactions[index];
+      //var journal = window.transactions[index];
+      $('#addJournal')[0].reset();
+      journal = new Journal();
+      clearJournalLineItems();
+      journal._lineItemCount = 0;
       console.log(data)
-      //deleteJournal(index) 
-      for (var key in journal) {
-        try {
-          document.getElementsByName("date")[0].value = formatdate(data._date);
-          document.getElementsByName("narration")[0].value = data.narration;
-        } catch(err){
+      document.getElementsByName("date")[0].value = formatdate(data._date);
+      document.getElementsByName("narration")[0].value = data.narration;
+      for (var lineItem in data._lineItems) {
+        journal.addNewLineItem();
+        console.log(lineItem);
+        document.getElementsByName("line-item[" +(journal._lineItemCount)+ "][narration]")[0].value = data._lineItems[lineItem]._description;
+        var amount = parseInt(data._lineItems[lineItem]._amount);
+        if (amount > 0) {
+          document.getElementsByName("line-item[" +journal._lineItemCount+ "][debit]")[0].value = amount;
+        } else {
+          document.getElementsByName("line-item[" +journal._lineItemCount+ "][credit]")[0].value = -amount;
         }
+        if ($(`input[name = "line-item[${journal._lineItemCount}][account]:first"]`).find("option[value='" + data._lineItems[lineItem]._account + "']").length) {
+          $(`input[name = "line-item[${journal._lineItemCount}][account]:first"]`).val(data._lineItems[lineItem]._account).trigger('change');
+          //$('#mySelect2').val(data._lineItems).trigger('change');
+        }
+
       }
+      updateTotal();
       $("#journalModal").modal() 
-      window.transactions = data.Journals;
-      tableCreate()
+      //window.transactions = data.Journals;
+      //tableCreate()
     })
     .catch(error => console.error(error))
   } catch { error => console.error(error)
@@ -235,6 +251,14 @@ function deleteJournal(index) {
         window.transactions.splice(index, 1);
         tableCreate();
       },
+  });
+}
+
+function clearJournalLineItems() {
+  var rows = $('#journal > tr');
+  rows.each(function(idx, li) {
+    var lineItem = $(li);
+    lineItem.remove();
   });
 }
 
