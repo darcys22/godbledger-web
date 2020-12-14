@@ -20,7 +20,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var log = logrus.WithField("prefix", "JournalsModel")
+var log = logrus.WithField("prefix", "Model")
 
 type LineItem struct {
 	ID          string `json:"id"`

@@ -16,6 +16,7 @@ func Register(r *gin.Engine) {
 
 	r.GET("/", Index)
 	r.GET("/reports", Reports)
+	r.POST("/reports", ReportsResults)
 
 	r.GET("/api/journals", GetJournals)
 	r.POST("/api/journals", PostJournal)
