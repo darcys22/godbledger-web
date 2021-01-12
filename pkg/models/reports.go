@@ -26,6 +26,10 @@ type ReportRequest struct {
 	Columns []string `json:"columns"`
 }
 
+type ReportsRequest struct {
+	Reports []ReportRequest `json:"reports"`
+}
+
 type ReportLine struct {
 	Styling string   `json:"styling"`
 	Row     []string `json:"row"`
@@ -36,7 +40,13 @@ type ReportResult struct {
 	Result  []ReportLine `json:"result"`
 }
 
-func NewReport(req ReportRequest) (error, *ReportResult) {
+var trialBalanceColumns = map[string]string{
+	"AccountName": "split_accounts.account_id",
+	"Amount":      "Sum(splits.amount)",
+	"Currency":    "currency.decimals",
+}
+
+func NewReport(req ReportsRequest) (error, *ReportResult) {
 	set := flag.NewFlagSet("getJournalListing", 0)
 	set.String("config", "", "doc")
 
@@ -74,8 +84,8 @@ func NewReport(req ReportRequest) (error, *ReportResult) {
 	rows, err := ledger.LedgerDb.Query(queryDB, queryDateEnd)
 
 	var r ReportResult
-	r.Options = req.Options
-	r.Columns = req.Columns
+	r.Options = req.Reports[0].Options
+	r.Columns = req.Reports[0].Columns
 
 	if err != nil {
 		return fmt.Errorf("Could not query database (%v)", err), nil
@@ -83,8 +93,12 @@ func NewReport(req ReportRequest) (error, *ReportResult) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var t []string
-		if err := rows.Scan(&t[0], &t[1], &t[2], &t[3]); err != nil {
+		t := make([]string, len(req.Reports[0].Columns))
+		pointers := make([]interface{}, len(t))
+		for i, _ := range pointers {
+			pointers[i] = &t[i]
+		}
+		if err := rows.Scan(pointers...); err != nil {
 			return fmt.Errorf("Could not scan rows of query (%v)", err), nil
 		}
 		var l ReportLine

@@ -7,7 +7,7 @@ import (
 )
 
 func ReportsResults(c *gin.Context) {
-	var request m.ReportRequest
+	var request m.ReportsRequest
 
 	if err := c.BindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

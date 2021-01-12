@@ -420,68 +420,67 @@ function updateTotal()
 }
 
 function tableCreate() {
+  var tbdy = document.getElementById('transactionstable');
+  tbdy.innerHTML = '';
+  for (var i = 0; i < window.transactions.length; i++) {
+    var tr = document.createElement('tr');
+    var td = document.createElement('td');
+    td.className = 'txntable';
+    td.appendChild(document.createTextNode(formatdate(window.transactions[i]._date)))
+    tr.appendChild(td)
+    var td = document.createElement('td');
+    td.className = 'txntable';
+    var span = document.createElement('span');
+    span.appendChild(document.createTextNode(truncate(window.transactions[i].id,12)))
+    span.title=window.transactions[i].id;
+    td.appendChild(span)
 
-    var tbdy = document.getElementById('transactionstable');
-    tbdy.innerHTML = '';
-    for (var i = 0; i < window.transactions.length; i++) {
-        var tr = document.createElement('tr');
-        var td = document.createElement('td');
-        td.className = 'txntable';
-        td.appendChild(document.createTextNode(formatdate(window.transactions[i]._date)))
-        tr.appendChild(td)
-        var td = document.createElement('td');
-        td.className = 'txntable';
-        var span = document.createElement('span');
-        span.appendChild(document.createTextNode(truncate(window.transactions[i].id,12)))
-        span.title=window.transactions[i].id;
-        td.appendChild(span)
+    var svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+    svg.setAttribute('viewBox',"0 0 16 16");
+    svg.setAttribute('width',"16");
+    svg.setAttribute("height","16");
+    var path = document.createElementNS("http://www.w3.org/2000/svg","path");
+    path.setAttribute("fill-rule","evenodd");
+    path.setAttribute("d","M5.75 1a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-3a.75.75 0 00-.75-.75h-4.5zm.75 3V2.5h3V4h-3zm-2.874-.467a.75.75 0 00-.752-1.298A1.75 1.75 0 002 3.75v9.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-9.5a1.75 1.75 0 00-.874-1.515.75.75 0 10-.752 1.298.25.25 0 01.126.217v9.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-9.5a.25.25 0 01.126-.217z");
+    var btn = document.createElement('button');
+    btn.title=window.transactions[i].id;
 
-        var svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
-        svg.setAttribute('viewBox',"0 0 16 16");
-        svg.setAttribute('width',"16");
-        svg.setAttribute("height","16");
-        var path = document.createElementNS("http://www.w3.org/2000/svg","path");
-        path.setAttribute("fill-rule","evenodd");
-        path.setAttribute("d","M5.75 1a.75.75 0 00-.75.75v3c0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-3a.75.75 0 00-.75-.75h-4.5zm.75 3V2.5h3V4h-3zm-2.874-.467a.75.75 0 00-.752-1.298A1.75 1.75 0 002 3.75v9.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 13.25v-9.5a1.75 1.75 0 00-.874-1.515.75.75 0 10-.752 1.298.25.25 0 01.126.217v9.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-9.5a.25.25 0 01.126-.217z");
-        var btn = document.createElement('button');
-        btn.title=window.transactions[i].id;
-
-        btn.setAttribute('data-param',window.transactions[i].id);
-        btn.className = 'clipboard btn btn-sm btn-light';
-        btn.onclick = function () {copyToClipboard(this.getAttribute('data-param'));}; 
-        svg.appendChild(path);
-        btn.appendChild(svg);
-        td.appendChild(btn);
-        tr.appendChild(td);
-        var td = document.createElement('td');
-        td.className = 'txntable';
-        td.appendChild(document.createTextNode(window.transactions[i]._description))
-        tr.appendChild(td)
-        var td = document.createElement('td');
-        td.className = 'txntable';
-        td.appendChild(document.createTextNode("$" + moneyNumber(window.transactions[i]._amount)));
-        tr.appendChild(td)
-        var td = document.createElement('td');
-        td.className = 'txntable';
-        var btn = document.createElement('button');
-        btn.className = 'btn btn-warning btn-rounded btn-sm';
-        btn.setAttribute('data-param-index', i);
-        btn.setAttribute('data-param-id',window.transactions[i].id);
-        btn.onclick = function () {editJournal(this.getAttribute('data-param-index'),this.getAttribute('data-param-id'));}; 
-        btn.innerHTML = "Edit";
-        td.appendChild(btn)
-        tr.appendChild(td)
-        var td = document.createElement('td');
-        var btn = document.createElement('button');
-        btn.className = 'btn btn-danger btn-rounded btn-sm';
-        btn.setAttribute('data-param', i);
-        btn.setAttribute('data-id', window.transactions[i].id);
-        btn.onclick = function () {deleteJournal(this.getAttribute('data-id'));}; 
-        btn.innerHTML = "Delete";
-        td.appendChild(btn)
-        tr.appendChild(td)
-        tbdy.appendChild(tr);
-    }
+    btn.setAttribute('data-param',window.transactions[i].id);
+    btn.className = 'clipboard btn btn-sm btn-light';
+    btn.onclick = function () {copyToClipboard(this.getAttribute('data-param'));}; 
+    svg.appendChild(path);
+    btn.appendChild(svg);
+    td.appendChild(btn);
+    tr.appendChild(td);
+    var td = document.createElement('td');
+    td.className = 'txntable';
+    td.appendChild(document.createTextNode(window.transactions[i]._description))
+    tr.appendChild(td)
+    var td = document.createElement('td');
+    td.className = 'txntable';
+    td.appendChild(document.createTextNode("$" + moneyNumber(window.transactions[i]._amount)));
+    tr.appendChild(td)
+    var td = document.createElement('td');
+    td.className = 'txntable';
+    var btn = document.createElement('button');
+    btn.className = 'btn btn-warning btn-rounded btn-sm';
+    btn.setAttribute('data-param-index', i);
+    btn.setAttribute('data-param-id',window.transactions[i].id);
+    btn.onclick = function () {editJournal(this.getAttribute('data-param-index'),this.getAttribute('data-param-id'));}; 
+    btn.innerHTML = "Edit";
+    td.appendChild(btn)
+    tr.appendChild(td)
+    var td = document.createElement('td');
+    var btn = document.createElement('button');
+    btn.className = 'btn btn-danger btn-rounded btn-sm';
+    btn.setAttribute('data-param', i);
+    btn.setAttribute('data-id', window.transactions[i].id);
+    btn.onclick = function () {deleteJournal(this.getAttribute('data-id'));}; 
+    btn.innerHTML = "Delete";
+    td.appendChild(btn)
+    tr.appendChild(td)
+    tbdy.appendChild(tr);
+  }
 }
 
 function formatcomma(element) {
@@ -552,43 +551,6 @@ const copyToClipboard = str => {
   }
 };
 
-const reportRequest = {
-  reports: [
-  {
-    Options: {
-      Title: "TrialBalance",
-      StartDate: "2019-07-01",
-      EndDate: "2020-06-30"
-    },
-    Columns: [
-      "Date",
-      "AccountName",
-      "Description",
-      "Amount"
-    ]
- }
-]}
-
-function getReport(reportName) {  
-  try {
-    fetch('/api/reports/',{
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json;charset=utf-8'
-      },
-      body: JSON.stringify(reportRequest)
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log(data)
-      //Clear the page and create a table
-      //Copy the data directly into a table for it
-    })
-    .catch(error => console.error(error))
-  } catch { error => console.error(error)
-  }
-
-}
 
 function main() {
   $('#addJournal')[0].reset();
