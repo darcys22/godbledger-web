@@ -57,14 +57,14 @@
 							<h2 class="border-bottom border-gray pb-2 mb-0">Reports</h2>
 							<div class="media text-muted pt-3">
 								<!--<img data-src="holder.js/32x32?theme=thumb&amp;bg=007bff&amp;fg=007bff&amp;size=1" alt="32x32" class="mr-2 rounded" style="width: 32px; height: 32px;" src="" data-holder-rendered="true">-->
-                <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray"><a href="#" text-decoration="none">
+                <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray"><a href="#" text-decoration="none" onclick="getReport('TrialBalance')">
 									<strong class="d-block text-gray-dark">Trial Balance</strong>
 								A trial balance sheet is a report that lists the ending balances of each account in the chart of accounts	
                   </a></p>
 							</div>
 							<div class="media text-muted pt-3">
 								<!--<img data-src="holder.js/32x32?theme=thumb&amp;bg=e83e8c&amp;fg=e83e8c&amp;size=1" alt="32x32" class="mr-2 rounded" style="width: 32px; height: 32px;" src="" data-holder-rendered="true">-->
-								<p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray"><a href="#" text-decoration="none">
+								<p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray"><a href="#" text-decoration="none" onclick="getReport('GeneralLedger')">
 									<strong class="d-block text-gray-dark">General Ledger</strong>
 									A general ledger report is a document containing a detailed account of every transaction made by a business for a specific period of time.
                   </a></p>
@@ -74,78 +74,6 @@
 							<!--</small>-->
 						</div>
 
-    </div>
-    <div class="modal fade" id="journalModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Journal Entry</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                </div>
-                <div class="modal-body">
-                    <form class="well form-horizontal" role="form" id="addJournal">
-                        <fieldset>
-                            <!-- Text input-->
-                            <div class="form-group">
-                                <label class="col-md-2 control-label">Date</label>
-                                <div class="col-md-3 inputGroupContainer">
-                                    <div class="input-group">
-                                        <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-                                        <input name="date" placeholder="YYYY-MM-DD" class="form-control" pattern="^\d{4}-\d{1,2}-\d{1,2}$" type="text">
-                                        <div class="help-block with-errors"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Text input-->
-                            <div class="form-group">
-                                <label class="col-md-2 control-label">Narration</label>
-                                <div class="col-md-10 inputGroupContainer">
-                                    <div class="input-group">
-                                        <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-                                        <textarea name="narration" placeholder="Journal Narration" class="form-control" type="text"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <br>
-                            <div class="inputGroupContainer">
-                                <div class="input-group">
-                                    <table id="journal" class="table table-bordered table-condensed">
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Description</th>
-                                            <th>Account</th>
-                                            <th>Debit</th>
-                                            <th>Credit</th>
-                                        </tr>
-                                        <tfoot>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td><span><input type="text" id="invoiceTotalDebit" readonly class="totalField money" value="0.00"></span></td>
-                                            <td><span><input type="text" id="invoiceTotalCredit" readonly class="totalField money" value="0.00"></span></td>
-                                        </tfoot>
-
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div class="totals">
-
-                                <button class="btn btn-primary" id="addNewLineItemButton" onclick=""><span class="text" data-automationid="Add a new line-button">Add a new line</span></button>
-                            </div>
-                            <div class="actions text-right">
-                                <div class="right">
-                                    <button class="btn btn-light btn-sm" data-dismiss="modal"><span class="text" data-automationid="Cancel-button">Cancel</span></button>
-                                    <button type="submit" class="btn btn-success" id="saveJournalButton"><span class="text" data-automationid="Save-button">Post Journal</span></button>
-                                </div>
-                            </div>
-                        </fieldset>
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
     <div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="instructions modal">
         <div class="modal-dialog modal-lg" role="document">
@@ -166,10 +94,7 @@
     </div>
     </div>
     <script src="app/moment-with-locales.js"></script>
-    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/validate.js/0.13.1/validate.min.js"></script>-->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
-    <!--<script src="app/papaparse.min.js"></script>-->
-    <script type="text/javascript" src="app/main.js"></script>
+    <script type="text/javascript" src="app/reports.js"></script>
 </body>
 <div id="footer">
     <p class="darcy">
