@@ -31,8 +31,8 @@ type ReportsRequest struct {
 }
 
 type ReportLine struct {
-	Styling string   `json:"styling"`
-	Row     []string `json:"row"`
+	//Styling string   `json:"styling"`
+	Row []string `json:"row"`
 }
 type ReportResult struct {
 	Options Options      `json:"options"`
