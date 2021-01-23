@@ -1,4 +1,5 @@
-const reportRequest = {
+let reportRequestMap = new Map()
+const TBRequest = {
   reports: [
   {
     options: {
@@ -13,22 +14,47 @@ const reportRequest = {
     ]
  }
 ]}
+reportRequestMap.set("TrialBalance",TBRequest)
+
+const GLRequest = {
+  reports: [
+  {
+    options: {
+      title: "GeneralLedger",
+      startdate: "2019-07-01",
+      enddate: "2020-06-30"
+    },
+    columns: [
+      "ID",
+      "Date",
+      "Description",
+      "Currency",
+      "Decimals",
+      "Amount",
+      "Account",
+    ]
+ }
+]}
+reportRequestMap.set("GeneralLedger",GLRequest)
+
+function reportRequestGenerator(reportName) {  
+  return reportRequestMap.get(reportName)
+}
 
 function getReport(reportName) {  
-  //console.log(JSON.stringify(reportRequest))
   try {
     fetch('/api/reports/',{
       method: 'POST',
       headers: {
         'Content-Type': 'application/json;charset=utf-8'
       },
-      body: JSON.stringify(reportRequest)
+      body: JSON.stringify(reportRequestGenerator(reportName))
     })
     .then(response => response.json())
     .then(data => {
       //Clear the page and create a table
       clearMain();
-      createConfigWellAndReportsTable();
+      createConfigWellAndReportsTable(data.options);
       $('#reportstable').DataTable({
         columns: data.columns.map((item) => ({ title: item})),
         data: data.result.map((item) => (item.row))
@@ -44,12 +70,12 @@ function clearMain() {
   $(document.getElementById("maincontainer")).empty();;
 }
 
-function createConfigWellAndReportsTable() {
+function createConfigWellAndReportsTable(config) {
   var container = document.getElementById('maincontainer');
   var title = document.createElement('h2');
   title.classList.add("m-3")
   title.classList.add("text-center")
-  title.textContent = "Trial Balance"
+  title.textContent = config.title
   container.appendChild(title)
   var configs = document.createElement('div');
   configs.classList.add("m-3")
