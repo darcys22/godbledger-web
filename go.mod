@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/darcys22/godbledger v0.4.0
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/contrib v0.0.0-20201005132743-ca038bbf2944
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-macaron/binding v1.1.1

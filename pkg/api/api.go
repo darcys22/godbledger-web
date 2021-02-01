@@ -3,24 +3,26 @@ package api
 import (
 	//"fmt"
 	"github.com/gin-gonic/gin"
-	//"net/http"
+	"net/http"
 
 	"github.com/darcys22/godbledger-web/pkg/service"
 )
 
+var (
+	loginService    service.LoginService = service.StaticLoginService()
+	jwtService      service.JWTService   = service.JWTAuthService()
+	loginController LoginController      = LoginHandler(loginService, jwtService)
+)
+
 // Register adds http routes
 func Register(r *gin.Engine) {
-	var loginService service.LoginService = service.StaticLoginService()
-	var jwtService service.JWTService = service.JWTAuthService()
-	var loginController LoginController = LoginHandler(loginService, jwtService)
 
-	//reqSignedIn := middleware.Auth(&middleware.AuthOptions{ReqSignedIn: true})
-	//reqGrafanaAdmin := middleware.Auth(&middleware.AuthOptions{ReqSignedIn: true, ReqGrafanaAdmin: true})
-	//reqEditorRole := middleware.RoleAuth(m.ROLE_EDITOR, m.ROLE_ADMIN)
-	//reqAccountAdmin := middleware.RoleAuth(m.ROLE_ADMIN)
-	//bind := binding.Bind
+	// not logged in views
+	r.GET("/logout", Logout)
+	//r.Post("/login", quota("session"), bind(dtos.LoginCommand{}), routing.Wrap(hs.LoginPost))
+	r.GET("/login", LoginView)
 
-	server.POST("/login", func(ctx *gin.Context) {
+	r.POST("/login", func(ctx *gin.Context) {
 		token := loginController.Login(ctx)
 		if token != "" {
 			ctx.JSON(http.StatusOK, gin.H{

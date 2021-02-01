@@ -1,0 +1,70 @@
+<html lang = "en">
+<head>
+    <title>My first login page in bootstrap</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,intial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        .size-color{
+            color: blue;
+            font-size: 25px;
+        }
+       .textbox {
+
+             height: 25px !important;
+
+             width: 2200px !important;
+
+             font-size: 14px !important;
+
+                } 
+        .margin{
+            margin-top: 50px;
+            margin-left:inherit;
+            margin-right: 70px;
+            margin-bottom: inherit;
+            background-color:darkgrey;
+        }
+    </style>
+    </head>
+    <body>
+      
+    <div class="container well margin">
+          <h1 >my first register page</h1>
+    <form>
+        <div class="form-group ">
+           <label for="fname" class="size-color">enter your Firstname </label>
+        <input type="text" id="fname" class="form-control" placeholder="please your first name"   required>
+        </div>
+         <div class="form-group">
+           <label for="lname " class="size-color">enter your LastName</label>
+        <input type="text" id="lname" class="form-control" placeholder="please your last name" size="100" required>
+        </div>
+         <div class="form-group">
+           <label for="email " class="size-color">enter your Email </label>
+        <input type="email" id="email" class="form-control" placeholder="please your Email addresss" size="100" required>
+        </div>
+        <div class=" row">
+            <div class="size-color col-xs-4">
+            <label>Select Your Gender</label>
+            </div>
+        <div class="col-xs-4"> <label><input type="checkbox" name="personality"class="form-control">Female</label></div>
+            <div class="col-xs-4"><label>
+            <input type="checkbox"  name="female" class="form-control">male</label>
+                   </div>
+            
+        </div>
+         </form>
+        <div class="row">
+            <div class="col-xs-4">
+            <button class="btn btn-block btn-success ">Registration</button>
+                    </div>
+            <div class="col-xs-4"><a href="login.view.html">
+            <button class="btn btn-block btn-primary">Cancel</button></a>
+            </div>
+        </div>
+        
+           
+        </div>
+        
+    </body>
