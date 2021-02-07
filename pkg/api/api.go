@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	loginService    service.LoginService = service.StaticLoginService()
-	jwtService      service.JWTService   = service.JWTAuthService()
-	loginController LoginController      = LoginHandler(loginService, jwtService)
+	loginService service.LoginService = service.StaticLoginService()
+	jwtService   service.JWTService   = service.JWTAuthService()
+	lController  LoginController      = LoginHandler(loginService, jwtService)
 )
 
 // Register adds http routes
@@ -23,7 +23,7 @@ func Register(r *gin.Engine) {
 	r.GET("/login", LoginView)
 
 	r.POST("/login", func(ctx *gin.Context) {
-		token := loginController.Login(ctx)
+		token := lController.Login(ctx)
 		if token != "" {
 			ctx.JSON(http.StatusOK, gin.H{
 				"token": token,

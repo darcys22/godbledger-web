@@ -3,14 +3,11 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"net/url"
 )
 
 func LoginView(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.view.html", nil)
-}
-
-func RegisterView(c *gin.Context) {
-	c.HTML(http.StatusOK, "register.view.html", nil)
 }
 
 func Logout(c *gin.Context) {
