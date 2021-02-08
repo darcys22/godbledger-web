@@ -12,9 +12,12 @@ import (
 
 func AuthorizeJWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		const BEARER_SCHEMA = "Bearer"
-		authHeader := c.GetHeader("Authorization")
-		tokenString := authHeader[len(BEARER_SCHEMA):]
+		cookie, err := c.Request.Cookie("access_token")
+		if err != nil {
+			fmt.Println(err)
+			c.AbortWithStatus(http.StatusUnauthorized)
+		}
+		tokenString := cookie.Value
 		token, err := service.JWTAuthService().ValidateToken(tokenString)
 		if token.Valid {
 			claims := token.Claims.(jwt.MapClaims)

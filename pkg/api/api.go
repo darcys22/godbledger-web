@@ -4,7 +4,9 @@ import (
 	//"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"net/url"
 
+	"github.com/darcys22/godbledger-web/pkg/middleware"
 	"github.com/darcys22/godbledger-web/pkg/service"
 )
 
@@ -25,16 +27,19 @@ func Register(r *gin.Engine) {
 	r.POST("/login", func(ctx *gin.Context) {
 		token := lController.Login(ctx)
 		if token != "" {
-			ctx.JSON(http.StatusOK, gin.H{
-				"token": token,
-			})
+			//ctx.JSON(http.StatusOK, gin.H{
+			//"token": token,
+			//})
+			ctx.SetCookie("access_token", token, 60*60*24, "/", "", true, true)
+			location := url.URL{Path: "/"}
+			ctx.Redirect(http.StatusFound, location.RequestURI())
 		} else {
 			ctx.JSON(http.StatusUnauthorized, nil)
 		}
 	})
 
 	r.GET("/", Index)
-	r.GET("/reports", Reports)
+	r.GET("/reports", Reports, middleware.AuthorizeJWT())
 	r.POST("api/reports", ReportsResults)
 
 	r.GET("/api/journals", GetJournals)
