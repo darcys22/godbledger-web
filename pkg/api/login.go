@@ -6,25 +6,23 @@ import (
 	"net/url"
 )
 
-func LoginView(c *gin.Context) {
-	c.HTML(http.StatusOK, "login.view.html", nil)
+func LoginView(ctx *gin.Context) {
+	ctx.HTML(http.StatusOK, "login.view.html", nil)
 }
 
-func Logout(c *gin.Context) {
+func Login(ctx *gin.Context) {
+	token := lController.Login(ctx)
+	if token != "" {
+		ctx.SetCookie("access_token", token, 60*60*48, "/", "", false, true)
+		location := url.URL{Path: "/"}
+		ctx.Redirect(http.StatusFound, location.RequestURI())
+	} else {
+		ctx.JSON(http.StatusUnauthorized, nil)
+	}
+}
 
-	//err := hs.AuthTokenService.RevokeToken(c.Req.Context(), c.UserToken)
-	//if err != nil && !errors.Is(err, models.ErrUserTokenNotFound) {
-	//hs.log.Error("failed to revoke auth token", "error", err)
-	//}
-
-	//cookies.WriteSessionCookie(c, hs.Cfg, "", -1)
-
-	//if setting.SignoutRedirectUrl != "" {
-	//c.Redirect(setting.SignoutRedirectUrl)
-	//} else {
-	//hs.log.Info("Successful Logout", "User", c.Email)
-	//c.Redirect(setting.AppSubUrl + "/login")
-	//}
+func Logout(ctx *gin.Context) {
+	ctx.SetCookie("access_token", "", 0, "/", "", false, true)
 	location := url.URL{Path: "/login"}
-	c.Redirect(http.StatusFound, location.RequestURI())
+	ctx.Redirect(http.StatusFound, location.RequestURI())
 }

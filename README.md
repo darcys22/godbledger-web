@@ -16,6 +16,11 @@ make run
 
 This will open a webserver over port :8000 that you can navigate to with your webbrowser.
 
+## Authentication
+
+User: test@godbledger.com
+Pass: password
+
 ## TODO:
 
 - Build Journal Entry Page

@@ -1,10 +1,7 @@
 package api
 
 import (
-	//"fmt"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"net/url"
 
 	"github.com/darcys22/godbledger-web/pkg/middleware"
 	"github.com/darcys22/godbledger-web/pkg/service"
@@ -19,34 +16,21 @@ var (
 // Register adds http routes
 func Register(r *gin.Engine) {
 
-	// not logged in views
+	// Unauthenticated Views
 	r.GET("/logout", Logout)
-	//r.Post("/login", quota("session"), bind(dtos.LoginCommand{}), routing.Wrap(hs.LoginPost))
 	r.GET("/login", LoginView)
+	r.POST("/login", Login)
 
-	r.POST("/login", func(ctx *gin.Context) {
-		token := lController.Login(ctx)
-		if token != "" {
-			//ctx.JSON(http.StatusOK, gin.H{
-			//"token": token,
-			//})
-			ctx.SetCookie("access_token", token, 60*60*24, "/", "", true, true)
-			location := url.URL{Path: "/"}
-			ctx.Redirect(http.StatusFound, location.RequestURI())
-		} else {
-			ctx.JSON(http.StatusUnauthorized, nil)
-		}
-	})
+	// Authenticated Views
+	r.GET("/", middleware.AuthorizeJWT(), Index)
+	r.GET("/reports", middleware.AuthorizeJWT(), Reports)
+	r.POST("api/reports", middleware.AuthorizeJWT(), ReportsResults)
 
-	r.GET("/", Index)
-	r.GET("/reports", Reports, middleware.AuthorizeJWT())
-	r.POST("api/reports", ReportsResults)
+	r.GET("/api/journals", middleware.AuthorizeJWT(), GetJournals)
+	r.POST("/api/journals", middleware.AuthorizeJWT(), PostJournal)
+	r.DELETE("/api/journals/:id", middleware.AuthorizeJWT(), DeleteJournal)
+	r.GET("/api/journals/:id", middleware.AuthorizeJWT(), GetJournal)
+	r.POST("/api/journals/:id", middleware.AuthorizeJWT(), EditJournal)
 
-	r.GET("/api/journals", GetJournals)
-	r.POST("/api/journals", PostJournal)
-	r.DELETE("/api/journals/:id", DeleteJournal)
-	r.GET("/api/journals/:id", GetJournal)
-	r.POST("/api/journals/:id", EditJournal)
-
-	r.GET("/api/accounts/list", GetAccountListing)
+	r.GET("/api/accounts/list", middleware.AuthorizeJWT(), GetAccountListing)
 }
