@@ -2,6 +2,7 @@ package models
 
 import (
 	"flag"
+	"fmt"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/ledger"
@@ -76,13 +77,12 @@ func GetExternalAccountListing(c *gin.Context) {
 }
 
 // Get Unreconciled Transactions
-
-type ReconcileRequest struct {
+type UnreconciledTransactionsRequest struct {
 	Account string `json:"account"`
 }
 
 type UnreconciledTransactionLine struct {
-	Row string `json:"row"`
+	Description string `json:"description"`
 }
 
 type ReconcileResult struct {
@@ -90,69 +90,58 @@ type ReconcileResult struct {
 	Result  []UnreconciledTransactionLine `json:"result"`
 }
 
-func GetUnreconciledTransactions(req ReconcileRequest) (error, *ReconcileResult) {
-	//set := flag.NewFlagSet("getJournalListing", 0)
-	//set.String("config", "", "doc")
+func UnreconciledTransactions(req UnreconciledTransactionsRequest) (error, *ReconcileResult) {
+	set := flag.NewFlagSet("UnreconciledTransactionsRequest", 0)
+	set.String("config", "", "doc")
 
-	//ctx := cli.NewContext(nil, set, nil)
-	//err, cfg := cmd.MakeConfig(ctx)
-	//if err != nil {
-	//return fmt.Errorf("Could not make config (%v)", err), nil
-	//}
+	ctx := cli.NewContext(nil, set, nil)
+	err, cfg := cmd.MakeConfig(ctx)
+	if err != nil {
+		return fmt.Errorf("Could not make config (%v)", err), nil
+	}
 
-	//ledger, err := ledger.New(ctx, cfg)
-	//if err != nil {
-	//return fmt.Errorf("Could not make new ledger (%v)", err), nil
-	//}
+	ledger, err := ledger.New(ctx, cfg)
+	if err != nil {
+		return fmt.Errorf("Could not make new ledger (%v)", err), nil
+	}
 
-	////queryDateStart := time.Now().Add(time.Hour * 24 * 365 * -100)
-	//queryDateEnd := time.Now().Add(time.Hour * 24 * 365 * 100)
-	//queryDB := `
-	//SELECT split_accounts.account_id,
-	//Sum(splits.amount),
-	//currency.decimals
-	//FROM   splits
-	//JOIN split_accounts ON splits.split_id = split_accounts.split_id
-	//JOIN currencies AS currency ON splits.currency = currency.NAME
-	//WHERE  splits.split_date <= ?
-	//AND "void" NOT IN (SELECT t.tag_name
-	//FROM   tags AS t
-	//JOIN transaction_tag AS tt
-	//ON tt.tag_id = t.tag_id
-	//WHERE  tt.transaction_id = splits.transaction_id)
-	//GROUP  BY split_accounts.account_id, splits.currency
-	//;`
+	queryDB := `
+	select
+		s.description
+	from
+		splits as s
+		join split_accounts as sa on s.split_id = sa.split_id
+		join accounts as a on sa.account_id = a.account_id
+	where
+		a.name = ?
+		and s.split_id not in (
+			select
+				distinct r.split_id
+			from
+				reconciliat ions as r
+		)
+	;`
 
-	//log.Debug("Querying Database")
-	////rows, err := ledger.LedgerDb.Query(queryDB, queryDateStart, queryDateEnd)
-	//rows, err := ledger.LedgerDb.Query(queryDB, queryDateEnd)
+	log.Debug("Querying Database")
+	rows, err := ledger.LedgerDb.Query(queryDB, req.Account)
+	if err != nil {
+		return fmt.Errorf("Could not query database (%v)", err), nil
+	}
+	defer rows.Close()
 
-	//var r ReportResult
-	//r.Options = req.Reports[0].Options
-	//r.Columns = req.Reports[0].Columns
+	var r ReconcileResult
+	r.Account = req.Account
 
-	//if err != nil {
-	//return fmt.Errorf("Could not query database (%v)", err), nil
-	//}
-	//defer rows.Close()
+	for rows.Next() {
+		var utl UnreconciledTransactionLine
+		if err := rows.Scan(&utl.Description); err != nil {
+			return fmt.Errorf("Could not scan rows of query (%v)", err), &r
+		}
+		r.Result = append(r.Result, utl)
+	}
+	if rows.Err() != nil {
+		return fmt.Errorf("rows errored with (%v)", rows.Err()), &r
+	}
 
-	//for rows.Next() {
-	//t := make([]string, len(req.Reports[0].Columns))
-	//pointers := make([]interface{}, len(t))
-	//for i, _ := range pointers {
-	//pointers[i] = &t[i]
-	//}
-	//if err := rows.Scan(pointers...); err != nil {
-	//return fmt.Errorf("Could not scan rows of query (%v)", err), nil
-	//}
-	//var l ReportLine
-	//l.Row = t
-	//r.Result = append(r.Result, l)
-	//}
-	//if rows.Err() != nil {
-	//return fmt.Errorf("rows errored with (%v)", rows.Err()), nil
-	//}
-
-	//return nil, &r
-	return nil, nil
+	return nil, &r
 }
