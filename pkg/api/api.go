@@ -22,11 +22,9 @@ func Register(r *gin.Engine) {
 	r.POST("/login", Login)
 
 	// Authenticated Views
-	r.GET("/", middleware.AuthorizeJWT(), Index)
-	r.GET("/reconcile", middleware.AuthorizeJWT(), Reconcile)
-	r.GET("/reports", middleware.AuthorizeJWT(), Reports)
-	r.POST("api/reports", middleware.AuthorizeJWT(), ReportsResults)
 
+	// Main/Journal Entry Page
+	r.GET("/", middleware.AuthorizeJWT(), Index)
 	r.GET("/api/journals", middleware.AuthorizeJWT(), GetJournals)
 	r.POST("/api/journals", middleware.AuthorizeJWT(), PostJournal)
 	r.DELETE("/api/journals/:id", middleware.AuthorizeJWT(), DeleteJournal)
@@ -34,4 +32,13 @@ func Register(r *gin.Engine) {
 	r.POST("/api/journals/:id", middleware.AuthorizeJWT(), EditJournal)
 
 	r.GET("/api/accounts/list", middleware.AuthorizeJWT(), GetAccountListing)
+
+	// Reconciliation Page
+	r.GET("/reconcile", middleware.AuthorizeJWT(), Reconcile)
+	r.GET("/api/reconcile/listexternalaccounts", middleware.AuthorizeJWT(), GetExternalAccountListing)
+
+	// Reports Page
+	r.GET("/reports", middleware.AuthorizeJWT(), Reports)
+	r.POST("api/reports", middleware.AuthorizeJWT(), ReportsResults)
+
 }
