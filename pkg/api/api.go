@@ -23,6 +23,7 @@ func Register(r *gin.Engine) {
 
 	// Authenticated Views
 	r.GET("/", middleware.AuthorizeJWT(), Index)
+	r.GET("/reconcile", middleware.AuthorizeJWT(), Reconcile)
 	r.GET("/reports", middleware.AuthorizeJWT(), Reports)
 	r.POST("api/reports", middleware.AuthorizeJWT(), ReportsResults)
 
