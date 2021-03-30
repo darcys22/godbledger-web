@@ -33,7 +33,7 @@ docs/GITCOMMIT
 docs/changed-files
 
 # locally required config files
-public/css/*.min.css
+#public/css/*.min.css
 
 # Editor junk
 *.sublime-workspace
