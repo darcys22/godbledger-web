@@ -296,6 +296,7 @@ func newGin() *gin.Engine {
 	mapStatic(m, "app", "app")
 	mapStatic(m, "css", "css")
 	mapStatic(m, "img", "img")
+	mapStatic(m, "fonts", "fonts")
 
 	m.LoadHTMLGlob(path.Join(setting.StaticRootPath, "views/*.html"))
 

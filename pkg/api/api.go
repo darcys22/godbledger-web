@@ -16,12 +16,12 @@ var (
 // Register adds http routes
 func Register(r *gin.Engine) {
 
-	// Unauthenticated Views
+	// ---- Unauthenticated Views -------
 	r.GET("/logout", Logout)
 	r.GET("/login", LoginView)
 	r.POST("/login", Login)
 
-	// Authenticated Views
+	// ---- Authenticated Views ---------
 
 	// Main/Journal Entry Page
 	r.GET("/", middleware.AuthorizeJWT(), Index)
