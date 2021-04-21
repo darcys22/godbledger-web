@@ -36,7 +36,7 @@ func Register(r *gin.Engine) {
 	// Reconciliation Page
 	r.GET("/reconcile", middleware.AuthorizeJWT(), Reconcile)
 	r.GET("/api/reconcile/listexternalaccounts", middleware.AuthorizeJWT(), GetExternalAccountListing)
-	r.GET("/api/reconcile/listunreconciledtransactions", middleware.AuthorizeJWT(), GetUnreconciledTransactions)
+	r.POST("/api/reconcile/listunreconciledtransactions", middleware.AuthorizeJWT(), GetUnreconciledTransactions)
 
 	// Reports Page
 	r.GET("/reports", middleware.AuthorizeJWT(), Reports)

@@ -77,17 +77,40 @@ func GetExternalAccountListing(c *gin.Context) {
 }
 
 // Get Unreconciled Transactions
+
+type UnreconciledTransactionOptions struct {
+	Account   string `json:"account"`
+	StartDate string `json:"startdate"`
+	EndDate   string `json:"enddate"`
+}
+
 type UnreconciledTransactionsRequest struct {
-	Account string `json:"account"`
+	Options UnreconciledTransactionOptions `json:"options"`
+	Columns []string                       `json:"columns"`
 }
 
 type UnreconciledTransactionLine struct {
-	Description string `json:"description"`
+	Row []string `json:"row"`
 }
 
 type ReconcileResult struct {
-	Account string                        `json:"account"`
-	Result  []UnreconciledTransactionLine `json:"result"`
+	Options UnreconciledTransactionOptions `json:"options"`
+	Columns []string                       `json:"columns"`
+	Result  []UnreconciledTransactionLine  `json:"result"`
+}
+
+var testresults = []UnreconciledTransactionLine{
+	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
+	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
+	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
+	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
+	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
+	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
+	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
+	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
+	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
+	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
+	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
 }
 
 func UnreconciledTransactions(req UnreconciledTransactionsRequest) (error, *ReconcileResult) {
@@ -118,27 +141,33 @@ func UnreconciledTransactions(req UnreconciledTransactionsRequest) (error, *Reco
 			select
 				distinct r.split_id
 			from
-				reconciliat ions as r
+				reconciliations as r
 		)
 	;`
 
 	log.Debug("Querying Database")
-	rows, err := ledger.LedgerDb.Query(queryDB, req.Account)
+	rows, err := ledger.LedgerDb.Query(queryDB, req.Options.Account)
 	if err != nil {
 		return fmt.Errorf("Could not query database (%v)", err), nil
 	}
 	defer rows.Close()
 
 	var r ReconcileResult
-	r.Account = req.Account
+	r.Options = req.Options
+	r.Columns = req.Columns
 
 	for rows.Next() {
 		var utl UnreconciledTransactionLine
-		if err := rows.Scan(&utl.Description); err != nil {
+		description := ""
+		if err := rows.Scan(&description); err != nil {
 			return fmt.Errorf("Could not scan rows of query (%v)", err), &r
 		}
+		utl.Row = append(utl.Row, description)
 		r.Result = append(r.Result, utl)
 	}
+	//TODO sean remove this
+	r.Result = testresults
+
 	if rows.Err() != nil {
 		return fmt.Errorf("rows errored with (%v)", rows.Err()), &r
 	}
