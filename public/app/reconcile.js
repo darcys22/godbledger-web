@@ -47,13 +47,14 @@ function getTransactions(account) {
       createConfigWellAndTransactionsTable(data.options);
       var table = $('#transactionstable')
       table.DataTable({
+        dom: 'Bfrtip',
+        select: true,
         columns: data.columns.map((item) => ({ title: item})),
         data: data.result.map((item) => (item.row)),
         buttons: [
         'copy', 'excel', 'pdf'
         ]
       });
-      table.buttons().container().appendTo( $('.col-sm-6:eq(0)', table.table().container() ) );
     })
     .catch(error => console.error(error))
   } catch { error => console.error(error)
