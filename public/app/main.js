@@ -52,6 +52,10 @@ class Journal {
       } 
     }
 
+    setID(journalID) {
+      this.id += journalID;
+    }
+
     addNewLineItem() {
       this._lineItemCount += 1;
       addLineItem(this._lineItemCount);
@@ -66,7 +70,6 @@ class Journal {
       var i = 0;
       for (i = 0; i < lineitemKeys.length; i++) {
         if (lineitemKeys[i].includes("[")){
-          //TODO make this .val
           var separators = ['\\\[', '\\\]'];
           var tokens = lineitemKeys[i].split(new RegExp(separators.join('|'), 'g'));
           var filtered = tokens.filter(function (el) {
@@ -112,14 +115,26 @@ class Journal {
 
       this._date = new moment().format();
       console.log(JSON.stringify(this));
-      $.ajax({
-          type: 'POST',
-          url: '/api/journals',
-          data: JSON.stringify(this),
-          success: function(data) {},
-          contentType: "application/json",
-          dataType: 'json'
-      });
+      if(this.id == "")
+      {
+        $.ajax({
+            type: 'POST',
+            url: '/api/journals',
+            data: JSON.stringify(this),
+            success: function(data) {},
+            contentType: "application/json",
+            dataType: 'json'
+        });
+      } else {
+        $.ajax({
+            type: 'POST',
+            url: '/api/journals/edit/'+this.id,
+            data: JSON.stringify(this),
+            success: function(data) {},
+            contentType: "application/json",
+            dataType: 'json'
+        });
+      }
     }
 }
 
@@ -213,12 +228,11 @@ function editJournal(index,id) {
       journal = new Journal();
       clearJournalLineItems();
       journal._lineItemCount = 0;
-      console.log(data)
-      document.getElementsByName("date")[0].value = formatdate(data._date);
+      journal.setID(id);
+      document.getElementsByName("date")[0].value = formatformaldate(data._date);
       document.getElementsByName("narration")[0].value = data.narration;
       for (var lineItem in data._lineItems) {
         journal.addNewLineItem();
-        console.log(lineItem);
         document.getElementsByName("line-item[" +(journal._lineItemCount)+ "][narration]")[0].value = data._lineItems[lineItem]._description;
         var amount = parseInt(data._lineItems[lineItem]._amount);
         if (amount > 0) {
@@ -226,11 +240,10 @@ function editJournal(index,id) {
         } else {
           document.getElementsByName("line-item[" +journal._lineItemCount+ "][credit]")[0].value = -amount;
         }
-        if ($(`input[name = "line-item[${journal._lineItemCount}][account]:first"]`).find("option[value='" + data._lineItems[lineItem]._account + "']").length) {
-          $(`input[name = "line-item[${journal._lineItemCount}][account]:first"]`).val(data._lineItems[lineItem]._account).trigger('change');
-          //$('#mySelect2').val(data._lineItems).trigger('change');
-        }
-
+        var account = data._lineItems[lineItem]._account;
+        var accountSelect = $(`select[name ="line-item[${journal._lineItemCount}][account]"]`);
+        var option = new Option(account, '0', true, true);
+        accountSelect.append(option).trigger('change');
       }
       updateTotal();
       $("#journalModal").modal() 
@@ -390,29 +403,24 @@ function updateTotal()
               
       if (!$(`select[name ="line-item[${i}][account]"]`).text()) {
         $('#saveJournalButton').prop('disabled', true);
-        //console.log("DR has no account")
       }
     } else if (document.getElementsByName(`line-item[${i}][debit]`)[0].value) {
       $('#saveJournalButton').prop('disabled', true);
-      //console.log("DR has value but no integer")
     } else {
       var CRAmount = parseInt(document.getElementsByName(`line-item[${i}][credit]`)[0].value);
       if (!isNaN(CRAmount) && CRAmount >=0) { 
         CRTotal += CRAmount; 
         if (!$(`select[name ="line-item[${i}][account]"]`).text()) {
           $('#saveJournalButton').prop('disabled', true);
-          //console.log("CR has no account")
         }
       } else if (document.getElementsByName(`line-item[${i}][credit]`)[0].value) {
         $('#saveJournalButton').prop('disabled', true);
-        //console.log("CR has value but no integer")
       }
     }
   }
 
   if ((Math.abs(DRTotal - CRTotal) >= 0.01) && (DRTotal > 0)) {
     $('#saveJournalButton').prop('disabled', true);
-    //console.log("Does not balance")
   }
 
   document.getElementById('invoiceTotalDebit').value = DRTotal;
@@ -504,6 +512,9 @@ var truncate = function (fullStr, strLen, separator) {
 
 function formatdate(element) {
   return moment(element).format('Do MMMM YYYY');
+}
+function formatformaldate(element) {
+  return moment(element).format('YYYY-MM-DD');
 }
 
 $.fn.serializeObject = function()
