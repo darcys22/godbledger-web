@@ -1,19 +1,25 @@
 package service
 
+import (
+	"github.com/darcys22/godbledger-web/pkg/models/sqlite"
+)
+
 type LoginService interface {
 	LoginUser(email string, password string) bool
 }
 type loginInformation struct {
-	email    string
-	password string
+	users *sqlite.UserModel
 }
 
 func StaticLoginService() LoginService {
-	return &loginInformation{
-		email:    "test@godbledger.com",
-		password: "password",
-	}
+	database := sqlite.New("sqlite.db")
+
+	return &loginInformation{users: &database}
 }
 func (info *loginInformation) LoginUser(email string, password string) bool {
-	return info.email == email && info.password == password
+	_, err := info.users.Authenticate(email, password)
+	if err != nil {
+		return false
+	}
+	return true
 }

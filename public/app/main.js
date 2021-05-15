@@ -128,7 +128,7 @@ class Journal {
       } else {
         $.ajax({
             type: 'POST',
-            url: '/api/journals/edit/'+this.id,
+            url: '/api/journals/'+this.id,
             data: JSON.stringify(this),
             success: function(data) {},
             contentType: "application/json",
@@ -515,6 +515,9 @@ function formatdate(element) {
 }
 function formatformaldate(element) {
   return moment(element).format('YYYY-MM-DD');
+}
+function moneyNumber(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 $.fn.serializeObject = function()
