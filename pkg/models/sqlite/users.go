@@ -2,10 +2,17 @@ package sqlite
 
 import (
 	"database/sql"
+	"errors"
 
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/sirupsen/logrus"
 )
+
+var log = logrus.WithField("prefix", "SqliteUsers")
+
+var ErrNoRows = errors.New("sql: no rows in result set")
 
 type UserModel struct {
 	DB *sql.DB
@@ -14,29 +21,51 @@ type UserModel struct {
 func New(path string) UserModel {
 	database, _ := sql.Open("sqlite3", path)
 
-	statement, _ := database.Prepare(`
-	CREATE TABLE IF NOT EXISTS users (
-	id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255) NOT NULL,
-	email VARCHAR(255) UNIQUE NOT NULL,
-	hashed_password CHAR(60) NOT NULL,
-	created DATETIME NOT NULL,
-	active BOOLEAN NOT NULL DEFAULT TRUE
-	);
+	log.Info("Users database at path: ", path)
+
+	statement, err := database.Prepare(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+		name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    hashed_password CHAR(60) NOT NULL,
+    created DATETIME NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT TRUE
+  );
 	`)
+	if err != nil {
+		log.Error("Error in prepare statement: ", err)
+	}
 	statement.Exec()
+	usersdb := UserModel{DB: database}
 
-	//TODO insert the default user if in database config
+	//TODO this should be conditionally run from config
+	defaultUserID := 0
+	err = database.QueryRow(`SELECT id FROM users WHERE email = ? LIMIT 1`, "test@godbledger.com").Scan(&defaultUserID)
+	if err != nil {
+		if err.Error() == ErrNoRows.Error() {
+			log.Info("Inserting default user into users table")
+			err = usersdb.Insert("defaultuser", "test@godbledger.com", "password")
+			if err != nil {
+				log.Error("Error in adding default user: ", err)
+			}
 
-	return UserModel{DB: database}
+		} else {
+			log.Error("Error in searching for default user: ", err)
+		}
+	}
+
+	return usersdb
 }
 
 func (m *UserModel) Insert(name, email, password string) error {
 	// Create a bcrypt hash of the plain-text password.
+	log.Infof("Inserting user into users table, Name: %s Email: %s", name, email)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
 		return err
 	}
-	stmt := `INSERT INTO users (name, email, hashed_password, created) VALUES(?, ?, ?, UTC_TIMESTAMP())`
+	stmt := `INSERT INTO users (name, email, hashed_password, created) VALUES(?, ?, ?, datetime('now'))`
 	_, err = m.DB.Exec(stmt, name, email, string(hashedPassword))
 	if err != nil {
 		return err
