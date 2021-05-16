@@ -120,7 +120,14 @@ class Journal {
         $.ajax({
             type: 'POST',
             url: '/api/journals',
-            data: JSON.stringify(this),
+            data: JSON.stringify(this,
+              function(k, v) {
+                if (k === '_amount') {
+                  return v.toString();
+                }
+                return v;
+              }
+            ),
             success: function(data) {},
             contentType: "application/json",
             dataType: 'json'
@@ -129,7 +136,14 @@ class Journal {
         $.ajax({
             type: 'POST',
             url: '/api/journals/'+this.id,
-            data: JSON.stringify(this),
+            data: JSON.stringify(this,
+              function(k, v) {
+                if (k === '_amount') {
+                  return v.toString();
+                }
+                return v;
+              }
+            ),
             success: function(data) {},
             contentType: "application/json",
             dataType: 'json'
@@ -319,10 +333,6 @@ function makeJSON() {
   download("transactions.json", text);
 }
 
-function moneyNumber(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
 function addLineItem(index) {
   var tbdy = document.getElementById('journal');
   var tr = document.createElement('tr');
@@ -431,6 +441,7 @@ function tableCreate() {
   var tbdy = document.getElementById('transactionstable');
   tbdy.innerHTML = '';
   for (var i = 0; i < window.transactions.length; i++) {
+    console.log(window.transactions[i])
     var tr = document.createElement('tr');
     var td = document.createElement('td');
     td.className = 'txntable';
@@ -466,6 +477,7 @@ function tableCreate() {
     tr.appendChild(td)
     var td = document.createElement('td');
     td.className = 'txntable';
+    //TODO sean make this decimaled
     td.appendChild(document.createTextNode("$" + moneyNumber(window.transactions[i]._amount)));
     tr.appendChild(td)
     var td = document.createElement('td');
@@ -516,8 +528,14 @@ function formatdate(element) {
 function formatformaldate(element) {
   return moment(element).format('YYYY-MM-DD');
 }
-function moneyNumber(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+function moneyNumber(x, decimals = 0) {
+  xstr = x.toString();
+  truncstr = xstr.substring(0, xstr.length - decimals);
+  truncstrcomma = truncstr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  if (decimals > 0) {
+      truncstrcomma = truncstrcomma + "."+xstr.substring(xstr.length - decimals, xstr.length);
+  }
+  return truncstrcomma;
 }
 
 $.fn.serializeObject = function()

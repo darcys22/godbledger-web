@@ -7,6 +7,8 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"math"
+	"strconv"
 	"time"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
@@ -27,7 +29,7 @@ type LineItem struct {
 	Date        string `json:"_date" binding:"required"`
 	Description string `json:"_description"`
 	Account     string `json:"_account" binding:"required"`
-	Amount      int64  `json:"_amount" binding:"required"`
+	Amount      string `json:"_amount" binding:"required"`
 	Currency    string `json:"_currency" binding:"required"`
 }
 
@@ -72,11 +74,14 @@ func (j *GetJournals) SearchJournals() error {
 			transactions.transaction_id,
 			max(splits.split_date),
 			transactions.brief,
-			sum(case when splits.amount > 0 then splits.amount else 0 end)
+			sum(case when splits.amount > 0 then splits.amount else 0 end),
+			currency.decimals,
+			currency.NAME
 		FROM
 			splits
 			JOIN split_accounts ON splits.split_id = split_accounts.split_id
 			JOIN transactions on splits.transaction_id = transactions.transaction_id
+			JOIN currencies AS currency ON splits.currency = currency.NAME
 		WHERE
 			splits.split_date >= ?
 			AND splits.split_date <= ?
@@ -89,7 +94,7 @@ func (j *GetJournals) SearchJournals() error {
 				WHERE
 					tt.transaction_id = splits.transaction_id
 			)
-		GROUP BY transactions.transaction_id
+		GROUP BY transactions.transaction_id, splits.currency
 		LIMIT 50
 	;`
 
@@ -103,9 +108,15 @@ func (j *GetJournals) SearchJournals() error {
 
 	for rows.Next() {
 		var t LineItem
-		if err := rows.Scan(&t.ID, &t.Date, &t.Description, &t.Amount); err != nil {
+		var decimals float64
+		if err := rows.Scan(&t.ID, &t.Date, &t.Description, &t.Amount, &decimals, &t.Currency); err != nil {
 			return fmt.Errorf("Could not scan rows of query (%v)", err)
 		}
+		centsAmount, err := strconv.ParseFloat(t.Amount, 64)
+		if err != nil {
+			return fmt.Errorf("Could not process the amount as a float (%v)", err)
+		}
+		t.Amount = fmt.Sprintf("%.2f", centsAmount/math.Pow(10, decimals))
 		j.Journals = append(j.Journals, t)
 	}
 	if rows.Err() != nil {
@@ -113,6 +124,10 @@ func (j *GetJournals) SearchJournals() error {
 	}
 
 	return nil
+}
+
+var currenciesDecimals = map[string]int{
+	"USD": 2,
 }
 
 func (j *PostJournalCommand) Save() error {
@@ -152,10 +167,18 @@ func (j *PostJournalCommand) Save() error {
 	transactionLines := make([]*pb.LineItem, j.LineItemCount)
 
 	for i, accChange := range j.LineItems {
+
+		//TODO sean get this from somewhere
+		decimals := float64(currenciesDecimals["USD"])
+		dollarsAmount, err := strconv.ParseFloat(accChange.Amount, 64)
+		if err != nil {
+			return fmt.Errorf("Could not process the amount as a float (%v)", err)
+		}
+		amount := int64(dollarsAmount * math.Pow(10, decimals))
 		transactionLines[i] = &pb.LineItem{
 			Accountname: accChange.Account,
 			Description: accChange.Description,
-			Amount:      accChange.Amount,
+			Amount:      amount,
 			Currency:    accChange.Currency,
 		}
 	}
