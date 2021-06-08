@@ -2,7 +2,6 @@ package registry
 
 import (
 	"context"
-	"reflect"
 	"sort"
 )
 
@@ -13,14 +12,6 @@ type Descriptor struct {
 }
 
 var services []*Descriptor
-
-func RegisterService(instance Service) {
-	services = append(services, &Descriptor{
-		Name:         reflect.TypeOf(instance).Elem().Name(),
-		Instance:     instance,
-		InitPriority: Medium,
-	})
-}
 
 func Register(descriptor *Descriptor) {
 	services = append(services, descriptor)
@@ -101,9 +92,3 @@ func IsDisabled(srv Service) bool {
 }
 
 type Priority int
-
-const (
-	High   Priority = 100
-	Medium Priority = 50
-	Low    Priority = 0
-)

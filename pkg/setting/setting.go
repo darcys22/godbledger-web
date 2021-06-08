@@ -656,27 +656,10 @@ func (cfg *Cfg) Load(args *CommandLineArgs) error {
 		return err
 	}
 
-	if err := readSnapshotsSettings(iniFile); err != nil {
-		return err
-	}
-
-	// read dashboard settings
-	dashboards := iniFile.Section("dashboards")
-	DashboardVersionsToKeep = dashboards.Key("versions_to_keep").MustInt(20)
-	MinRefreshInterval, err = valueAsString(dashboards, "min_refresh_interval", "5s")
-	if err != nil {
-		return err
-	}
-
-	cfg.DefaultHomeDashboardPath = dashboards.Key("default_home_dashboard_path").MustString("")
-
 	if err := readUserSettings(iniFile, cfg); err != nil {
 		return err
 	}
 	if err := readAuthSettings(iniFile, cfg); err != nil {
-		return err
-	}
-	if err := readRenderingSettings(iniFile, cfg); err != nil {
 		return err
 	}
 
@@ -1142,24 +1125,6 @@ func readAlertingSettings(iniFile *ini.File) error {
 	AlertingNotificationTimeout = time.Second * time.Duration(notificationTimeoutSeconds)
 	AlertingMaxAttempts = alerting.Key("max_attempts").MustInt(3)
 	AlertingMinInterval = alerting.Key("min_interval_seconds").MustInt64(1)
-
-	return nil
-}
-
-func readSnapshotsSettings(iniFile *ini.File) error {
-	snapshots := iniFile.Section("snapshots")
-	var err error
-	ExternalSnapshotUrl, err = valueAsString(snapshots, "external_snapshot_url", "")
-	if err != nil {
-		return err
-	}
-	ExternalSnapshotName, err = valueAsString(snapshots, "external_snapshot_name", "")
-	if err != nil {
-		return err
-	}
-	ExternalEnabled = snapshots.Key("external_enabled").MustBool(true)
-	SnapShotRemoveExpired = snapshots.Key("snapshot_remove_expired").MustBool(true)
-	SnapshotPublicMode = snapshots.Key("public_mode").MustBool(false)
 
 	return nil
 }
