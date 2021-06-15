@@ -13,7 +13,7 @@ import (
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/ledger"
-	pb "github.com/darcys22/godbledger/proto"
+	pb "github.com/darcys22/godbledger/proto/transaction"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
