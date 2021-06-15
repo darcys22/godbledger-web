@@ -29,7 +29,6 @@ const GLRequest = {
       "Date",
       "Description",
       "Currency",
-      "Decimals",
       "Amount",
       "Account",
     ]

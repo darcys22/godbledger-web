@@ -6,6 +6,7 @@ import (
 	//"crypto/x509"
 	"flag"
 	"fmt"
+	"strings"
 	//"io/ioutil"
 	"time"
 
@@ -90,6 +91,11 @@ func TrialBalanceReport(req ReportsRequest) (error, *ReportResult) {
 																			 JOIN transaction_tag AS tt
 																				 ON tt.tag_id = t.tag_id
 																WHERE  tt.transaction_id = splits.transaction_id)
+						 AND "main" IN (SELECT t.tag_name
+																FROM   tags AS t
+																			 JOIN account_tag AS at
+																				 ON at.tag_id = t.tag_id
+																WHERE  at.account_id = split_accounts.account_id)
 			GROUP  BY split_accounts.account_id, splits.currency
 			;`
 
@@ -128,13 +134,14 @@ func TrialBalanceReport(req ReportsRequest) (error, *ReportResult) {
 
 // General Ledger
 var GeneralLedgerColumns = map[string]string{
-	"ID":          "transactions.transaction_id",
-	"Date":        "splits.split_date",
-	"Description": "splits.description",
-	"Currency":    "splits.currency",
-	"Decimals":    "currency.decimals",
-	"Amount":      "splits.amount",
-	"Account":     "split_accounts.account_id",
+	"ID":           "transactions.transaction_id",
+	"Date":         "splits.split_date",
+	"Description":  "splits.description",
+	"Currency":     "splits.currency",
+	"Decimals":     "currency.decimals",
+	"Amount":       "splits.amount / POWER(10,(SELECT decimals from currencies where name = splits.currency))",
+	"AtomicAmount": "splits.amount",
+	"Account":      "split_accounts.account_id",
 }
 
 func GeneralLedgerReport(req ReportsRequest) (error, *ReportResult) {
@@ -155,16 +162,15 @@ func GeneralLedgerReport(req ReportsRequest) (error, *ReportResult) {
 	queryDateStart := time.Now().Add(time.Hour * 24 * 365 * -100)
 	queryDateEnd := time.Now().Add(time.Hour * 24 * 365 * 100)
 
-	queryDB := `
-		SELECT
-			transactions.transaction_id,
-			splits.split_date,
-			splits.description,
-			splits.currency,
-			currency.decimals,
-			splits.amount,
-			split_accounts.account_id
-		FROM
+	queryDB := strings.Builder{}
+	queryDB.WriteString("SELECT\n")
+
+	for _, col := range req.Reports[0].Columns {
+		queryDB.WriteString(GeneralLedgerColumns[col])
+		queryDB.WriteString("\n")
+	}
+
+	queryDB.WriteString(`FROM
 			splits
 			JOIN split_accounts ON splits.split_id = split_accounts.split_id
 			JOIN transactions on splits.transaction_id = transactions.transaction_id
@@ -179,12 +185,19 @@ func GeneralLedgerReport(req ReportsRequest) (error, *ReportResult) {
 					tags AS t
 					JOIN transaction_tag AS tt ON tt.tag_id = t.tag_id
 				WHERE
-					tt.transaction_id = splits.transaction_id
-			)
-	;`
+					tt.transaction_id = splits.transaction_id)
+			AND "main" IN (
+				SELECT
+					t.tag_name
+				FROM
+					tags AS t
+					JOIN account_tag AS at ON at.tag_id = t.tag_id
+				WHERE
+					at.account_id = split_accounts.account_id)
+	;`)
 
 	log.Debug("Querying Database")
-	rows, err := ledger.LedgerDb.Query(queryDB, queryDateStart, queryDateEnd)
+	rows, err := ledger.LedgerDb.Query(queryDB.String(), queryDateStart, queryDateEnd)
 
 	if err != nil {
 		return fmt.Errorf("Could not query database (%v)", err), nil
