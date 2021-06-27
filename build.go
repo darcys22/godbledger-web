@@ -7,6 +7,7 @@ import (
 	"crypto/md5"
 	"crypto/sha256"
 	//"encoding/json"
+	"encoding/base64"
 	"flag"
 	"fmt"
 	"go/build"
@@ -21,6 +22,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cespare/cp"
+
+	"github.com/darcys22/godbledger-web/internal/build"
 )
 
 const (
@@ -139,7 +144,7 @@ func main() {
 			createRpmPackages()
 
 		case "pkg-deb":
-			createDebPackages()
+			doDebianSource([]string{})
 
 		case "sha-dist":
 			shaFilesInDist()
@@ -245,6 +250,8 @@ type linuxPackageOptions struct {
 	depends []string
 }
 
+var GOBIN, _ = filepath.Abs(filepath.Join("bin"))
+
 var (
 	// A debian package is created for all executables listed here.
 	debExecutables = []debExecutable{
@@ -256,8 +263,9 @@ var (
 
 	// A debian package is created for all executables listed here.
 	debGoDBLedger = debPackage{
-		Name:        "godbledger",
-		Version:     version.Version,
+		Name: "godbledger",
+		//Version:     version.Version,
+		Version:     "0.0.1",
 		Executables: debExecutables,
 	}
 
@@ -278,9 +286,27 @@ var (
 	debGoBootPaths = map[string]string{
 		"golang-go": "/usr/lib/go",
 	}
+
+	dlgoVersion = "1.16"
 )
 
-func createDebPackages() {
+// skips archiving for some build configurations.
+func maybeSkipArchive(env build.Environment) {
+	if env.IsPullRequest {
+		log.Printf("skipping because this is a PR build")
+		os.Exit(0)
+	}
+	if env.IsCronJob {
+		log.Printf("skipping because this is a cron job")
+		os.Exit(0)
+	}
+	//if env.Branch != "master" && !strings.HasPrefix(env.Tag, "v1.") {
+	//log.Printf("skipping because branch %q, tag %q is not on the whitelist", env.Branch, env.Tag)
+	//os.Exit(0)
+	//}
+}
+
+func doDebianSource(cmdline []string) {
 	var (
 		cachedir = flag.String("cachedir", "./build/cache", `Filesystem path to cache the downloaded Go bundles at`)
 		signer   = flag.String("signer", "", `Signing key name, also used as package author`)
@@ -610,7 +636,7 @@ func createRpmPackages() {
 
 func createLinuxPackages() {
 	if !skipDebGen {
-		createDebPackages()
+		doDebianSource([]string{})
 	}
 
 	if !skipRpmGen {
@@ -997,4 +1023,28 @@ func shortenBuildId(buildId string) string {
 		return buildId
 	}
 	return buildId[0:8]
+}
+
+func goTool(subcmd string, args ...string) *exec.Cmd {
+	return goToolArch(runtime.GOARCH, os.Getenv("CC"), subcmd, args...)
+}
+
+func goToolArch(arch string, cc string, subcmd string, args ...string) *exec.Cmd {
+	cmd := build.GoTool(subcmd, args...)
+	if arch == "" || arch == runtime.GOARCH {
+		cmd.Env = append(cmd.Env, "GOBIN="+GOBIN)
+	} else {
+		cmd.Env = append(cmd.Env, "CGO_ENABLED=1")
+		cmd.Env = append(cmd.Env, "GOARCH="+arch)
+	}
+	if cc != "" {
+		cmd.Env = append(cmd.Env, "CC="+cc)
+	}
+	for _, e := range os.Environ() {
+		if strings.HasPrefix(e, "GOBIN=") {
+			continue
+		}
+		cmd.Env = append(cmd.Env, e)
+	}
+	return cmd
 }
