@@ -1,0 +1,1 @@
+/bin/linux-amd64/{{.BinaryName}} usr/bin

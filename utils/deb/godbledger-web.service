@@ -1,0 +1,18 @@
+[Unit]
+Description=GoDBLedger Web Server
+After=network-online.target
+Wants=network-online.target
+StartLimitInterval=0
+
+[Service]
+User=debian-godbledger-web
+Type=simple
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ExecStart=/usr/bin/godbledger-web --config /var/lib/godbledger-web/config.toml --datadir /var/lib/godbledger-web --log-file /var/lib/godbledger-web/log.txt --pidfile /var/lib/godbledger-web/pidfile
+WorkingDirectory=/var/lib/godbledger-web
+Restart=on-failure
+RestartSec=4
+
+[Install]
+WantedBy=multi-user.target
