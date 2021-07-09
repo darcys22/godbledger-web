@@ -45,14 +45,38 @@ function getTransactions(account) {
       clearMain();
       console.log(data);
       createConfigWellAndTransactionsTable(data.options);
+      cols = data.columns.map((item) => ({ title: item , className: "dt-right"}))
+      cols.push({title:"", className: "dt-right"})
+      //dta = data.result.map((item) => (item.row.concat([null])))
+      dta = data.result.map((item) => (item.row))
+      console.log(dta)
+      //dta.push(null)
       var table = $('#transactionstable')
       table.DataTable({
         dom: 'Bfrtip',
         select: true,
-        columns: data.columns.map((item) => ({ title: item})),
-        data: data.result.map((item) => (item.row)),
-        buttons: [
-        'copy', 'excel', 'pdf'
+        columns: cols,
+        data: dta,
+        columnDefs: [
+            {
+                // The `data` parameter refers to the data for the cell (defined by the
+                // `data` option, which defaults to the column being worked with, in
+                // this case `data: 0`.
+                "render": function ( data, type, row ) {
+                    return `
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-info btn-sm">New Journal</button>
+                        <button type="button" class="btn btn-info btn-sm dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                          <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <div class="dropdown-menu">
+                          <a class="dropdown-item" href="#">Something else here</a>
+                        </div>
+                      </div>
+                    `
+                },
+                "targets": cols.length - 1
+            }
         ]
       });
     })

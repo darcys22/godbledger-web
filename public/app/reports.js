@@ -55,6 +55,7 @@ function getReport(reportName) {
       clearMain();
       createConfigWellAndReportsTable(data.options);
       $('#reportstable').DataTable({
+        dom: 'Bfrtip',
         columns: data.columns.map((item) => ({ title: item})),
         data: data.result.map((item) => (item.row))
       });
@@ -198,7 +199,7 @@ function createConfigWellAndReportsTable(config) {
   table.classList.add("m-3")
   container.appendChild(table);
   $('#datepickercontainer .input-daterange').datepicker({
-    format: "d MM yyyy",
+    format: "dd MM yyyy",
     todayBtn: "linked",
     clearBtn: true
   });

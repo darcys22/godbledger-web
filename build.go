@@ -10,7 +10,7 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
-	"go/build"
+	//"go/build"
 	"io"
 	"io/ioutil"
 	"log"
@@ -108,11 +108,9 @@ func main() {
 			setup()
 
 		case "build-srv", "build-server":
-			clean()
 			doBuild("godbledger-web", "./pkg/cmd/godbledger-web", []string{})
 
 		case "build":
-			//clean()
 			for _, binary := range binaries {
 				doBuild(binary, "./pkg/cmd/"+binary, []string{})
 			}
@@ -151,9 +149,6 @@ func main() {
 
 		case "latest":
 			makeLatestDistCopies()
-
-		case "clean":
-			clean()
 
 		default:
 			log.Fatalf("Unknown command %q", cmd)
@@ -858,16 +853,6 @@ func rmr(paths ...string) {
 		log.Println("rm -r", path)
 		os.RemoveAll(path)
 	}
-}
-
-func clean() {
-	if isDev {
-		return
-	}
-
-	rmr("dist")
-	rmr("tmp")
-	rmr(filepath.Join(build.Default.GOPATH, fmt.Sprintf("pkg/%s_%s/github.com/darcys22", goos, goarch)))
 }
 
 func setBuildEnv() {
