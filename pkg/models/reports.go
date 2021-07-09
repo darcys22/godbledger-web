@@ -56,9 +56,10 @@ func NewReport(req ReportsRequest) (error, *ReportResult) {
 // Trial Balance
 
 var trialBalanceColumns = map[string]string{
-	"AccountName": "split_accounts.account_id",
-	"Amount":      "Sum(splits.amount)",
-	"Currency":    "currency.decimals",
+	"Accountname":  "split_accounts.account_id",
+	"Amount":       "Sum(splits.amount) / POWER(10,(SELECT decimals from currencies where name = splits.currency))",
+	"AtomicAmount": "Sum(splits.amount)",
+	"Currency":     "currency.name",
 }
 
 func TrialBalanceReport(req ReportsRequest) (error, *ReportResult) {
@@ -76,16 +77,24 @@ func TrialBalanceReport(req ReportsRequest) (error, *ReportResult) {
 		return fmt.Errorf("Could not make new ledger (%v)", err), nil
 	}
 
-	//queryDateStart := time.Now().Add(time.Hour * 24 * 365 * -100)
+	queryDateStart := time.Now().Add(time.Hour * 24 * 365 * -100)
 	queryDateEnd := time.Now().Add(time.Hour * 24 * 365 * 100)
-	queryDB := `
-			SELECT split_accounts.account_id,
-						 Sum(splits.amount),
-						 currency.decimals
-			FROM   splits
+	queryDB := strings.Builder{}
+	queryDB.WriteString("SELECT\n")
+
+	for i, col := range req.Reports[0].Columns {
+		queryDB.WriteString(trialBalanceColumns[col])
+		if i != len(req.Reports[0].Columns)-1 {
+			queryDB.WriteString(",")
+		}
+		queryDB.WriteString("\n")
+	}
+
+	queryDB.WriteString(`FROM splits
 						 JOIN split_accounts ON splits.split_id = split_accounts.split_id
 						 JOIN currencies AS currency ON splits.currency = currency.NAME
-			WHERE  splits.split_date <= ?
+			WHERE  splits.split_date >= ?
+						 AND splits.split_date <= ?
 						 AND "void" NOT IN (SELECT t.tag_name
 																FROM   tags AS t
 																			 JOIN transaction_tag AS tt
@@ -97,11 +106,11 @@ func TrialBalanceReport(req ReportsRequest) (error, *ReportResult) {
 																				 ON at.tag_id = t.tag_id
 																WHERE  at.account_id = split_accounts.account_id)
 			GROUP  BY split_accounts.account_id, splits.currency
-			;`
+			;`)
 
+	log.Debug(queryDB.String())
 	log.Debug("Querying Database")
-	//rows, err := ledger.LedgerDb.Query(queryDB, queryDateStart, queryDateEnd)
-	rows, err := ledger.LedgerDb.Query(queryDB, queryDateEnd)
+	rows, err := ledger.LedgerDb.Query(queryDB.String(), queryDateStart, queryDateEnd)
 
 	var r ReportResult
 	r.Options = req.Reports[0].Options
@@ -139,7 +148,7 @@ var GeneralLedgerColumns = map[string]string{
 	"Description":  "splits.description",
 	"Currency":     "splits.currency",
 	"Decimals":     "currency.decimals",
-	"Amount":       "splits.amount / POWER(10,(SELECT decimals from currencies where name = splits.currency))",
+	"Amount":       "splits.amount / POWER(10,(SELECT decimals from currency where name = splits.currency))",
 	"AtomicAmount": "splits.amount",
 	"Account":      "split_accounts.account_id",
 }
@@ -165,13 +174,15 @@ func GeneralLedgerReport(req ReportsRequest) (error, *ReportResult) {
 	queryDB := strings.Builder{}
 	queryDB.WriteString("SELECT\n")
 
-	for _, col := range req.Reports[0].Columns {
+	for i, col := range req.Reports[0].Columns {
 		queryDB.WriteString(GeneralLedgerColumns[col])
+		if i != len(req.Reports[0].Columns)-1 {
+			queryDB.WriteString(",")
+		}
 		queryDB.WriteString("\n")
 	}
 
-	queryDB.WriteString(`FROM
-			splits
+	queryDB.WriteString(`FROM splits
 			JOIN split_accounts ON splits.split_id = split_accounts.split_id
 			JOIN transactions on splits.transaction_id = transactions.transaction_id
 			JOIN currencies AS currency ON splits.currency = currency.NAME

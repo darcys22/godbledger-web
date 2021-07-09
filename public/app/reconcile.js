@@ -47,10 +47,8 @@ function getTransactions(account) {
       createConfigWellAndTransactionsTable(data.options);
       cols = data.columns.map((item) => ({ title: item , className: "dt-right"}))
       cols.push({title:"", className: "dt-right"})
-      //dta = data.result.map((item) => (item.row.concat([null])))
       dta = data.result.map((item) => (item.row))
       console.log(dta)
-      //dta.push(null)
       var table = $('#transactionstable')
       table.DataTable({
         dom: 'Bfrtip',

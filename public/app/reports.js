@@ -8,7 +8,7 @@ const TBRequest = {
       enddate: "2020-06-30"
     },
     columns: [
-      "AccountName",
+      "Accountname",
       "Amount",
       "Currency"
     ]
@@ -56,7 +56,7 @@ function getReport(reportName) {
       createConfigWellAndReportsTable(data.options);
       $('#reportstable').DataTable({
         dom: 'Bfrtip',
-        columns: data.columns.map((item) => ({ title: item})),
+        columns: data.columns.map((item) => ({ title: item, className: "dt-right"})),
         data: data.result.map((item) => (item.row))
       });
     })
