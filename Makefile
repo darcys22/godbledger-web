@@ -1,7 +1,3 @@
-## This is a self-documented Makefile. For usage information, run `make help`:
-##
-## For more information, refer to https://suva.sh/posts/well-documented-makefiles/
-
 -include local/Makefile
 
 .PHONY: all deps-go deps-js deps build-go build-server build-cli build-js build build-docker-dev build-docker-full lint-go revive golangci-lint test-go test-js test run run-frontend clean devenv devenv-down revive-strict protobuf help
@@ -97,16 +93,32 @@ lint-go: golangci-lint revive revive-strict # Run all code checks for backend.
 
 ##@ Docker
 
-build-docker-dev: ## Build Docker image for development (fast).
-	@echo "build development container"
-	@echo "\033[92mInfo:\033[0m the frontend code is expected to be built already."
-	$(GO) run build.go -goos linux -pkg-arch amd64 ${OPT} build pkg-archive latest
-	cp dist/godbledger-web-latest.linux-x64.tar.gz packaging/docker
-	cd packaging/docker && docker build --tag godbledger/godbledger:dev .
+# convenience target which looks like the other top-level build-* targets
+build-docker: docker-build
 
-build-docker-full: ## Build Docker image for development.
-	@echo "build docker container"
-	docker build --tag godbledger/godbledger:dev .
+docker-build:
+	docker build -t godbledger:$(VERSION) -t godbledger:latest -f ./utils/Dockerfile.build .
+
+docker-login:
+	@$(if $(strip $(shell docker ps | grep godbledger-server)), @docker exec -it godbledger-server /bin/ash || 0, @docker run -it --rm --entrypoint /bin/ash godbledger:$(VERSION) )
+
+docker-start:
+	GDBL_DATA_DIR=$(GDBL_DATA_DIR) GDBL_LOG_LEVEL=$(GDBL_LOG_LEVEL) GDBL_VERSION=$(VERSION) docker-compose up
+
+docker-stop:
+	docker-compose down
+
+docker-status:
+	@$(if $(strip $(shell docker ps | grep godbledger-server)), @echo "godbledger-server is running on localhost:50051", @echo "godbledger-server is not running")
+
+docker-inspect:
+	docker inspect godbledger-server
+
+docker-logs:
+	@docker logs godbledger-server
+
+docker-logs-follow:
+	@docker logs -f godbledger-server
 
 ##@ Services
 
