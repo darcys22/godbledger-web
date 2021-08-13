@@ -67,8 +67,6 @@ Godbledger comes with a `docker-compose.yml` file and some make targets to help 
 User: test@godbledger.com
 Pass: password
 
-## TODO:
-
-- Build Journal Entry Page
-- Build Reports Page
-- Build Bank Reconciliation Page
+### Roadmap
+Discussion can be found on this github issue:
+https://github.com/darcys22/godbledger/issues/169
