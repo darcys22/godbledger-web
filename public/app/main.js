@@ -2,6 +2,8 @@ class LineItem {
     constructor() {
       this._date = moment().format();
       this._description = "";
+      //TODO sean this needs to be editable
+      this._currency= "USD";
       this._account = "";
       this._amount = 0;
     }
@@ -90,19 +92,19 @@ class Journal {
               break;
             case "debit":
               if (lineitem._amount == 0 && journalForm[lineitemKeys[i]]) {
-                lineitem._amount = parseInt(journalForm[lineitemKeys[i]],10) * 1;
+                lineitem._amount = parseFloat(journalForm[lineitemKeys[i]],10).toFixed(2) * 1;
               }
               break;
             case "credit":
               if (lineitem._amount == 0 && journalForm[lineitemKeys[i]]) {
-                lineitem._amount = parseInt(journalForm[lineitemKeys[i]],10) * -1;
+                lineitem._amount = parseFloat(journalForm[lineitemKeys[i]],10).toFixed(2) * -1;
               }
               break;
             default:
               console.log("could not identify" + lineitemKeys[i])
           }
 
-          this._lineitems[parseInt(filtered[1], 10)] = lineitem;
+          this._lineitems[parseFloat(filtered[1], 10)] = lineitem;
         }
       }
       this._narration = journalForm.narration;
@@ -110,11 +112,9 @@ class Journal {
       this._lineitems = this._lineitems.filter(function (el) {
         return !el.isEmpty();
       });
+      this._date = journalDate;
       this._lineItemCount = this._lineitems.length;
-      window.transactions.unshift( {"id":"","_date":this._lineitems[0]._date,"_description":this._narration,"_amount":this._lineitems[1]._amount})
-
-      this._date = new moment().format();
-      console.log(JSON.stringify(this));
+      window.transactions.unshift({"id":"","_date":this._date,"_description":this._narration,"_amount":Math.abs(this._lineitems[0]._amount).toFixed(2)})
       if(this.id == "")
       {
         $.ajax({
@@ -193,6 +193,7 @@ $('#addJournal').on('submit', function (e) {
     window.journal.save($('#addJournal').serializeObject());
     $('#addJournal')[0].reset();
     tableCreate();
+    clearJournalDateDescription();
     clearJournalLineItems();
     journal = new Journal();
     $('#journalModal').modal('toggle');
@@ -223,6 +224,7 @@ function getJournal(index) {
         try {
           document.getElementById("addJournal").elements[key].value = journal[key]
         } catch(err){
+          console.log(err)
         }
       }
       $("#journalModal").modal() 
@@ -237,14 +239,15 @@ function editJournal(index,id) {
     fetch('/api/journals/'+id)
     .then(response => response.json())
     .then(data => {
-      //var journal = window.transactions[index];
+      console.log(JSON.stringify(data));
       $('#addJournal')[0].reset();
       journal = new Journal();
+      clearJournalDateDescription();
       clearJournalLineItems();
       journal._lineItemCount = 0;
       journal.setID(id);
       document.getElementsByName("date")[0].value = formatformaldate(data._date);
-      document.getElementsByName("narration")[0].value = data.narration;
+      document.getElementsByName("narration")[0].value = data._narration;
       for (var lineItem in data._lineItems) {
         journal.addNewLineItem();
         document.getElementsByName("line-item[" +(journal._lineItemCount)+ "][narration]")[0].value = data._lineItems[lineItem]._description;
@@ -261,8 +264,6 @@ function editJournal(index,id) {
       }
       updateTotal();
       $("#journalModal").modal() 
-      //window.transactions = data.Journals;
-      //tableCreate()
     })
     .catch(error => console.error(error))
   } catch { error => console.error(error)
@@ -279,6 +280,11 @@ function deleteJournal(index) {
         tableCreate();
       },
   });
+}
+
+function clearJournalDateDescription() {
+  $('input[name=date').val('');
+  $('input[name=narration').val('');
 }
 
 function clearJournalLineItems() {
@@ -349,6 +355,7 @@ function addLineItem(index) {
   input.setAttribute('data-lpignore', "true");
   input.name = `line-item[${index}][narration]`;
   input.type = "text";
+  input.setAttribute('tabindex', index*4+3);
   td.appendChild(input);
   tr.appendChild(td);
 
@@ -357,6 +364,7 @@ function addLineItem(index) {
   var select = document.createElement('select');
   select.className = 'js-example-basic-single form-control';
   select.name = `line-item[${index}][account]`;
+  select.setAttribute('tabindex', index*4+4);
   td.appendChild(select);
   tr.appendChild(td);
 
@@ -367,9 +375,10 @@ function addLineItem(index) {
   input.setAttribute('data-lpignore', "true");
   input.name = `line-item[${index}][debit]`;
   input.type = "number";
-    var DRAmount = parseInt();
   input.setAttribute("onchange", `document.getElementsByName("line-item[${index}][credit]")[0].value="";updateTotal();`);;
   input.setAttribute("min", 0);;
+  input.setAttribute("step", 0.01);;
+  input.setAttribute('tabindex', index*4+5);
   td.appendChild(input);
   tr.appendChild(td);
 
@@ -382,6 +391,8 @@ function addLineItem(index) {
   input.type = "number";
   input.setAttribute("onchange", `document.getElementsByName("line-item[${index}][debit]")[0].value="";updateTotal();`);;
   input.setAttribute("min", 0);;
+  input.setAttribute('tabindex', index*4+6);
+  input.setAttribute("step", 0.01);;
   td.appendChild(input);
   tr.appendChild(td);
 
@@ -407,9 +418,10 @@ function updateTotal()
   var CRTotal = 0;
 
   for (var i = 1; i <= journal._lineItemCount; i++) {
-    var DRAmount = parseInt(document.getElementsByName(`line-item[${i}][debit]`)[0].value);
+    var DRAmount = parseFloat(document.getElementsByName(`line-item[${i}][debit]`)[0].value);
     if (!isNaN(DRAmount) && DRAmount >=0) { 
       DRTotal += DRAmount; 
+      $(`input[name ="line-item[${i}][debit]"]`).val(DRAmount.toFixed(2))
               
       if (!$(`select[name ="line-item[${i}][account]"]`).text()) {
         $('#saveJournalButton').prop('disabled', true);
@@ -417,9 +429,10 @@ function updateTotal()
     } else if (document.getElementsByName(`line-item[${i}][debit]`)[0].value) {
       $('#saveJournalButton').prop('disabled', true);
     } else {
-      var CRAmount = parseInt(document.getElementsByName(`line-item[${i}][credit]`)[0].value);
+      var CRAmount = parseFloat(document.getElementsByName(`line-item[${i}][credit]`)[0].value);
       if (!isNaN(CRAmount) && CRAmount >=0) { 
         CRTotal += CRAmount; 
+      $(`input[name ="line-item[${i}][credit]"]`).val(CRAmount.toFixed(2))
         if (!$(`select[name ="line-item[${i}][account]"]`).text()) {
           $('#saveJournalButton').prop('disabled', true);
         }
@@ -433,20 +446,22 @@ function updateTotal()
     $('#saveJournalButton').prop('disabled', true);
   }
 
-  document.getElementById('invoiceTotalDebit').value = DRTotal;
-  document.getElementById('invoiceTotalCredit').value = CRTotal;
+  document.getElementById('invoiceTotalDebit').value = DRTotal.toFixed(2);
+  document.getElementById('invoiceTotalCredit').value = CRTotal.toFixed(2);
 }
 
 function tableCreate() {
   var tbdy = document.getElementById('transactionstable');
   tbdy.innerHTML = '';
   for (var i = 0; i < window.transactions.length; i++) {
-    console.log(window.transactions[i])
+    // Date
     var tr = document.createElement('tr');
     var td = document.createElement('td');
     td.className = 'txntable';
     td.appendChild(document.createTextNode(formatdate(window.transactions[i]._date)))
     tr.appendChild(td)
+
+    // Journal ID
     var td = document.createElement('td');
     td.className = 'txntable';
     var span = document.createElement('span');
@@ -454,6 +469,7 @@ function tableCreate() {
     span.title=window.transactions[i].id;
     td.appendChild(span)
 
+    // Journal ID copy to clipboard
     var svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
     svg.setAttribute('viewBox',"0 0 16 16");
     svg.setAttribute('width',"16");
@@ -469,27 +485,39 @@ function tableCreate() {
     btn.onclick = function () {copyToClipboard(this.getAttribute('data-param'));}; 
     svg.appendChild(path);
     btn.appendChild(svg);
-    td.appendChild(btn);
+    if (window.transactions[i].id.length > 0){
+      td.appendChild(btn);
+    }
     tr.appendChild(td);
+
+    // Narration
     var td = document.createElement('td');
     td.className = 'txntable';
     td.appendChild(document.createTextNode(window.transactions[i]._description))
     tr.appendChild(td)
+
+    // Amount
     var td = document.createElement('td');
     td.className = 'txntable';
-    //TODO sean make this decimaled
-    td.appendChild(document.createTextNode("$" + moneyNumber(window.transactions[i]._amount)));
+    var amount = document.createTextNode("$" + moneyNumber(window.transactions[i]._amount))
+    td.appendChild(amount);
+    td.className = 'txntable dollaramount';
     tr.appendChild(td)
+
+    // Edit button
     var td = document.createElement('td');
-    td.className = 'txntable';
     var btn = document.createElement('button');
     btn.className = 'btn btn-warning btn-rounded btn-sm';
     btn.setAttribute('data-param-index', i);
     btn.setAttribute('data-param-id',window.transactions[i].id);
     btn.onclick = function () {editJournal(this.getAttribute('data-param-index'),this.getAttribute('data-param-id'));}; 
     btn.innerHTML = "Edit";
-    td.appendChild(btn)
+    if (window.transactions[i].id.length > 0){
+      td.appendChild(btn)
+    }
     tr.appendChild(td)
+
+    // Delete button
     var td = document.createElement('td');
     var btn = document.createElement('button');
     btn.className = 'btn btn-danger btn-rounded btn-sm';
@@ -497,11 +525,27 @@ function tableCreate() {
     btn.setAttribute('data-id', window.transactions[i].id);
     btn.onclick = function () {deleteJournal(this.getAttribute('data-id'));}; 
     btn.innerHTML = "Delete";
-    td.appendChild(btn)
+    if (window.transactions[i].id.length > 0){
+      td.appendChild(btn)
+    }
     tr.appendChild(td)
     tbdy.appendChild(tr);
   }
 }
+
+$('#journalModal').on('shown.bs.modal', function () {
+  $('input[name=date').trigger('focus');
+})
+
+$('#journalModal').on('hidden.bs.modal', function () {
+  clearJournalDateDescription();
+  clearJournalLineItems();
+  journal = new Journal();
+  $('#addJournal')[0].reset();
+  updateTotal()
+  $('#saveJournalButton').prop('disabled', true);
+  window.now = moment();
+})
 
 function formatcomma(element) {
   return element.toString().replace(/ /g,'').replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -529,7 +573,9 @@ function formatformaldate(element) {
   return moment(element).format('YYYY-MM-DD');
 }
 function moneyNumber(x, decimals = 0) {
+  console.log(x)
   xstr = x.toString();
+  console.log(xstr)
   truncstr = xstr.substring(0, xstr.length - decimals);
   truncstrcomma = truncstr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   if (decimals > 0) {
@@ -582,7 +628,6 @@ const copyToClipboard = str => {
     document.getSelection().addRange(selected);
   }
 };
-
 
 function main() {
   $('#addJournal')[0].reset();

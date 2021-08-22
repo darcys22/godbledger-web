@@ -7,10 +7,10 @@ closeBtn.addEventListener("click", ()=>{
   menuBtnChange();//calling the function(optional)
 });
 
-searchBtn.addEventListener("click", ()=>{ // Sidebar open when you click on the search iocn
-  sidebar.classList.toggle("open");
-  menuBtnChange(); //calling the function(optional)
-});
+//searchBtn.addEventListener("click", ()=>{ // Sidebar open when you click on the search iocn
+  //sidebar.classList.toggle("open");
+  //menuBtnChange(); //calling the function(optional)
+//});
 
 // following are the code to change sidebar button(optional)
 function menuBtnChange() {

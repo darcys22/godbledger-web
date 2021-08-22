@@ -66,7 +66,7 @@ docker-build:
 	docker build -t godbledger-web:$(VERSION) -t godbledger-web:latest -f ./utils/Dockerfile.build-web .
 
 docker-login:
-	@$(if $(strip $(shell docker ps | grep godbledger-server)), @docker exec -it godbledger-server /bin/ash || 0, @docker run -it --rm --entrypoint /bin/ash godbledger:$(VERSION) )
+	@$(if $(strip $(shell docker ps | grep godbledger-web)), @docker exec -it godbledger-web /bin/ash || 0, @docker run -it --rm --entrypoint /bin/ash godbledger-web:$(VERSION) )
 
 docker-start:
 	GDBL_DATA_DIR=$(GDBL_DATA_DIR) GDBL_LOG_LEVEL=$(GDBL_LOG_LEVEL) GDBL_VERSION=$(VERSION) docker-compose up
@@ -75,7 +75,7 @@ docker-stop:
 	docker-compose down
 
 docker-status:
-	@$(if $(strip $(shell docker ps | grep godbledger-server)), @echo "godbledger-server is running on localhost:50051", @echo "godbledger-server is not running")
+	@$(if $(strip $(shell docker ps | grep godbledger-web)), @echo "godbledger-web is running on localhost:80", @echo "godbledger-web is not running")
 
 docker-inspect:
 	docker inspect godbledger-server

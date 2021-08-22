@@ -23,7 +23,7 @@
           <th>Date</th>
           <th>Journal ID</th>
           <th>Narration</th>
-          <th>Amount</th>
+          <th class="dollaramount">Amount</th>
           <th></th>
           <th></th>
         </tr>
@@ -37,13 +37,13 @@
     </table>
   </div>
 </div>
-<div class="modal fade" id="journalModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+<div class="modal fade" id="journalModal" tabindex="-1" role="dialog" aria-labelledby="journalModal">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Journal Entry</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" tabindex="-1">
+          <span aria-hidden="true" tabindex="-1">&times;</span>
         </button>
       </div>
       <div class = "modal-body">
@@ -55,7 +55,7 @@
               <div class="col-md-3 inputGroupContainer">
                 <div class="input-group">
                   <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-                  <input name="date" placeholder="YYYY-MM-DD" class="form-control" pattern="^\d{4}-\d{1,2}-\d{1,2}$" type="text">
+                  <input name="date" placeholder="YYYY-MM-DD" class="form-control" pattern="^\d{4}-\d{1,2}-\d{1,2}$" type="text" tabindex="1">
                   <div class="help-block with-errors"></div>
                 </div>
               </div>
@@ -66,7 +66,7 @@
               <div class="col-md-10 inputGroupContainer">
                 <div class="input-group">
                   <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-                  <textarea name="narration" placeholder="Journal Narration" class="form-control"  type="text"></textarea>
+                  <textarea name="narration" placeholder="Journal Narration" class="form-control"  type="text" tabindex="2"></textarea>
                 </div>
               </div>
             </div>
@@ -75,12 +75,12 @@
               <div class="input-group">
               <table id="journal" class="table table-bordered table-condensed">
                 <tr><th>#</th><th>Description</th><th>Account</th><th>Debit</th><th>Credit</th></tr>
-                <tfoot>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><span><input type="text" id="invoiceTotalDebit" readonly class="totalField money" value="0.00"></span></td>
-                    <td><span><input type="text" id="invoiceTotalCredit" readonly class="totalField money" value="0.00"></span></td>
+                <tfoot class="hiddenfooter">
+                    <td class="hiddenfooter"></td>
+                    <td class="hiddenfooter"></td>
+                    <td class="hiddenfooter"></td>
+                    <td class="hiddenfooter"><span><input type="text" id="invoiceTotalDebit" readonly class="totalField money" value="0.00" tabindex="-1"></span></td>
+                    <td class="hiddenfooter"><span><input type="text" id="invoiceTotalCredit" readonly class="totalField money" value="0.00" tabindex="-1"></span></td>
                 </tfoot>
 
             </table>
@@ -89,12 +89,12 @@
 
             <div class="totals">
 
-              <button class="btn btn-primary" id="addNewLineItemButton" onclick=""><span class="text" data-automationid="Add a new line-button">Add a new line</span></button>
+              <button class="btn btn-primary" id="addNewLineItemButton" onclick="" tabindex="-1"><span class="text" data-automationid="Add a new line-button" tabindex="-1">Add a new line</span></button>
             </div>
             <div class="actions text-right">
               <div class="right">
-                <button class="btn btn-light btn-sm"  data-dismiss="modal"><span class="text" data-automationid="Cancel-button">Cancel</span></button>
-                <button type="submit" class="btn btn-success" id="saveJournalButton"><span class="text" data-automationid="Save-button">Post Journal</span></button>
+                <button class="btn btn-light btn-sm"  data-dismiss="modal" tabindex="-1"><span class="text" data-automationid="Cancel-button" tabindex="-1">Cancel</span></button>
+                <button type="submit" class="btn btn-success" id="saveJournalButton" tabindex="-1"><span class="text" data-automationid="Save-button" tabindex="-1">Post Journal</span></button>
               </div>
             </div>
       </fieldset>

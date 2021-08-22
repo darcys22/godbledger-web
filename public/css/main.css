@@ -5,6 +5,27 @@ table {
 .txntable {
   vertical-align: middle !important;
 }
+
+.dollaramount {
+  text-align: right;
+}
+
+.totalField {
+  border-top-style: hidden;
+  border-right-style: hidden;
+  border-left-style: hidden;
+  border-bottom-style: hidden;
+  padding: .375rem .75rem;
+  font-weight: bold;
+  text-align: right;
+}
+
+.hiddenfooter {
+  border-right-style: hidden !important;
+  border-left-style: hidden !important;
+  border-bottom-style: hidden;
+}
+
 td input {
     width: 100%;
     box-sizing: border-box;

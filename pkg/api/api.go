@@ -42,4 +42,13 @@ func Register(r *gin.Engine) {
 	r.GET("/reports", middleware.AuthorizeJWT(), Reports)
 	r.POST("api/reports", middleware.AuthorizeJWT(), ReportsResults)
 
+	// Modules Page
+	r.GET("/modules", middleware.AuthorizeJWT(), Modules)
+
+	// Users Page
+	r.GET("/user", middleware.AuthorizeJWT(), User)
+
+	// Admin Page
+	r.GET("/admin", middleware.AuthorizeJWT(), Admin)
+
 }

@@ -6,7 +6,7 @@ RUN apk upgrade
 RUN apk add --update gcc g++ make git
 
 ENV GOPATH /go
-WORKDIR /go/src/github.com/darcys22/godbledger-web
+WORKDIR /go/src/github.com/darcys22/godbledger
 ADD . .
 
 # TODO: pull app version from VERSION
@@ -32,7 +32,7 @@ ENV PATH=/app:${PATH}
 ENV GDBL_LOG_LEVEL info
 ENV GDBL_DATA_DIR ~/.ledger
 ENV GDBL_CONFIG_FILE ~/.ledger/config.docker.toml
-COPY --from=builder /go/src/github.com/darcys22/godbledger-web/bin/linux-amd64/* ./
+COPY --from=builder /go/src/github.com/darcys22/godbledger/build/bin/native/* ./
 
-EXPOSE 8000
-ENTRYPOINT GO111MODULE=on ./godbledger-web 
+EXPOSE 50051
+ENTRYPOINT ./godbledger --verbosity=${GDBL_LOG_LEVEL} --rpc-host=0.0.0.0 --rpc-port=50051 --datadir=${GDBL_DATA_DIR} --config=${GDBL_CONFIG_FILE}

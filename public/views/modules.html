@@ -1,0 +1,23 @@
+<!--Embed the header.html template at this location-->
+{{ template "header.html" .}}
+<div class="container" id="maincontainer">
+
+  <div class="my-3 p-3 bg-white rounded box-shadow">
+          <h2 class="border-bottom border-gray pb-2 mb-0">Modules</h2>
+          <div class="media text-muted pt-3">
+            <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray"><a href="/" text-decoration="none">
+              <strong class="d-block text-gray-dark">Manual Journals</strong>
+              Module to create Manual Journals
+              </a></p>
+          </div>
+          <div class="media text-muted pt-3">
+            <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray"><a href="/reconcile" text-decoration="none">
+              <strong class="d-block text-gray-dark">Bank & External Account Feeds (STILL IN PROGRESS)</strong>
+              Module to review transactions from external sources
+              </a></p>
+          </div>
+        </div>
+
+</div>
+<!--Embed the footer.html template at this location-->
+{{ template "footer.html" .}}

@@ -57,7 +57,8 @@ func NewReport(req ReportsRequest) (error, *ReportResult) {
 
 var trialBalanceColumns = map[string]string{
 	"Accountname":  "split_accounts.account_id",
-	"Amount":       "Sum(splits.amount) / POWER(10,(SELECT decimals from currencies where name = splits.currency))",
+	//"Amount":       "Sum(splits.amount) / POWER(10,(SELECT decimals from currencies where name = splits.currency))",
+	"Amount":       "Sum(splits.amount)",
 	"AtomicAmount": "Sum(splits.amount)",
 	"Currency":     "currency.name",
 }
@@ -148,7 +149,8 @@ var GeneralLedgerColumns = map[string]string{
 	"Description":  "splits.description",
 	"Currency":     "splits.currency",
 	"Decimals":     "currency.decimals",
-	"Amount":       "splits.amount / POWER(10,(SELECT decimals from currency where name = splits.currency))",
+	//"Amount":       "splits.amount / POWER(10,(SELECT decimals from currency where name = splits.currency))",
+	"Amount":       "splits.amount",
 	"AtomicAmount": "splits.amount",
 	"Account":      "split_accounts.account_id",
 }

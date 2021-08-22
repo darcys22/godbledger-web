@@ -35,7 +35,7 @@ type LineItem struct {
 
 type PostJournalCommand struct {
 	Date          string     `json:"_date" binding:"required"`
-	Narration     string     `json:"narration"`
+	Narration     string     `json:"_narration"`
 	LineItemCount int        `json:"_lineItemCount" binding:"required"`
 	LineItems     []LineItem `json:"_lineItems" binding:"required"`
 }
@@ -50,6 +50,7 @@ func NewJournalsListing() *GetJournals {
 }
 
 func (j *GetJournals) SearchJournals() error {
+	log.Trace("Calling Search Journals function")
 	j.Journals = []LineItem{}
 
 	set := flag.NewFlagSet("getJournalListing", 0)
@@ -72,7 +73,7 @@ func (j *GetJournals) SearchJournals() error {
 	queryDB := `
 		SELECT
 			transactions.transaction_id,
-			max(splits.split_date),
+			max(splits.split_date) as jdate,
 			transactions.brief,
 			sum(case when splits.amount > 0 then splits.amount else 0 end),
 			currency.decimals,
@@ -95,6 +96,7 @@ func (j *GetJournals) SearchJournals() error {
 					tt.transaction_id = splits.transaction_id
 			)
 		GROUP BY transactions.transaction_id, splits.currency
+		ORDER BY jdate DESC
 		LIMIT 50
 	;`
 
@@ -131,6 +133,7 @@ var currenciesDecimals = map[string]int{
 }
 
 func (j *PostJournalCommand) Save() error {
+	log.Trace("Calling Save Journal function")
 	set := flag.NewFlagSet("PostJournal", 0)
 	set.String("config", "", "doc")
 
@@ -166,6 +169,12 @@ func (j *PostJournalCommand) Save() error {
 
 	transactionLines := make([]*pb.LineItem, j.LineItemCount)
 
+	layout := "2006-01-02T15:04:05-07:00"
+	t, err := time.Parse(layout, j.Date)
+	if err != nil {
+		return fmt.Errorf("Could not parse date", err)
+	}
+
 	for i, accChange := range j.LineItems {
 
 		//TODO sean get this from somewhere
@@ -183,11 +192,6 @@ func (j *PostJournalCommand) Save() error {
 		}
 	}
 
-	layout := "2006-01-02T15:04:05-07:00"
-	t, err := time.Parse(layout, j.Date)
-	if err != nil {
-		return fmt.Errorf("Could not parse date", err)
-	}
 	req := &pb.TransactionRequest{
 		Date:        t.Format("2006-01-02"),
 		Description: j.Narration,
@@ -202,6 +206,7 @@ func (j *PostJournalCommand) Save() error {
 }
 
 func DeleteJournalCommand(id string) error {
+	log.Trace("Calling Delete Journal function")
 	set := flag.NewFlagSet("DeleteJournal", 0)
 	set.String("config", "", "doc")
 
@@ -248,6 +253,7 @@ func DeleteJournalCommand(id string) error {
 }
 
 func GetJournalCommand(id string) (PostJournalCommand, error) {
+	log.Trace("Calling Get Journal Command function")
 	j := PostJournalCommand{}
 	j.LineItems = []LineItem{}
 
@@ -300,6 +306,11 @@ func GetJournalCommand(id string) (PostJournalCommand, error) {
 		if err := rows.Scan(&t.ID, &t.Date, &t.Description, &t.Currency, &decimals, &t.Amount, &t.Account, &narration); err != nil {
 			return j, fmt.Errorf("Could not scan rows of query (%v)", err)
 		}
+		centsAmount, err := strconv.ParseFloat(t.Amount, 64)
+		if err != nil {
+			return j, fmt.Errorf("Could not process the amount as a float (%v)", err)
+		}
+		t.Amount = fmt.Sprintf("%.2f", centsAmount/math.Pow(10, decimals))
 		j.LineItems = append(j.LineItems, t)
 		j.Narration = narration
 		j.Date = t.Date
@@ -308,6 +319,7 @@ func GetJournalCommand(id string) (PostJournalCommand, error) {
 		return j, fmt.Errorf("rows errored with (%v)", rows.Err())
 	}
 
+	j.LineItemCount = len(j.LineItems)
 	return j, nil
 }
 
