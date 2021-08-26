@@ -70,3 +70,10 @@ Pass: password
 ### Roadmap
 Discussion can be found on this github issue:
 https://github.com/darcys22/godbledger/issues/169
+
+
+### Misc
+https://github.com/mattrobenolt/grafana/tree/ae0cbdff73297bd8ab24b6a9bbfdcb0cd1439218
+
+https://select2.org/
+https://github.com/select2/select2-bootstrap-theme

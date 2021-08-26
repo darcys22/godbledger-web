@@ -58,7 +58,7 @@ func New(cfg Config) (*Server, error) {
 		buildBranch: cfg.BuildBranch,
 	}
 	if cfg.Listener != nil {
-		if err := s.init(&cfg); err != nil {
+		if err := s.init(); err != nil {
 			return nil, err
 		}
 	}
@@ -88,7 +88,7 @@ type Server struct {
 }
 
 // init initializes the server and its services.
-func (s *Server) init(cfg *Config) error {
+func (s *Server) init() error {
 	s.mtx.Lock()
 	defer s.mtx.Unlock()
 
@@ -100,8 +100,6 @@ func (s *Server) init(cfg *Config) error {
 	s.loadConfiguration()
 	s.writePIDFile()
 
-	//login.Init()
-
 	return nil
 }
 
@@ -109,7 +107,7 @@ func (s *Server) init(cfg *Config) error {
 // exited. To initiate shutdown, call the Shutdown method in another goroutine.
 func (s *Server) Run() (err error) {
 
-	if err = s.init(nil); err != nil {
+	if err = s.init(); err != nil {
 		return
 	}
 
@@ -162,8 +160,6 @@ func (s *Server) Run() (err error) {
 			}
 		}
 	}()
-
-	s.notifySystemd("READY=1")
 
 	m := newGin()
 	api.Register(m)
@@ -253,32 +249,6 @@ func (s *Server) loadConfiguration() {
 		"branch":   s.buildBranch,
 		"compiled": time.Unix(setting.BuildStamp, 0),
 	}).Infof("Starting %s", setting.ApplicationName)
-}
-
-// notifySystemd sends state notifications to systemd.
-func (s *Server) notifySystemd(state string) {
-	notifySocket := os.Getenv("NOTIFY_SOCKET")
-	if notifySocket == "" {
-		log.Debug(
-			"NOTIFY_SOCKET environment variable empty or unset, can't send systemd notification")
-		return
-	}
-
-	socketAddr := &net.UnixAddr{
-		Name: notifySocket,
-		Net:  "unixgram",
-	}
-	conn, err := net.DialUnix(socketAddr.Net, nil, socketAddr)
-	if err != nil {
-		log.Warn("Failed to connect to systemd", "err", err, "socket", notifySocket)
-		return
-	}
-	defer conn.Close()
-
-	_, err = conn.Write([]byte(state))
-	if err != nil {
-		log.Warn("Failed to write notification to systemd", "err", err)
-	}
 }
 
 func newGin() *gin.Engine {

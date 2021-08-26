@@ -13,10 +13,6 @@ type Descriptor struct {
 
 var services []*Descriptor
 
-func Register(descriptor *Descriptor) {
-	services = append(services, descriptor)
-}
-
 func GetServices() []*Descriptor {
 	slice := getServicesWithOverrides()
 
@@ -30,10 +26,6 @@ func GetServices() []*Descriptor {
 type OverrideServiceFunc func(descriptor Descriptor) (*Descriptor, bool)
 
 var overrides []OverrideServiceFunc
-
-func RegisterOverride(fn OverrideServiceFunc) {
-	overrides = append(overrides, fn)
-}
 
 func getServicesWithOverrides() []*Descriptor {
 	slice := []*Descriptor{}

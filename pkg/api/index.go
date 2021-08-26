@@ -28,7 +28,3 @@ func User(c *gin.Context) {
 func Admin(c *gin.Context) {
 	c.HTML(http.StatusOK, "admin.html", nil)
 }
-
-func NotFound(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "index.html", nil)
-}
