@@ -2,28 +2,21 @@ package server
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"sync"
 	"time"
 
 	"github.com/darcys22/godbledger-web/pkg/api"
-	"github.com/darcys22/godbledger-web/pkg/registry"
 	"github.com/darcys22/godbledger-web/pkg/setting"
 
-	"github.com/gin-gonic/contrib/gzip"
-	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-
-	"golang.org/x/sync/errgroup"
 )
 
 var log = logrus.WithField("prefix", "server")
@@ -42,12 +35,10 @@ type Config struct {
 // New returns a new instance of Server.
 func New(cfg Config) (*Server, error) {
 	rootCtx, shutdownFn := context.WithCancel(context.Background())
-	childRoutines, childCtx := errgroup.WithContext(rootCtx)
 
 	s := &Server{
-		context:       childCtx,
+		context:       rootCtx,
 		shutdownFn:    shutdownFn,
-		childRoutines: childRoutines,
 		cfg:           setting.NewCfg(),
 
 		configFile:  cfg.ConfigFile,
@@ -70,7 +61,6 @@ func New(cfg Config) (*Server, error) {
 type Server struct {
 	context            context.Context
 	shutdownFn         context.CancelFunc
-	childRoutines      *errgroup.Group
 	cfg                *setting.Cfg
 	shutdownReason     string
 	shutdownInProgress bool
@@ -111,61 +101,10 @@ func (s *Server) Run() (err error) {
 		return
 	}
 
-	services := registry.GetServices()
-
-	// Start background services.
-	for _, svc := range services {
-		service, ok := svc.Instance.(registry.BackgroundService)
-		if !ok {
-			continue
-		}
-
-		if registry.IsDisabled(svc.Instance) {
-			continue
-		}
-
-		// Variable is needed for accessing loop variable in callback
-		descriptor := svc
-		s.childRoutines.Go(func() error {
-			// Don't start new services when server is shutting down.
-			if s.shutdownInProgress {
-				return nil
-			}
-
-			err := service.Run(s.context)
-			// Mark that we are in shutdown mode
-			// So no more services are started
-			s.shutdownInProgress = true
-			if err != nil {
-				if err != context.Canceled {
-					// Server has crashed.
-					log.Error("Stopped "+descriptor.Name, "reason", err)
-				} else {
-					log.Debug("Stopped "+descriptor.Name, "reason", err)
-				}
-
-				return err
-			}
-
-			return nil
-		})
-	}
-
-	defer func() {
-		log.Debug("Waiting on services...")
-		if waitErr := s.childRoutines.Wait(); waitErr != nil && !errors.Is(waitErr, context.Canceled) {
-			log.Error("A service failed", "err", waitErr)
-			if err == nil {
-				err = waitErr
-			}
-		}
-	}()
-
-	m := newGin()
-	api.Register(m)
+	m := api.NewGin()
 
 	listenAddr := fmt.Sprintf("%s:%s", setting.HttpAddr, setting.HttpPort)
-	log.Infof("Listen: %v://%s%s", setting.Protocol, listenAddr, setting.AppSubUrl)
+	log.Infof("Listen: %v://%s%s", setting.Protocol, listenAddr)
 
 	s.httpSrv = &http.Server{
 		Addr:    listenAddr,
@@ -208,12 +147,6 @@ func (s *Server) Shutdown(reason string) {
 
 	// call cancel func on root context
 	s.shutdownFn()
-
-	// wait for child routines
-
-	if err := s.childRoutines.Wait(); err != nil && !errors.Is(err, context.Canceled) {
-		log.WithField("err", err).Error("Failed waiting for services to shutdown", "error", err)
-	}
 }
 
 // ExitCode returns an exit code for a given error.
@@ -249,49 +182,6 @@ func (s *Server) loadConfiguration() {
 		"branch":   s.buildBranch,
 		"compiled": time.Unix(setting.BuildStamp, 0),
 	}).Infof("Starting %s", setting.ApplicationName)
-}
-
-func newGin() *gin.Engine {
-	//gin.Env = setting.Env
-	//macaron.Env = setting.Env
-
-	m := gin.Default()
-	//m.Use(middleware.Logger())
-	m.Use(gin.Recovery())
-	if setting.EnableGzip {
-		m.Use(gzip.Gzip(gzip.DefaultCompression))
-	}
-
-	mapStatic(m, "", "public")
-	mapStatic(m, "app", "app")
-	mapStatic(m, "css", "css")
-	mapStatic(m, "img", "img")
-	mapStatic(m, "fonts", "fonts")
-
-	m.LoadHTMLGlob(path.Join(setting.StaticRootPath, "views/*.html"))
-
-	return m
-}
-
-func mapStatic(m *gin.Engine, dir string, prefix string) {
-	headers := func() gin.HandlerFunc {
-		return func(c *gin.Context) {
-			c.Writer.Header().Set("Cache-Control", "public, max-age=3600")
-			c.Next()
-		}
-	}
-
-	if setting.Env == setting.DEV {
-		headers = func() gin.HandlerFunc {
-			return func(c *gin.Context) {
-				c.Writer.Header().Set("Cache-Control", "max-age=0, must-revalidate, no-cache")
-				c.Next()
-			}
-		}
-	}
-
-	m.Static(prefix, path.Join(setting.StaticRootPath, dir))
-	m.Use(headers())
 }
 
 // writePIDFile retrieves the current process ID and writes it to file.

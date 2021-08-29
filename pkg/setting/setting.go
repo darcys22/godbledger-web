@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	ini "gopkg.in/ini.v1"
@@ -21,8 +20,6 @@ type Scheme string
 const (
 	HTTP              Scheme = "http"
 	HTTPS             Scheme = "https"
-	HTTP2             Scheme = "h2"
-	SOCKET            Scheme = "socket"
 	DEFAULT_HTTP_ADDR string = "0.0.0.0"
 	REDACTED_PASSWORD string = "*********"
 )
@@ -37,10 +34,6 @@ const (
 var (
 	// App settings.
 	Env              = DEV
-	AppUrl           string
-	AppSubUrl        string
-	ServeFromSubPath bool
-	InstanceName     string
 
 	// build
 	BuildVersion    string
@@ -50,26 +43,16 @@ var (
 	IsEnterprise    bool
 	ApplicationName string
 
-	// packaging
-	Packaging = "unknown"
-
 	// Paths
 	HomePath       string
-	PluginsPath    string
 	CustomInitPath = "conf/custom.ini"
 
 	// Http server options
 	Protocol           Scheme
-	Domain             string
 	HttpAddr, HttpPort string
 	CertFile, KeyFile  string
-	SocketPath         string
-	RouterLogging      bool
-	DataProxyLogging   bool
-	DataProxyTimeout   int
 	StaticRootPath     string
 	EnableGzip         bool
-	EnforceDomain      bool
 
 	// Global setting objects.
 	Raw          *ini.File
@@ -79,38 +62,6 @@ var (
 	configFiles                  []string
 	appliedCommandLineProperties []string
 	appliedEnvOverrides          []string
-
-	ReportingEnabled   bool
-	CheckForUpdates    bool
-	GoogleAnalyticsId  string
-	GoogleTagManagerId string
-
-	// LDAP
-	LDAPEnabled           bool
-	LDAPConfigFile        string
-	LDAPSyncCron          string
-	LDAPAllowSignup       bool
-	LDAPActiveSyncEnabled bool
-
-	// Alerting
-	AlertingEnabled            bool
-	ExecuteAlerts              bool
-	AlertingRenderLimit        int
-	AlertingErrorOrTimeout     string
-	AlertingNoDataOrNullValues string
-
-	AlertingEvaluationTimeout   time.Duration
-	AlertingNotificationTimeout time.Duration
-	AlertingMaxAttempts         int
-	AlertingMinInterval         int64
-
-	// Explore UI
-	ExploreEnabled bool
-
-	// GoDBLedger.NET URL
-	GodbledgerComUrl string
-
-	ImageUploadProvider string
 )
 
 // TODO move all global vars to this struct
@@ -118,9 +69,6 @@ type Cfg struct {
 	Raw *ini.File
 
 	// HTTP Server Settings
-	AppUrl           string
-	AppSubUrl        string
-	ServeFromSubPath bool
 	StaticRootPath   string
 	Protocol         Scheme
 
@@ -131,19 +79,6 @@ type Cfg struct {
 	BuildStamp   int64
 	IsEnterprise bool
 
-	// packaging
-	Packaging string
-
-	// Paths
-	ProvisioningPath   string
-	DataPath           string
-	BundledPluginsPath string
-
-	// Dataproxy
-	SendUserHeader bool
-
-	// DistributedCache
-	RemoteCacheOptions *RemoteCacheOptions
 }
 
 type CommandLineArgs struct {
@@ -154,25 +89,6 @@ type CommandLineArgs struct {
 
 func init() {
 	IsWindows = runtime.GOOS == "windows"
-}
-
-func parseAppUrlAndSubUrl(section *ini.Section) (string, string, error) {
-	appUrl, err := valueAsString(section, "root_url", "http://localhost:3000/")
-	if err != nil {
-		return "", "", err
-	}
-	if appUrl[len(appUrl)-1] != '/' {
-		appUrl += "/"
-	}
-
-	// Check if has app suburl.
-	url, err := url.Parse(appUrl)
-	if err != nil {
-		log.Fatalf("Invalid root_url(%s): %s", appUrl, err)
-	}
-	appSubUrl := strings.TrimSuffix(url.Path, "/")
-
-	return appUrl, appSubUrl, nil
 }
 
 func shouldRedactKey(s string) bool {
@@ -366,13 +282,6 @@ func (cfg *Cfg) loadConfiguration(args *CommandLineArgs) (*ini.File, error) {
 	// apply command line overrides
 	applyCommandLineProperties(commandLineProps, parsedFile)
 
-	// update data path and logging config
-	dataPath, err := valueAsString(parsedFile.Section("paths"), "data", "")
-	if err != nil {
-		return nil, err
-	}
-	cfg.DataPath = makeAbsolute(dataPath, HomePath)
-
 	return parsedFile, err
 }
 
@@ -429,7 +338,6 @@ func (cfg *Cfg) Load(args *CommandLineArgs) error {
 	cfg.BuildStamp = BuildStamp
 	cfg.BuildBranch = BuildBranch
 	cfg.IsEnterprise = IsEnterprise
-	cfg.Packaging = Packaging
 
 	ApplicationName = APP_NAME
 
@@ -437,81 +345,12 @@ func (cfg *Cfg) Load(args *CommandLineArgs) error {
 	if err != nil {
 		return err
 	}
-	InstanceName, err = valueAsString(iniFile.Section(""), "instance_name", "unknown_instance_name")
-	if err != nil {
-		return err
-	}
-	plugins, err := valueAsString(iniFile.Section("paths"), "plugins", "")
-	if err != nil {
-		return err
-	}
-	PluginsPath = makeAbsolute(plugins, HomePath)
-	cfg.BundledPluginsPath = makeAbsolute("plugins-bundled", HomePath)
-	provisioning, err := valueAsString(iniFile.Section("paths"), "provisioning", "")
-	if err != nil {
-		return err
-	}
-	cfg.ProvisioningPath = makeAbsolute(provisioning, HomePath)
 	if err := readServerSettings(iniFile, cfg); err != nil {
 		return err
 	}
 
-	// read data proxy settings
-	dataproxy := iniFile.Section("dataproxy")
-	DataProxyLogging = dataproxy.Key("logging").MustBool(false)
-	DataProxyTimeout = dataproxy.Key("timeout").MustInt(30)
-	cfg.SendUserHeader = dataproxy.Key("send_user_header").MustBool(false)
-
-
-	analytics := iniFile.Section("analytics")
-	ReportingEnabled = analytics.Key("reporting_enabled").MustBool(true)
-	CheckForUpdates = analytics.Key("check_for_updates").MustBool(true)
-	GoogleAnalyticsId = analytics.Key("google_analytics_ua_id").String()
-	GoogleTagManagerId = analytics.Key("google_tag_manager_id").String()
-
-	if err := readAlertingSettings(iniFile); err != nil {
-		return err
-	}
-
-	explore := iniFile.Section("explore")
-	ExploreEnabled = explore.Key("enabled").MustBool(true)
 
 	cfg.Protocol = Protocol
-
-	cfg.readLDAPConfig()
-	cfg.readSessionConfig()
-
-	// check old key  name
-	GodbledgerComUrl, err = valueAsString(iniFile.Section("godbledger_net"), "url", "")
-	if err != nil {
-		return err
-	}
-	if GodbledgerComUrl == "" {
-		GodbledgerComUrl, err = valueAsString(iniFile.Section("godbledger_com"), "url", "https://godbledger.com")
-		if err != nil {
-			return err
-		}
-	}
-
-	imageUploadingSection := iniFile.Section("external_image_storage")
-	ImageUploadProvider, err = valueAsString(imageUploadingSection, "provider", "")
-	if err != nil {
-		return err
-	}
-
-	cacheServer := iniFile.Section("remote_cache")
-	dbName, err := valueAsString(cacheServer, "type", "database")
-	if err != nil {
-		return err
-	}
-	connStr, err := valueAsString(cacheServer, "connstr", "")
-	if err != nil {
-		return err
-	}
-	cfg.RemoteCacheOptions = &RemoteCacheOptions{
-		Name:    dbName,
-		ConnStr: connStr,
-	}
 
 	return nil
 }
@@ -520,67 +359,9 @@ func valueAsString(section *ini.Section, keyName string, defaultValue string) (s
 	return section.Key(keyName).MustString(defaultValue), nil
 }
 
-type RemoteCacheOptions struct {
-	Name    string
-	ConnStr string
-}
-
-func (cfg *Cfg) readLDAPConfig() {
-	ldapSec := cfg.Raw.Section("auth.ldap")
-	LDAPConfigFile = ldapSec.Key("config_file").String()
-	LDAPSyncCron = ldapSec.Key("sync_cron").String()
-	LDAPEnabled = ldapSec.Key("enabled").MustBool(false)
-	LDAPActiveSyncEnabled = ldapSec.Key("active_sync_enabled").MustBool(false)
-	LDAPAllowSignup = ldapSec.Key("allow_sign_up").MustBool(true)
-}
-
-func (cfg *Cfg) readSessionConfig() {
-	sec, _ := cfg.Raw.GetSection("session")
-
-	if sec != nil {
-		log.Warn(
-			"[Removed] Session setting was removed in v6.2, use remote_cache option instead",
-		)
-	}
-}
-
-func readAlertingSettings(iniFile *ini.File) error {
-	alerting := iniFile.Section("alerting")
-	AlertingEnabled = alerting.Key("enabled").MustBool(true)
-	ExecuteAlerts = alerting.Key("execute_alerts").MustBool(true)
-	AlertingRenderLimit = alerting.Key("concurrent_render_limit").MustInt(5)
-	var err error
-	AlertingErrorOrTimeout, err = valueAsString(alerting, "error_or_timeout", "alerting")
-	if err != nil {
-		return err
-	}
-	AlertingNoDataOrNullValues, err = valueAsString(alerting, "nodata_or_nullvalues", "no_data")
-	if err != nil {
-		return err
-	}
-
-	evaluationTimeoutSeconds := alerting.Key("evaluation_timeout_seconds").MustInt64(30)
-	AlertingEvaluationTimeout = time.Second * time.Duration(evaluationTimeoutSeconds)
-	notificationTimeoutSeconds := alerting.Key("notification_timeout_seconds").MustInt64(30)
-	AlertingNotificationTimeout = time.Second * time.Duration(notificationTimeoutSeconds)
-	AlertingMaxAttempts = alerting.Key("max_attempts").MustInt(3)
-	AlertingMinInterval = alerting.Key("min_interval_seconds").MustInt64(1)
-
-	return nil
-}
-
 func readServerSettings(iniFile *ini.File, cfg *Cfg) error {
 	server := iniFile.Section("server")
 	var err error
-	AppUrl, AppSubUrl, err = parseAppUrlAndSubUrl(server)
-	if err != nil {
-		return err
-	}
-	ServeFromSubPath = server.Key("serve_from_sub_path").MustBool(false)
-
-	cfg.AppUrl = AppUrl
-	cfg.AppSubUrl = AppSubUrl
-	cfg.ServeFromSubPath = ServeFromSubPath
 
 	Protocol = HTTP
 	protocolStr, err := valueAsString(server, "protocol", "http")
@@ -592,20 +373,7 @@ func readServerSettings(iniFile *ini.File, cfg *Cfg) error {
 		CertFile = server.Key("cert_file").String()
 		KeyFile = server.Key("cert_key").String()
 	}
-	if protocolStr == "h2" {
-		Protocol = HTTP2
-		CertFile = server.Key("cert_file").String()
-		KeyFile = server.Key("cert_key").String()
-	}
-	if protocolStr == "socket" {
-		Protocol = SOCKET
-		SocketPath = server.Key("socket").String()
-	}
 
-	Domain, err = valueAsString(server, "domain", "localhost")
-	if err != nil {
-		return err
-	}
 	HttpAddr, err = valueAsString(server, "http_addr", DEFAULT_HTTP_ADDR)
 	if err != nil {
 		return err
@@ -614,10 +382,8 @@ func readServerSettings(iniFile *ini.File, cfg *Cfg) error {
 	if err != nil {
 		return err
 	}
-	RouterLogging = server.Key("router_logging").MustBool(false)
 
 	EnableGzip = server.Key("enable_gzip").MustBool(false)
-	EnforceDomain = server.Key("enforce_domain").MustBool(false)
 	staticRoot, err := valueAsString(server, "static_root_path", "")
 	if err != nil {
 		return err

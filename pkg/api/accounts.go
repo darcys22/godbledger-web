@@ -7,11 +7,9 @@ import (
 	"github.com/darcys22/godbledger/godbledger/ledger"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
 
-var log = logrus.WithField("prefix", "AccountController")
 
 type Results struct {
 	Results []Account `json:"results"`

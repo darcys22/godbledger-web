@@ -1,20 +1,42 @@
 package api
 
 import (
+	"path"
+
+	"github.com/gin-gonic/contrib/gzip"
 	"github.com/gin-gonic/gin"
 
 	"github.com/darcys22/godbledger-web/pkg/middleware"
-	"github.com/darcys22/godbledger-web/pkg/service"
+	"github.com/darcys22/godbledger-web/pkg/setting"
+	
+	"github.com/sirupsen/logrus"
 )
 
-var (
-	loginService service.LoginService = service.StaticLoginService()
-	jwtService   service.JWTService   = service.JWTAuthService()
-	lController  LoginController      = LoginHandler(loginService, jwtService)
-)
+var log = logrus.WithField("prefix", "API")
 
-// Register adds http routes
-func Register(r *gin.Engine) {
+func mapStatic(m *gin.Engine, dir string, prefix string) {
+	headers := func() gin.HandlerFunc {
+		return func(c *gin.Context) {
+			c.Writer.Header().Set("Cache-Control", "public, max-age=3600")
+			c.Next()
+		}
+	}
+
+	if setting.Env == setting.DEV {
+		headers = func() gin.HandlerFunc {
+			return func(c *gin.Context) {
+				c.Writer.Header().Set("Cache-Control", "max-age=0, must-revalidate, no-cache")
+				c.Next()
+			}
+		}
+	}
+
+	m.Static(prefix, path.Join(setting.StaticRootPath, dir))
+	m.Use(headers())
+}
+
+// register adds http routes
+func register(r *gin.Engine) {
 
 	// ---- Unauthenticated Views -------
 	r.GET("/logout", Logout)
@@ -52,3 +74,26 @@ func Register(r *gin.Engine) {
 	r.GET("/admin", middleware.AuthorizeJWT(), Admin)
 
 }
+
+func NewGin() *gin.Engine {
+
+	m := gin.Default()
+	m.Use(gin.Recovery())
+	if setting.EnableGzip {
+		m.Use(gzip.Gzip(gzip.DefaultCompression))
+	}
+
+	mapStatic(m, "", "public")
+	mapStatic(m, "app", "app")
+	mapStatic(m, "css", "css")
+	mapStatic(m, "img", "img")
+	mapStatic(m, "fonts", "fonts")
+
+	m.LoadHTMLGlob(path.Join(setting.StaticRootPath, "views/*.html"))
+
+	register(m)
+
+	return m
+}
+
+

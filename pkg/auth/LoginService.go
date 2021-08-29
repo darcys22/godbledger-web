@@ -1,4 +1,4 @@
-package service
+package auth
 
 import (
 	"fmt"
@@ -6,9 +6,30 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/darcys22/godbledger-web/pkg/models/sqlite"
 )
 
-//jwt service
+type LoginService interface {
+	LoginUser(email string, password string) bool
+}
+type loginInformation struct {
+	users *sqlite.UserModel
+}
+
+func StaticLoginService() LoginService {
+	database := sqlite.New("sqlite.db")
+
+	return &loginInformation{users: &database}
+}
+func (info *loginInformation) LoginUser(email string, password string) bool {
+	_, err := info.users.Authenticate(email, password)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+//JWT service
 type JWTService interface {
 	GenerateToken(email string, isUser bool) string
 	ValidateToken(token string) (*jwt.Token, error)
@@ -26,18 +47,14 @@ type jwtServices struct {
 
 //auth-jwt
 func JWTAuthService() JWTService {
-	return &jwtServices{
-		secretKey: getSecretKey(),
-		issuer:    "DarcyFinancial",
-	}
-}
-
-func getSecretKey() string {
 	secret := os.Getenv("SECRET")
 	if secret == "" {
 		secret = "secret"
 	}
-	return secret
+	return &jwtServices{
+		secretKey: secret,
+		issuer:    "DarcyFinancial",
+	}
 }
 
 func (service *jwtServices) GenerateToken(email string, isUser bool) string {

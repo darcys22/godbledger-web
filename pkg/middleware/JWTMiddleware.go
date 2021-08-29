@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/darcys22/godbledger-web/pkg/service"
+	"github.com/darcys22/godbledger-web/pkg/auth"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -29,7 +29,7 @@ func AuthorizeJWT() gin.HandlerFunc {
 			return
 		}
 		tokenString := cookie.Value
-		token, err := service.JWTAuthService().ValidateToken(tokenString)
+		token, err := auth.JWTAuthService().ValidateToken(tokenString)
 		if err != nil {
 			respondWithError(ctx, err)
 			return
