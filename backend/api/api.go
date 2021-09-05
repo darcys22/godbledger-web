@@ -62,7 +62,7 @@ func register(r *gin.Engine) {
 
 	// Reports Page
 	r.GET("/reports", middleware.AuthorizeJWT(), Reports)
-	r.POST("api/reports", middleware.AuthorizeJWT(), ReportsResults)
+	r.POST("api/reports/", middleware.AuthorizeJWT(), ReportsResults)
 
 	// Modules Page
 	r.GET("/modules", middleware.AuthorizeJWT(), Modules)

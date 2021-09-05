@@ -14,7 +14,7 @@ then run the webserver on the same host as a GoDBLedger server.
 make run
 ```
 
-This will open a webserver over port :8000 that you can navigate to with your webbrowser.
+This will open a webserver over port :3000 that you can navigate to with your webbrowser.
 
 ## Docker 
 
@@ -42,7 +42,7 @@ Godbledger comes with a `docker-compose.yml` file and some make targets to help 
         - username: `godbledger`
         - password: `password`
     - `godbledger` server is available through docker at `localhost:50051` and configured to use that mysql service as a backend
-    - `godbledger-web` server is available through docker at `localhost:8000` and configured to use that mysql service as a backend
+    - `godbledger-web` server is available through docker at `localhost:3000` and configured to use that mysql service as a backend
     - CLI tools running on your local host machine can connect with the following values in your local `config.toml` file:
 
         ```toml
