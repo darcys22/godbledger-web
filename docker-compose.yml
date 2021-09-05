@@ -49,15 +49,15 @@ services:
       - app
     environment:
       - WAIT_HOSTS=db:3306
-      - WAIT_HOSTS=db:50051
+      - WAIT_HOSTS=app:50051
       - WAIT_HOSTS_TIMEOUT=300
       - WAIT_SLEEP_INTERVAL=10
       - WAIT_HOST_CONNECT_TIMEOUT=10
     entrypoint:
       - ./wait_entrypoint.sh
-      - ./godbledger-web
+      - ./godbledger-web -config=./defaults.ini
     ports:
-      - "8000:8000"
+      - "3000:3000"
     volumes:
       - ${GDBL_DATA_DIR:-~/.ledger}/docker:/var/lib/ledger
 

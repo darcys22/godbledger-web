@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/darcys22/godbledger-web/pkg/auth"
+	"github.com/darcys22/godbledger-web/backend/auth"
 )
 
 var (

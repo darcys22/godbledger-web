@@ -74,7 +74,7 @@ func (j *GetJournals) SearchJournals() error {
 		SELECT
 			transactions.transaction_id,
 			max(splits.split_date) as jdate,
-			transactions.brief,
+			transactions.description,
 			sum(case when splits.amount > 0 then splits.amount else 0 end),
 			currency.decimals,
 			currency.NAME
@@ -280,7 +280,7 @@ func GetJournalCommand(id string) (PostJournalCommand, error) {
 			currency.decimals,
 			splits.amount,
 			split_accounts.account_id,
-			transactions.brief
+			transactions.description
 		FROM
 			splits
 			JOIN split_accounts ON splits.split_id = split_accounts.split_id

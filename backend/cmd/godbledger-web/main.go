@@ -12,8 +12,8 @@ import (
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 
-	"github.com/darcys22/godbledger-web/pkg/server"
-	"github.com/darcys22/godbledger-web/pkg/setting"
+	"github.com/darcys22/godbledger-web/backend/server"
+	"github.com/darcys22/godbledger-web/backend/setting"
 )
 
 var version = "0.0.1"

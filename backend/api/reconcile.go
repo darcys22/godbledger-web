@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	m "github.com/darcys22/godbledger-web/pkg/models"
+	m "github.com/darcys22/godbledger-web/backend/models"
 	"github.com/gin-gonic/gin"
 )
 

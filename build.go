@@ -108,18 +108,18 @@ func main() {
 			setup()
 
 		case "build-srv", "build-server":
-			doBuild("godbledger-web", "./pkg/cmd/godbledger-web", []string{})
+			doBuild("godbledger-web", "./backend/cmd/godbledger-web", []string{})
 
 		case "build":
 			for _, binary := range binaries {
-				doBuild(binary, "./pkg/cmd/"+binary, []string{})
+				doBuild(binary, "./backend/cmd/"+binary, []string{})
 			}
 
 		case "build-frontend":
 			grunt(gruntBuildArg("build")...)
 
 		case "test":
-			test("./pkg/...")
+			test("./backend/...")
 			grunt("test")
 
 		case "package":

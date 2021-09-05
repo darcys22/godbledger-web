@@ -33,6 +33,19 @@ ENV GDBL_LOG_LEVEL info
 ENV GDBL_DATA_DIR ~/.ledger
 ENV GDBL_CONFIG_FILE ~/.ledger/config.docker.toml
 COPY --from=builder /go/src/github.com/darcys22/godbledger-web/bin/linux-amd64/* ./
+COPY --from=builder /go/src/github.com/darcys22/godbledger-web/conf/* ./conf/
 
-EXPOSE 8000
-ENTRYPOINT GO111MODULE=on ./godbledger-web 
+RUN mkdir -p public && \
+  mkdir -p public/app && \
+  mkdir -p public/css && \
+  mkdir -p public/fonts && \
+  mkdir -p public/img && \
+  mkdir -p public/views
+
+COPY --from=builder /go/src/github.com/darcys22/godbledger-web/public/app/* ./public/app/
+COPY --from=builder /go/src/github.com/darcys22/godbledger-web/public/css/* ./public/css/
+COPY --from=builder /go/src/github.com/darcys22/godbledger-web/public/fonts/* ./public/fonts/
+COPY --from=builder /go/src/github.com/darcys22/godbledger-web/public/img/* ./public/img/
+COPY --from=builder /go/src/github.com/darcys22/godbledger-web/public/views/* ./public/views/
+
+EXPOSE 3000

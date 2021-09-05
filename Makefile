@@ -3,7 +3,7 @@
 .PHONY: all deps-go deps-js deps build-go build-server build-cli build-js build build-docker-dev build-docker-full lint-go revive golangci-lint test-go test-js test run run-frontend clean devenv devenv-down revive-strict protobuf help
 
 GO = GO111MODULE=on go
-GO_FILES ?= ./pkg/...
+GO_FILES ?= ./backend/...
 VERSION ?= latest
 #SH_FILES ?= $(shell find ./scripts -name *.sh)
 

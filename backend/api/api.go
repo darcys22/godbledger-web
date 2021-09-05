@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/contrib/gzip"
 	"github.com/gin-gonic/gin"
 
-	"github.com/darcys22/godbledger-web/pkg/middleware"
-	"github.com/darcys22/godbledger-web/pkg/setting"
+	"github.com/darcys22/godbledger-web/backend/middleware"
+	"github.com/darcys22/godbledger-web/backend/setting"
 	
 	"github.com/sirupsen/logrus"
 )

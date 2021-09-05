@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/darcys22/godbledger-web/pkg/api"
-	"github.com/darcys22/godbledger-web/pkg/setting"
+	"github.com/darcys22/godbledger-web/backend/api"
+	"github.com/darcys22/godbledger-web/backend/setting"
 
 	"github.com/sirupsen/logrus"
 )
@@ -104,7 +104,7 @@ func (s *Server) Run() (err error) {
 	m := api.NewGin()
 
 	listenAddr := fmt.Sprintf("%s:%s", setting.HttpAddr, setting.HttpPort)
-	log.Infof("Listen: %v://%s%s", setting.Protocol, listenAddr)
+	log.Infof("Listen: %v://%s", setting.Protocol, listenAddr)
 
 	s.httpSrv = &http.Server{
 		Addr:    listenAddr,

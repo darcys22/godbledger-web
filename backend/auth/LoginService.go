@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/darcys22/godbledger-web/pkg/models/sqlite"
+	"github.com/darcys22/godbledger-web/backend/models/sqlite"
 )
 
 type LoginService interface {
