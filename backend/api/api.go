@@ -69,9 +69,12 @@ func register(r *gin.Engine) {
 
 	// Users Page
 	r.GET("/user", middleware.AuthorizeJWT(), User)
+	r.POST("/changepassword", middleware.AuthorizeJWT(), ChangePassword)
+	r.POST("/defaultcurrency", middleware.AuthorizeJWT(), DefaultCurrency)
 
 	// Admin Page
 	r.GET("/admin", middleware.AuthorizeJWT(), Admin)
+	r.POST("/newuser", middleware.AuthorizeJWT(), NewUser)
 
 }
 

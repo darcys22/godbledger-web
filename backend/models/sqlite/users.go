@@ -94,3 +94,25 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 	// Otherwise, the password is correct. Return the user ID.
 	return id, nil
 }
+
+func (m *UserModel) NewUser(email, password string) (int, error) {
+
+	// Retrieve the id and hashed password associated with the given email. If no
+	// matching email exists, or the user is not active, we return the
+	// ErrInvalidCredentials error.
+	var id int
+	var hashedPassword []byte
+	stmt := "INSERT into uid, hashed_password FROM users WHERE email = ? AND active = TRUE"
+	row := m.DB.QueryRow(stmt, email)
+	err := row.Scan(&id, &hashedPassword)
+	if err != nil {
+		return 0, err
+	}
+	// Check whether the hashed password and plain-text password provided match. // If they don't, we return the ErrInvalidCredentials error.
+	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
+	if err != nil {
+		return 0, err
+	}
+	// Otherwise, the password is correct. Return the user ID.
+	return id, nil
+}

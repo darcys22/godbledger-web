@@ -21,8 +21,17 @@ func StaticLoginService() LoginService {
 
 	return &loginInformation{users: &database}
 }
+
 func (info *loginInformation) LoginUser(email string, password string) bool {
 	_, err := info.users.Authenticate(email, password)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func (info *loginInformation) NewUser(email string, password string) bool {
+	_, err := info.users.New(email, password)
 	if err != nil {
 		return false
 	}

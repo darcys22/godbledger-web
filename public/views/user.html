@@ -3,56 +3,49 @@
 <div class="container" id="maincontainer">
   <div class="my-3 p-3 bg-white rounded box-shadow">
 		<h2 class="border-bottom border-gray pb-2 mb-0">User Page</h2>
-		<div class="limiter">
-			<div class="wrap-login100 p-l-50 p-r-50 p-t-77 p-b-30">
-					<form class="login100-form validate-form" action="/changepass" method="post" id="changepassform">
-					<span class="login100-form-title p-b-55">
-					change password
-					</span>
-					<div class="wrap-input100 validate-input m-b-16" data-validate="password is required">
-					<input class="input100" type="password" name="old_password" placeholder="old password" style="" autocomplete="off">
-					<span class="symbol-input100">
-					<span class="lnr lnr-lock"></span>
-					</span>
-					</div>
-					<div class="wrap-input100 validate-input m-b-16" data-validate="password is required">
-					<input class="input100" type="password" name="new_password" placeholder="new password" style="" autocomplete="off">
-					<span class="symbol-input100">
-					<span class="lnr lnr-lock"></span>
-					</span>
-					</div>
-					<div class="wrap-input100 validate-input m-b-16" data-validate="password is required">
-					<input class="input100" type="password" name="conform_new_password" placeholder="confirm password" style="" autocomplete="off">
-					<span class="symbol-input100">
-					<span class="lnr lnr-lock"></span>
-					</span>
-					</div>
-					<div class="container-login100-form-btn p-t-25">
-					<button class="login100-form-btn" type="submit">
-					change password
-					</button>
-					</div>
-					</form>
+		<div class="col d-flex justify-content-center">
+			<div class="card m-5" style="width: 18rem;">
+				<div class="card-body">
+				<h5 class="card-title">Change Password</h5>
+				<div>
+				<form class="validate-form" action="/changepassword" method="post" id="changepassform">
+				<div class="input-group flex-nowrap m-1">
+				<div class="input-group-prepend">
+				<span class="input-group-text lnr lnr-lock"></span>
+				</div>
+				<input type="password" class="form-control" name="previouspassword" placeholder="Previous Password" style="" autocomplete="off">
+				</div>
+				<div class="input-group flex-nowrap m-1">
+				<div class="input-group-prepend">
+				<span class="input-group-text lnr lnr-lock"></span>
+				</div>
+				<input type="password" class="form-control" name="newpassword" placeholder="New Password" style="" autocomplete="off">
+				</div>
+				<div class="input-group flex-nowrap m-1">
+				<div class="input-group-prepend">
+				<span class="input-group-text lnr lnr-lock"></span>
+				</div>
+				<input type="password" class="form-control" name="repeatpassword" placeholder="Repeat Password" style="" autocomplete="off">
+				</div>
+				<div>
+				<button type="submit" class="btn btn-primary m-1">Create User</button>
+				</form>
+				</div>
+				</div>
+				</div>
 			</div>
-		</div>
-		<div class="limiter">
-			<div class="wrap-login100 p-l-50 p-r-50 p-t-77 p-b-30">
-					<form class="login100-form validate-form" action="/changepass" method="post" id="changepassform">
-					<span class="login100-form-title p-b-55">
-					Default Currency
-					</span>
-					<div class="wrap-input100 validate-input m-b-16">
-					<input class="input100" type="text" name="currency" placeholder="USD" style="" autocomplete="off">
-					<span class="symbol-input100">
-					<span class="lnr lnr-envelope"></span>
-					</span>
+			<div class="card m-5" style="width: 18rem;">
+				<div class="card-body">
+				<h5 class="card-title">Default Currency</h5>
+				<div>
+					<form class="validate-form" id="changedefaultcurrency">
+					<div class="input-group flex-nowrap m-1">
+					<input type="text" class="form-control" placeholder="USD" aria-label="Default Currency" aria-describedby="addon-wrapping">
 					</div>
-					<div class="container-login100-form-btn p-t-25">
-					<button class="login100-form-btn" type="submit">
-					change default currency
-					</button>
-					</div>
+					<button type="submit" class="btn btn-primary m-1">Change Default Currency</button>
 					</form>
+				</div>
+			</div>
 			</div>
 		</div>
 	</div>

@@ -46,6 +46,20 @@ func (controller *LoginController) Login(ctx *gin.Context) string {
 	return ""
 }
 
+func (controller *LoginController) NewUser(ctx *gin.Context) string {
+	var credential LoginCredentials
+	err := ctx.ShouldBind(&credential)
+	if err != nil {
+		return "no data found"
+	}
+	isUserAuthenticated := controller.loginService.NewUser(credential.Email, credential.Password)
+	if isUserAuthenticated {
+		return controller.jwtService.GenerateToken(credential.Email, true)
+
+	}
+	return ""
+}
+
 func LoginView(ctx *gin.Context) {
 	ctx.HTML(http.StatusOK, "login.view.html", nil)
 }
