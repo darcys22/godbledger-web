@@ -2,31 +2,30 @@
 {{ template "header.html" .}}
 <div class="container" id="maincontainer">
   <div class="my-3 p-3 bg-white rounded box-shadow">
-		<h2 class="border-bottom border-gray pb-2 mb-0">Admin Page</h2>
-		<div class="limiter">
-			<div class="wrap-login100 p-l-50 p-r-50 p-t-77 p-b-30">
-					<form class="login100-form validate-form" action="/newuser" method="post" id="changepassform">
-					<span class="login100-form-title p-b-55">
-					Create New User
-					</span>
-					<div class="wrap-input100 validate-input m-b-16" data-validate="Valid email is required: ex@abc.xyz">
-					<input class="input100" type="text" name="email" placeholder="Email" style="" autocomplete="off">
-					<span class="symbol-input100">
-					<span class="lnr lnr-envelope"></span>
-					</span>
+		<h3 class="border-bottom border-gray pb-2 mb-0">Admin Page</h2>
+		<div class="col d-flex justify-content-center">
+			<div class="card m-5" style="width: 18rem;">
+				<div class="card-body">
+					<h5 class="card-title">Create New User</h5>
+					<div>
+							<form class="validate-form" action="/newuser" method="post" id="changepassform">
+							<div class="input-group flex-nowrap m-1">
+								<div class="input-group-prepend">
+										<span class="input-group-text lnr lnr-envelope"></span>
+								</div>
+								<input type="text" class="form-control" placeholder="Email" aria-label="Username" aria-describedby="addon-wrapping">
+							</div>
+							<div class="input-group flex-nowrap m-1">
+								<div class="input-group-prepend">
+									<span class="input-group-text lnr lnr-lock"></span>
+								</div>
+								<input type="password" class="form-control" name="password" placeholder="Password" style="" autocomplete="off">
+							</div>
+							<div>
+							<button type="submit" class="btn btn-primary m-1">Create User</button>
+							</form>
 					</div>
-					<div class="wrap-input100 validate-input m-b-16" data-validate="password is required">
-					<input class="input100" type="password" name="password" placeholder="Password" style="" autocomplete="off">
-					<span class="symbol-input100">
-					<span class="lnr lnr-lock"></span>
-					</span>
-					</div>
-					<div class="container-login100-form-btn p-t-25">
-					<button class="login100-form-btn" type="submit">
-					Create User
-					</button>
-					</div>
-					</form>
+				</div>
 			</div>
 		</div>
 	</div>
