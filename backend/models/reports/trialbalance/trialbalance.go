@@ -1,4 +1,4 @@
-package models
+package trialbalance
 
 import (
 	"flag"
@@ -6,11 +6,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/darcys22/godbledger-web/backend/models/reports"
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/ledger"
 
 	"github.com/urfave/cli/v2"
+	"github.com/sirupsen/logrus"
 )
+
+var log = logrus.WithField("prefix", "Reports-Trial-Balance")
 
 // Trial Balance
 var trialBalanceColumns = map[string]string{
@@ -20,72 +24,7 @@ var trialBalanceColumns = map[string]string{
 	"Currency":     "currency.name",
 }
 
-var decimalsCache = map[string]int{
-	"USDc": 2,
-}
-
-type tbProcessor struct {
-	columns []string
-	input map[string]string
-	decimals int
-}
-
-func processRow(ledger ledger, columns []string, inputs []string) (error, []string) {
-	var rowProcessor = tbProcessor{columns,map[string]string{},0}
-	for i, column := range columns {
-
-		log.Debug(column)
-		switch column {
-		case "Currency":
-			if val, ok := decimalsCache[inputs[i]]; ok {
-				log.Debug("found currency ", inputs[i])
-					rowProcessor.decimals = val
-			} else {
-				log.Debug("not found currency ", inputs[i])
-				querycurrency := "SELECT decimals FROM currencies where name = ?"
-				rows, err := ledger.LedgerDb.Query(querycurrency, inputs[i])
-				if err != nil {
-					return fmt.Errorf("Could not query database (%v)", err), nil
-				}
-				defer rows.Close()
-				for rows.Next() {
-					if err := rows.Scan(&rowProcessor.decimals); err != nil {
-						return fmt.Errorf("Could not scan rows of query (%v)", err), nil
-					}
-					rowProcessor.input[column] = inputs[i]
-				}
-				if rows.Err() != nil {
-					return fmt.Errorf("rows errored with (%v)", rows.Err()), nil
-				}
-			}
-		default:
-			rowProcessor.input[column] = inputs[i]
-		}
-	}
-
-	var result []string
-
-	for i, column := range columns {
-		switch column {
-		case "Amount":
-			if rowProcessor.decimals > 0 {
-				atomicAmount := strings.TrimSpace(inputs[i])
-				index := len(atomicAmount) - rowProcessor.decimals
-				decimalAmount := atomicAmount[:index] + "." + atomicAmount[index:]
-				result = append(result, decimalAmount)
-			} else {
-				result = append(result, inputs[i])
-			}
-
-		default:
-			result = append(result, inputs[i])
-		}
-	}
-
-	return nil, result
-}
-
-func TrialBalanceReport(req ReportsRequest) (error, *ReportResult) {
+func TrialBalanceReport(req reports.ReportsRequest) (error, *reports.ReportResult) {
 	set := flag.NewFlagSet("getJournalListing", 0)
 	set.String("config", "", "doc")
 
@@ -135,7 +74,7 @@ GROUP  BY split_accounts.account_id, splits.currency
 	log.Trace(queryDB.String())
 	rows, err := ledger.LedgerDb.Query(queryDB.String(), queryDateStart, queryDateEnd)
 
-	var r ReportResult
+	var r reports.ReportResult
 	r.Options = req.Reports[0].Options
 	r.Columns = req.Reports[0].Columns
 
@@ -153,11 +92,11 @@ GROUP  BY split_accounts.account_id, splits.currency
 		if err := rows.Scan(pointers...); err != nil {
 			return fmt.Errorf("Could not scan rows of query (%v)", err), nil
 		}
-		err, processedRow := processRow(&ledger, req.Reports[0].Columns, t)
+		err, processedRow := reports.ProcessRows(ledger, req.Reports[0].Columns, t)
 		if err != nil {
 			return fmt.Errorf("Could not process rows of query (%v)", err), nil
 		}
-		r.Result = append(r.Result, ReportLine{processedRow})
+		r.Result = append(r.Result, reports.ReportLine{processedRow})
 	}
 	if rows.Err() != nil {
 		return fmt.Errorf("rows errored with (%v)", rows.Err()), nil

@@ -1,4 +1,4 @@
-package models
+package generalledger
 
 import (
 	//"context"
@@ -10,11 +10,15 @@ import (
 	//"io/ioutil"
 	"time"
 
+	"github.com/darcys22/godbledger-web/backend/models/reports"
 	"github.com/darcys22/godbledger/godbledger/cmd"
 	"github.com/darcys22/godbledger/godbledger/ledger"
 
 	"github.com/urfave/cli/v2"
+	"github.com/sirupsen/logrus"
 )
+
+var log = logrus.WithField("prefix", "Reports-General-Ledger")
 
 // General Ledger
 var GeneralLedgerColumns = map[string]string{
@@ -23,13 +27,12 @@ var GeneralLedgerColumns = map[string]string{
 	"Description":  "splits.description",
 	"Currency":     "splits.currency",
 	"Decimals":     "currency.decimals",
-	//"Amount":       "splits.amount / POWER(10,(SELECT decimals from currency where name = splits.currency))",
 	"Amount":       "splits.amount",
 	"AtomicAmount": "splits.amount",
 	"Account":      "split_accounts.account_id",
 }
 
-func GeneralLedgerReport(req ReportsRequest) (error, *ReportResult) {
+func GeneralLedgerReport(req reports.ReportsRequest) (error, *reports.ReportResult) {
 	set := flag.NewFlagSet("getJournalListing", 0)
 	set.String("config", "", "doc")
 
@@ -91,7 +94,7 @@ func GeneralLedgerReport(req ReportsRequest) (error, *ReportResult) {
 	}
 	defer rows.Close()
 
-	var r ReportResult
+	var r reports.ReportResult
 	r.Options = req.Reports[0].Options
 	r.Columns = req.Reports[0].Columns
 
@@ -109,9 +112,11 @@ func GeneralLedgerReport(req ReportsRequest) (error, *ReportResult) {
 		if err := rows.Scan(pointers...); err != nil {
 			return fmt.Errorf("Could not scan rows of query (%v)", err), nil
 		}
-		var l ReportLine
-		l.Row = t
-		r.Result = append(r.Result, l)
+		err, processedRow := reports.ProcessRows(ledger, req.Reports[0].Columns, t)
+		if err != nil {
+			return fmt.Errorf("Could not process rows of query (%v)", err), nil
+		}
+		r.Result = append(r.Result, reports.ReportLine{processedRow})
 	}
 	if rows.Err() != nil {
 		return fmt.Errorf("rows errored with (%v)", rows.Err()), nil

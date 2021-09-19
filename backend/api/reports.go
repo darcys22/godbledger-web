@@ -1,13 +1,14 @@
 package api
 
 import (
-	m "github.com/darcys22/godbledger-web/backend/models/reports"
+	m "github.com/darcys22/godbledger-web/backend/models"
+	"github.com/darcys22/godbledger-web/backend/models/reports"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func ReportsResults(c *gin.Context) {
-	var request m.ReportsRequest
+	var request reports.ReportsRequest
 
 	if err := c.BindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
