@@ -71,6 +71,7 @@ type Cfg struct {
 	// HTTP Server Settings
 	StaticRootPath   string
 	Protocol         Scheme
+	Domain           string
 
 	// build
 	BuildVersion string
@@ -380,6 +381,11 @@ func readServerSettings(iniFile *ini.File, cfg *Cfg) error {
 		return err
 	}
 	HttpPort, err = valueAsString(server, "http_port", "3000")
+	if err != nil {
+		return err
+	}
+
+	cfg.Domain, err = valueAsString(server, "domain", "localhost")
 	if err != nil {
 		return err
 	}

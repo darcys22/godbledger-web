@@ -131,8 +131,8 @@ func (s *Server) Run() (err error) {
 			log.Fatalf("listen: %s\n", err)
 		}
 	case setting.HTTPS:
-		//if err := autotls.Run(m, listenAddr); err != nil && err != http.ErrServerClosed {
-		if err := autotls.Run(m, "sn8.darcyfinancial.com"); err != nil && err != http.ErrServerClosed {
+		log.Infof("Listen securely on: %s", s.cfg.Domain)
+		if err := autotls.Run(m, s.cfg.Domain); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
 	default:
