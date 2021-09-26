@@ -57,7 +57,8 @@ services:
       - ./wait_entrypoint.sh
       - ./godbledger-web -config=./defaults.ini
     ports:
-      - "3000:3000"
+      - "80:3000"
+      - "443:443"
     volumes:
       - ${GDBL_DATA_DIR:-~/.ledger}/docker:/var/lib/ledger
 
