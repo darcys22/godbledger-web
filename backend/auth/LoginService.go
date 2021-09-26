@@ -31,10 +31,10 @@ func (info *loginInformation) LoginUser(email string, password string) bool {
 }
 
 func (info *loginInformation) NewUser(email string, password string) bool {
-	_, err := info.users.New(email, password)
-	if err != nil {
-		return false
-	}
+	//_, err := info.users.New(email, password)
+	//if err != nil {
+		//return false
+	//}
 	return true
 }
 

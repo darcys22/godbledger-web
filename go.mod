@@ -6,6 +6,7 @@ require (
 	github.com/Songmu/retry v0.1.0
 	github.com/darcys22/godbledger v0.6.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gin-gonic/autotls v0.0.3 // indirect
 	github.com/gin-gonic/contrib v0.0.0-20201005132743-ca038bbf2944
 	github.com/gin-gonic/gin v1.6.3
 	github.com/google/go-github v17.0.0+incompatible

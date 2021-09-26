@@ -52,11 +52,11 @@ func (controller *LoginController) NewUser(ctx *gin.Context) string {
 	if err != nil {
 		return "no data found"
 	}
-	isUserAuthenticated := controller.loginService.NewUser(credential.Email, credential.Password)
-	if isUserAuthenticated {
-		return controller.jwtService.GenerateToken(credential.Email, true)
+	//isUserAuthenticated := controller.loginService.NewUser(credential.Email, credential.Password)
+	//if isUserAuthenticated {
+		//return controller.jwtService.GenerateToken(credential.Email, true)
 
-	}
+	//}
 	return ""
 }
 

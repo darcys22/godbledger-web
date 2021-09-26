@@ -34,6 +34,7 @@ ENV GDBL_DATA_DIR ~/.ledger
 ENV GDBL_CONFIG_FILE ~/.ledger/config.docker.toml
 COPY --from=builder /go/src/github.com/darcys22/godbledger-web/bin/linux-amd64/* ./
 COPY --from=builder /go/src/github.com/darcys22/godbledger-web/conf/* ./conf/
+RUN sed -i 's/protocol = http/protocol = https/g' ./conf/defaults.ini
 
 RUN mkdir -p public && \
   mkdir -p public/app && \

@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	"github.com/gin-gonic/autotls"
 
 	"github.com/darcys22/godbledger-web/backend/api"
 	"github.com/darcys22/godbledger-web/backend/setting"
@@ -130,7 +131,8 @@ func (s *Server) Run() (err error) {
 			log.Fatalf("listen: %s\n", err)
 		}
 	case setting.HTTPS:
-		if err := s.httpSrv.ListenAndServeTLS(setting.CertFile, setting.KeyFile); err != nil && err != http.ErrServerClosed {
+		//if err := autotls.Run(m, listenAddr); err != nil && err != http.ErrServerClosed {
+		if err := autotls.Run(m, "play.godbledger.com"); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
 	default:
