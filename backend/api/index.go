@@ -17,6 +17,10 @@ func Reconcile(c *gin.Context) {
 	c.HTML(http.StatusOK, "reconcile.html", nil)
 }
 
+func Accounts(c *gin.Context) {
+	c.HTML(http.StatusOK, "accounts.html", nil)
+}
+
 func Modules(c *gin.Context) {
 	c.HTML(http.StatusOK, "modules.html", nil)
 }

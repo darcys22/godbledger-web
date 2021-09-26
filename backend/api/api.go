@@ -49,11 +49,18 @@ func register(r *gin.Engine) {
 	r.GET("/", middleware.AuthorizeJWT(), Index)
 	r.GET("/api/journals", middleware.AuthorizeJWT(), GetJournals)
 	r.POST("/api/journals", middleware.AuthorizeJWT(), PostJournal)
-	r.DELETE("/api/journals/:id", middleware.AuthorizeJWT(), DeleteJournal)
 	r.GET("/api/journals/:id", middleware.AuthorizeJWT(), GetJournal)
 	r.POST("/api/journals/:id", middleware.AuthorizeJWT(), EditJournal)
+	r.DELETE("/api/journals/:id", middleware.AuthorizeJWT(), DeleteJournal)
 
-	r.GET("/api/accounts/list", middleware.AuthorizeJWT(), GetAccountListing)
+	// Chart of Accounts Page
+	r.GET("/accounts", middleware.AuthorizeJWT(), Accounts)
+	r.GET("/api/accounts", middleware.AuthorizeJWT(), GetAccounts)
+	r.POST("/api/accounts", middleware.AuthorizeJWT(), PostAccount)
+	r.GET("/api/accounts/:id", middleware.AuthorizeJWT(), GetAccount)
+	r.DELETE("/api/accounts/:id", middleware.AuthorizeJWT(), DeleteAccount)
+	r.POST("/api/accounts/tags", middleware.AuthorizeJWT(), PostAccountTag)
+	r.DELETE("/api/accounts/:account/tags/:tagid", middleware.AuthorizeJWT(), DeleteAccountTag)
 
 	// Reconciliation Page
 	r.GET("/reconcile", middleware.AuthorizeJWT(), Reconcile)
