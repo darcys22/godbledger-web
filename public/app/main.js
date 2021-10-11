@@ -183,6 +183,11 @@ $(document).ready(function() {
     });
 });
 
+$('input[name="date"]').on("blur", function(){
+  dt = Date.create($(this).val()).format('{yyyy}-{MM}-{dd}')
+  $(this).val(dt)
+});
+
 $('#addJournal').on('submit', function (e) {
   if (e.isDefaultPrevented()) {
     // handle the invalid form...
@@ -239,7 +244,6 @@ function editJournal(index,id) {
     fetch('/api/journals/'+id)
     .then(response => response.json())
     .then(data => {
-      console.log(JSON.stringify(data));
       $('#addJournal')[0].reset();
       journal = new Journal();
       clearJournalDateDescription();
@@ -573,9 +577,7 @@ function formatformaldate(element) {
   return moment(element).format('YYYY-MM-DD');
 }
 function moneyNumber(x, decimals = 0) {
-  console.log(x)
   xstr = x.toString();
-  console.log(xstr)
   truncstr = xstr.substring(0, xstr.length - decimals);
   truncstrcomma = truncstr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   if (decimals > 0) {
@@ -630,6 +632,7 @@ const copyToClipboard = str => {
 };
 
 function main() {
+  Date.setLocale("en-AU");
   $('#addJournal')[0].reset();
   updateTotal()
   $('#saveJournalButton').prop('disabled', true);
