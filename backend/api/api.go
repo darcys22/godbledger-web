@@ -59,8 +59,8 @@ func register(r *gin.Engine) {
 	r.POST("/api/accounts", middleware.AuthorizeJWT(), PostAccount)
 	r.GET("/api/accounts/:id", middleware.AuthorizeJWT(), GetAccount)
 	r.DELETE("/api/accounts/:id", middleware.AuthorizeJWT(), DeleteAccount)
-	r.POST("/api/accounts/tags", middleware.AuthorizeJWT(), PostAccountTag)
-	r.DELETE("/api/accounts/:account/tags/:tagid", middleware.AuthorizeJWT(), DeleteAccountTag)
+	r.POST("/api/accounttags", middleware.AuthorizeJWT(), PostAccountTag)
+	r.DELETE("/api/accounttags/:account/:tagid", middleware.AuthorizeJWT(), DeleteAccountTag)
 
 	// Reconciliation Page
 	r.GET("/reconcile", middleware.AuthorizeJWT(), Reconcile)

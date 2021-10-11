@@ -177,7 +177,7 @@ $(document).ready(function() {
       theme: "bootstrap",
       placeholder: "Select Account",
       ajax: {
-        url: '/api/accounts/list',
+        url: '/api/accounts',
         dataType: 'json',
       }
     });
@@ -403,7 +403,7 @@ function addLineItem(index) {
     theme: "bootstrap",
     placeholder: "Select Account",
     ajax: {
-      url: '/api/accounts/list',
+      url: '/api/accounts',
       dataType: 'json',
     }
   }).on("change",function(){

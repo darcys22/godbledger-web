@@ -11,13 +11,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// Get External Accounts
-
-type Account struct {
-	ID   int    `json:"id"`
-	Text string `json:"text"`
-}
-
 type ExternalAccountsResult struct {
 	Results []Account `json:"results"`
 }

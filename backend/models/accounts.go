@@ -2,13 +2,13 @@ package models
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
+	//"crypto/tls"
+	//"crypto/x509"
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"math"
-	"strconv"
+	//"io/ioutil"
+	//"math"
+	//"strconv"
 	"time"
 
 	"github.com/darcys22/godbledger/godbledger/cmd"
@@ -16,9 +16,9 @@ import (
 	pb "github.com/darcys22/godbledger/proto/transaction"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
+	//"google.golang.org/grpc/credentials"
 
-	"github.com/sirupsen/logrus"
+	//"github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 )
 
@@ -28,17 +28,17 @@ type Account struct {
 }
 
 type PostAccountCommand struct {
-	Name string     `json:"_name" binding:"required"`
-	Tags []string `json:"_tags"`
+	Name string     `json:"name" binding:"required"`
+	Tags []string `json:"tags"`
 }
 
 type GetAccounts struct {
 	Results []Account `json:"results"`
 }
 
-func NewAccountssListing() *GetAccounts {
+func NewAccountsListing() *GetAccounts {
 	accounts := []Account{}
-	return &GetJournals{accounts}
+	return &GetAccounts{accounts}
 }
 
 func (a *GetAccounts) SearchAccounts() error {
@@ -90,120 +90,94 @@ func (a *GetAccounts) SearchAccounts() error {
 
 func (j *PostAccountCommand) Save() error {
 	log.Trace("Calling Save Account function")
-	//set := flag.NewFlagSet("PostAccount", 0)
-	//set.String("config", "", "doc")
+	set := flag.NewFlagSet("PostAccount", 0)
+	set.String("config", "", "doc")
 
-	//ctx := cli.NewContext(nil, set, nil)
-	//err, cfg := cmd.MakeConfig(ctx)
-	//if err != nil {
-		//return fmt.Errorf("Could not make config (%v)", err)
-	//}
+	ctx := cli.NewContext(nil, set, nil)
+	err, cfg := cmd.MakeConfig(ctx)
+	if err != nil {
+		return fmt.Errorf("Could not make config (%v)", err)
+	}
 
-	//address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
-	//log.WithField("address", address).Info("GRPC Dialing on port")
-	//opts := []grpc.DialOption{}
+	address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
+	log.WithField("address", address).Info("GRPC Dialing on port")
+	opts := []grpc.DialOption{}
 
-	//if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
-		//tlsCredentials, err := loadTLSCredentials(cfg)
-		//if err != nil {
-			//return fmt.Errorf("Could not load TLS credentials (%v)", err)
-		//}
-		//opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
-	//} else {
-		//opts = append(opts, grpc.WithInsecure())
-	//}
+	if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
+		tlsCredentials, err := loadTLSCredentials(cfg)
+		if err != nil {
+			return fmt.Errorf("Could not load TLS credentials (%v)", err)
+		}
+		opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
+	} else {
+		opts = append(opts, grpc.WithInsecure())
+	}
 
-	//conn, err := grpc.Dial(address, opts...)
-	//if err != nil {
-		//return fmt.Errorf("Could not connect to GRPC (%v)", err)
-	//}
-	//defer conn.Close()
-	//client := pb.NewTransactorClient(conn)
+	conn, err := grpc.Dial(address, opts...)
+	if err != nil {
+		return fmt.Errorf("Could not connect to GRPC (%v)", err)
+	}
+	defer conn.Close()
+	client := pb.NewTransactorClient(conn)
 
-	//ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second)
-	//defer cancel()
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 
-	//transactionLines := make([]*pb.LineItem, j.LineItemCount)
-
-	//layout := "2006-01-02T15:04:05-07:00"
-	//t, err := time.Parse(layout, j.Date)
-	//if err != nil {
-		//return fmt.Errorf("Could not parse date", err)
-	//}
-
-	//for i, accChange := range j.LineItems {
-
-		////TODO sean get this from somewhere
-		//decimals := float64(currenciesDecimals["USD"])
-		//dollarsAmount, err := strconv.ParseFloat(accChange.Amount, 64)
-		//if err != nil {
-			//return fmt.Errorf("Could not process the amount as a float (%v)", err)
-		//}
-		//amount := int64(dollarsAmount * math.Pow(10, decimals))
-		//transactionLines[i] = &pb.LineItem{
-			//Accountname: accChange.Account,
-			//Description: accChange.Description,
-			//Amount:      amount,
-			//Currency:    accChange.Currency,
-		//}
-	//}
-
-	//req := &pb.TransactionRequest{
-		//Date:        t.Format("2006-01-02"),
-		//Description: j.Narration,
-		//Lines:       transactionLines,
-	//}
-	//r, err := client.AddTransaction(ctxTimeout, req)
-	//if err != nil {
-		//return fmt.Errorf("Could not call Add Transaction Method (%v)", err)
-	//}
-	//log.Infof("Add Transaction Response: %s", r.GetMessage())
+	req := &pb.AccountTagRequest{
+		Account:  j.Name,
+		Tag:      j.Tags,
+	}
+	r, err := client.AddAccount(ctxTimeout, req)
+	if err != nil {
+		return fmt.Errorf("Could not call Add Account Method (%v)", err)
+	}
+	log.Infof("Add Account Response: %s", r.GetMessage())
 	return nil
 }
 
 func DeleteAccountCommand(id string) error {
 	log.Trace("Calling Delete Account function")
-	//set := flag.NewFlagSet("DeleteAccount", 0)
-	//set.String("config", "", "doc")
+	set := flag.NewFlagSet("DeleteAccount", 0)
+	set.String("config", "", "doc")
 
-	//ctx := cli.NewContext(nil, set, nil)
-	//err, cfg := cmd.MakeConfig(ctx)
-	//if err != nil {
-		//return fmt.Errorf("Could not make config (%v)", err)
-	//}
+	ctx := cli.NewContext(nil, set, nil)
+	err, cfg := cmd.MakeConfig(ctx)
+	if err != nil {
+		return fmt.Errorf("Could not make config (%v)", err)
+	}
 
-	//address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
-	//log.WithField("address", address).Info("GRPC Dialing on port")
-	//opts := []grpc.DialOption{}
+	address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
+	log.WithField("address", address).Info("GRPC Dialing on port")
+	opts := []grpc.DialOption{}
 
-	//if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
-		//tlsCredentials, err := loadTLSCredentials(cfg)
-		//if err != nil {
-			//return fmt.Errorf("Could not load TLS credentials (%v)", err)
-		//}
-		//opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
-	//} else {
-		//opts = append(opts, grpc.WithInsecure())
-	//}
+	if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
+		tlsCredentials, err := loadTLSCredentials(cfg)
+		if err != nil {
+			return fmt.Errorf("Could not load TLS credentials (%v)", err)
+		}
+		opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
+	} else {
+		opts = append(opts, grpc.WithInsecure())
+	}
 
-	//conn, err := grpc.Dial(address, opts...)
-	//if err != nil {
-		//return fmt.Errorf("Could not connect to GRPC (%v)", err)
-	//}
-	//defer conn.Close()
-	//client := pb.NewTransactorClient(conn)
+	conn, err := grpc.Dial(address, opts...)
+	if err != nil {
+		return fmt.Errorf("Could not connect to GRPC (%v)", err)
+	}
+	defer conn.Close()
+	client := pb.NewTransactorClient(conn)
 
-	//ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second)
-	//defer cancel()
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 
-	//req := &pb.DeleteRequest{
-		//Identifier: id,
-	//}
-	//r, err := client.DeleteTransaction(ctxTimeout, req)
-	//if err != nil {
-		//return fmt.Errorf("Could not call Delete Transaction Method (%v)", err)
-	//}
-	//log.Infof("Delete Transaction Response: %s", r.GetMessage())
+	req := &pb.DeleteAccountTagRequest{
+		Account: id,
+	}
+	r, err := client.DeleteAccount(ctxTimeout, req)
+	if err != nil {
+		return fmt.Errorf("Could not call Delete Transaction Method (%v)", err)
+	}
+	log.Infof("Delete Transaction Response: %s", r.GetMessage())
 
 	return nil
 }

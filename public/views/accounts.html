@@ -3,23 +3,26 @@
 		<section class="jumbotron text-center">
 			<div class="container">
 				<h2>Chart of Accounts</h2>
-        <div class="container">
+        <div class="container mt-5">
           <div class="row justify-content-md-center">
+            <form id="addAccount">
             <div class="col-12 col-md-3"></div>
-            <div class="col-sm">
-              <select class="selectaccount" style="width: 100%, height: 100%"></select>
+            <div class="form-group">
+              <input type="text" class="form-control" id="inputAccount" name="account" aria-describedby="accountHelp" placeholder="Enter new account">
+              <small id="accountHelp" class="form-text text-muted">Enter a new account in the above input and click add to add to your chart of accounts</small>
             </div>
             <div class="col-sm">
-              <button type="button" id="refresh" class="btn btn-secondary my-w" data-toggle="tooltip" title="Refresh the table to view journals" >
-                Refresh Table
+              <button type="submit" id="add" class="btn btn-primary my-w" data-toggle="tooltip" title="Add account button" >
+                Add Account
               </button>
             </div>
             <div class="col-12 col-md-3"></div>
+          </form>
           </div>
         </div>
 			</div>
 		</section>
-    <div class="container" id="maincontainer">Select an account to view unreconciled transactions</div>
+    <div class="container" id="maincontainer">Loading Chart of Accounts...</div>
 
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/b-print-1.7.1/fh-3.1.9/datatables.min.css"/>
     <link rel='shortcut icon' type='image/x-icon' href='img/favicon.ico'/>
@@ -29,6 +32,6 @@
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/b-print-1.7.1/fh-3.1.9/datatables.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
-    <script type="text/javascript" src="app/coa.js"></script> 
+    <script type="text/javascript" src="app/accounts.js"></script> 
   <!--Embed the footer.html template at this location-->
   {{ template "footer.html" .}}
