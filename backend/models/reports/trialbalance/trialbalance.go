@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/darcys22/godbledger-web/backend/models/reports"
 	"github.com/darcys22/godbledger/godbledger/cmd"
@@ -39,8 +38,15 @@ func TrialBalanceReport(req reports.ReportsRequest) (error, *reports.ReportResul
 		return fmt.Errorf("Could not make new ledger (%v)", err), nil
 	}
 
-	queryDateStart := time.Now().Add(time.Hour * 24 * 365 * -100)
-	queryDateEnd := time.Now().Add(time.Hour * 24 * 365 * 100)
+	queryDateStart, err := reports.ProcessDate(req.Reports[0].Options.StartDate)
+	if err != nil {
+		return fmt.Errorf("Could not process start date (%v)", err), nil
+	}
+	queryDateEnd, err := reports.ProcessDate(req.Reports[0].Options.EndDate)
+	if err != nil {
+		return fmt.Errorf("Could not process start date (%v)", err), nil
+	}
+
 	queryDB := strings.Builder{}
 	queryDB.WriteString("SELECT\n")
 

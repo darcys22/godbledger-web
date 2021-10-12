@@ -2,6 +2,7 @@ package reports
 
 import (
 	"fmt"
+	"time"
 	"strings"
 
 	"github.com/darcys22/godbledger/godbledger/ledger"
@@ -99,4 +100,9 @@ func ProcessRows(ledger *ledger.Ledger, columns []string, inputs []string) (erro
 	}
 
 	return nil, result
+}
+
+func ProcessDate(time_str string) (time.Time, error) {
+	layout := "2006-01-02"
+	return time.Parse(layout, time_str)
 }
