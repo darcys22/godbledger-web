@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/contrib/gzip"
 	"github.com/gin-gonic/gin"
 
-	"github.com/darcys22/godbledger-web/backend/middleware"
 	"github.com/darcys22/godbledger-web/backend/setting"
 	
 	"github.com/sirupsen/logrus"
@@ -46,42 +45,43 @@ func register(r *gin.Engine) {
 	// ---- Authenticated Views ---------
 
 	// Main/Journal Entry Page
-	r.GET("/", middleware.AuthorizeJWT(), Index)
-	r.GET("/api/journals", middleware.AuthorizeJWT(), GetJournals)
-	r.POST("/api/journals", middleware.AuthorizeJWT(), PostJournal)
-	r.GET("/api/journals/:id", middleware.AuthorizeJWT(), GetJournal)
-	r.POST("/api/journals/:id", middleware.AuthorizeJWT(), EditJournal)
-	r.DELETE("/api/journals/:id", middleware.AuthorizeJWT(), DeleteJournal)
+	r.GET("/", AuthorizeJWT(), Index)
+	r.GET("/api/journals", AuthorizeJWT(), GetJournals)
+	r.POST("/api/journals", AuthorizeJWT(), PostJournal)
+	r.GET("/api/journals/:id", AuthorizeJWT(), GetJournal)
+	r.POST("/api/journals/:id", AuthorizeJWT(), EditJournal)
+	r.DELETE("/api/journals/:id", AuthorizeJWT(), DeleteJournal)
 
 	// Chart of Accounts Page
-	r.GET("/accounts", middleware.AuthorizeJWT(), Accounts)
-	r.GET("/api/accounts", middleware.AuthorizeJWT(), GetAccounts)
-	r.POST("/api/accounts", middleware.AuthorizeJWT(), PostAccount)
-	r.GET("/api/accounts/:id", middleware.AuthorizeJWT(), GetAccount)
-	r.DELETE("/api/accounts/:id", middleware.AuthorizeJWT(), DeleteAccount)
-	r.POST("/api/accounttags", middleware.AuthorizeJWT(), PostAccountTag)
-	r.DELETE("/api/accounttags/:account/:tagid", middleware.AuthorizeJWT(), DeleteAccountTag)
+	r.GET("/accounts", AuthorizeJWT(), Accounts)
+	r.GET("/api/accounts", AuthorizeJWT(), GetAccounts)
+	r.POST("/api/accounts", AuthorizeJWT(), PostAccount)
+	r.GET("/api/accounts/:id", AuthorizeJWT(), GetAccount)
+	r.DELETE("/api/accounts/:id", AuthorizeJWT(), DeleteAccount)
+	r.POST("/api/accounttags", AuthorizeJWT(), PostAccountTag)
+	r.DELETE("/api/accounttags/:account/:tagid", AuthorizeJWT(), DeleteAccountTag)
 
 	// Reconciliation Page
-	r.GET("/reconcile", middleware.AuthorizeJWT(), Reconcile)
-	r.GET("/api/reconcile/listexternalaccounts", middleware.AuthorizeJWT(), GetExternalAccountListing)
-	r.POST("/api/reconcile/listunreconciledtransactions", middleware.AuthorizeJWT(), GetUnreconciledTransactions)
+	r.GET("/reconcile", AuthorizeJWT(), Reconcile)
+	r.GET("/api/reconcile/listexternalaccounts", AuthorizeJWT(), GetExternalAccountListing)
+	r.POST("/api/reconcile/listunreconciledtransactions", AuthorizeJWT(), GetUnreconciledTransactions)
 
 	// Reports Page
-	r.GET("/reports", middleware.AuthorizeJWT(), Reports)
-	r.POST("api/reports/", middleware.AuthorizeJWT(), ReportsResults)
+	r.GET("/reports", AuthorizeJWT(), Reports)
+	r.POST("api/reports/", AuthorizeJWT(), ReportsResults)
 
 	// Modules Page
-	r.GET("/modules", middleware.AuthorizeJWT(), Modules)
+	r.GET("/modules", AuthorizeJWT(), Modules)
 
 	// Users Page
-	r.GET("/user", middleware.AuthorizeJWT(), User)
-	r.POST("/changepassword", middleware.AuthorizeJWT(), ChangePassword)
-	r.POST("/defaultcurrency", middleware.AuthorizeJWT(), DefaultCurrency)
+	r.GET("/user", AuthorizeJWT(), User)
+	r.GET("/api/user/settings", AuthorizeJWT(), GetUserSettings)
+	r.POST("/api/user/changepassword", AuthorizeJWT(), ChangePassword)
+	r.POST("/api/user/defaultcurrency", AuthorizeJWT(), DefaultCurrency)
 
 	// Admin Page
-	r.GET("/admin", middleware.AuthorizeJWT(), Admin)
-	r.POST("/newuser", middleware.AuthorizeJWT(), NewUser)
+	r.GET("/admin", AuthorizeJWT(), Admin)
+	r.POST("/api/newuser", AuthorizeJWT(), NewUser)
 
 }
 

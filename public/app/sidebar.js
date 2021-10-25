@@ -2,6 +2,7 @@ let sidebar = document.querySelector(".sidebar");
 let closeBtn = document.querySelector("#btn");
 let searchBtn = document.querySelector(".bx-search");
 
+
 closeBtn.addEventListener("click", ()=>{
   sidebar.classList.toggle("open");
   menuBtnChange();//calling the function(optional)
@@ -20,4 +21,22 @@ function menuBtnChange() {
    closeBtn.classList.replace("bx-menu-alt-right","bx-menu");//replacing the iocns class
  }
 }
+
+fetch('/api/user/settings', {
+  method: 'GET',
+  headers: {
+    'Content-Type': 'application/json;charset=utf-8'
+  }
+})
+.then(response => response.json())
+.then(data => {
+  let name = document.querySelector(".name");
+  let role = document.querySelector(".job");
+  window.user = data
+  name.innerText = data.name
+  role.innerText = data.role
+  if (typeof Date.setLocale !== 'undefined') {
+    Date.setLocale(data.datelocale);
+  }
+})
 

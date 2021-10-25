@@ -2,8 +2,7 @@ class LineItem {
     constructor() {
       this._date = moment().format();
       this._description = "";
-      //TODO sean this needs to be editable
-      this._currency= "USD";
+      this._currency= window.user.defaultcurrency;
       this._account = "";
       this._amount = 0;
     }
@@ -632,7 +631,6 @@ const copyToClipboard = str => {
 };
 
 function main() {
-  Date.setLocale("en-AU");
   $('#addJournal')[0].reset();
   updateTotal()
   $('#saveJournalButton').prop('disabled', true);

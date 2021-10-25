@@ -42,6 +42,7 @@ func (info *loginInformation) NewUser(email string, password string) bool {
 type JWTService interface {
 	GenerateToken(email string, isUser bool) string
 	ValidateToken(token string) (*jwt.Token, error)
+	ParseUser(token string) (string, error)
 }
 type authCustomClaims struct {
 	Name string `json:"name"`
@@ -89,10 +90,29 @@ func (service *jwtServices) GenerateToken(email string, isUser bool) string {
 func (service *jwtServices) ValidateToken(encodedToken string) (*jwt.Token, error) {
 	return jwt.Parse(encodedToken, func(token *jwt.Token) (interface{}, error) {
 		if _, isvalid := token.Method.(*jwt.SigningMethodHMAC); !isvalid {
-			return nil, fmt.Errorf("Invalid token", token.Header["alg"])
+			return nil, fmt.Errorf("Invalid token %v", token.Header["alg"])
 
 		}
 		return []byte(service.secretKey), nil
 	})
 
+}
+
+//type authCustomClaims struct {
+func (service *jwtServices) ParseUser(encodedToken string) (string, error) {
+	token, err := jwt.ParseWithClaims(encodedToken, &authCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, isvalid := token.Method.(*jwt.SigningMethodHMAC); !isvalid {
+			return nil, fmt.Errorf("Invalid token %v", token.Header["alg"])
+
+		}
+		return []byte(service.secretKey), nil
+	})
+	if err != nil {
+		return "", err
+	}
+	if claims, ok := token.Claims.(*authCustomClaims); ok && token.Valid {
+		return claims.Name, nil
+	} else {
+		return "", fmt.Errorf("Invalid Token")
+	}
 }

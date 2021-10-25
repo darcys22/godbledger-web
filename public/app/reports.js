@@ -307,6 +307,5 @@ function dateQuickSelect(rangeType) {
 }
 
 function main() {
-  Date.setLocale("en-AU");
 }
 main();
