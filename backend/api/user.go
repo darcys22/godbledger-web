@@ -6,22 +6,16 @@ import (
 
 	"github.com/darcys22/godbledger-web/backend/auth"
 	m "github.com/darcys22/godbledger-web/backend/models"
+	"github.com/darcys22/godbledger-web/backend/models/sqlite"
 
 	"github.com/gin-gonic/gin"
 	"github.com/dgrijalva/jwt-go"
 
 )
 
-type UserSettings struct {
-	// Simply the username/email will be displayed in client
-	Name            string `json:"name"`
-	// Admin or Regular user, will allow for hiding admin screens but server side will also check
-	Role            string `json:"role"`
-	// Used for date parsing - https://sugarjs.com/docs/#/DateLocales
-	DateLocale      string `json:"datelocale"`
-	// USD - will be used by client for all currency items
-	DefaultCurrency string `json:"defaultcurrency"`
-}
+var (
+	users sqlite.UserModel = sqlite.New("sqlite.db")
+)
 
 func respondWithError(ctx *gin.Context, message interface{}) {
 	log.Debugf("Error processing JWT: %v", message)
@@ -56,54 +50,105 @@ func AuthorizeJWT() gin.HandlerFunc {
 }
 
 func GetUserSettings(ctx *gin.Context) {
-		settings := UserSettings{}
 		cookie, err := ctx.Request.Cookie("access_token")
 		if err != nil {
 			respondWithError(ctx, "Cookie required")
 			return
 		}
 		tokenString := cookie.Value
-		user, err := auth.JWTAuthService().ParseUser(tokenString)
+		username, err := auth.JWTAuthService().ParseUser(tokenString)
 		if err != nil {
 			respondWithError(ctx, "Invalid API token")
 			return
-		} else {
-			settings.Name = user
-			//TODO sean put actual currency here
-			settings.DefaultCurrency = "USD"
-			//TODO sean put actual currency here
-			settings.DateLocale = "en-AU"
-			//settings.DateLocale = "en-US"
-			//TODO sean put actual role here
-			settings.Role = "Admin"
 		}
-		ctx.JSON(200, settings)
+
+		current_user, err := users.Get(username)
+		if err != nil {
+			respondWithError(ctx, "Could not find user")
+			return
+		}
+
+		ctx.JSON(200, current_user.Settings())
 }
 
-func ChangePassword(c *gin.Context) {
+func ChangePassword(ctx *gin.Context) {
 	var journal m.PostJournalCommand
 
-	if err := c.BindJSON(&journal); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := ctx.BindJSON(&journal); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if err := journal.Save(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
-	c.JSON(200, journal)
+	ctx.JSON(200, journal)
 }
 
-func DefaultCurrency(c *gin.Context) {
-	var journal m.PostJournalCommand
+func DefaultCurrency(ctx *gin.Context) {
+	var currency m.PostCurrencyCommand
 
-	if err := c.BindJSON(&journal); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := ctx.BindJSON(&currency); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := journal.Save(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	cookie, err := ctx.Request.Cookie("access_token")
+	if err != nil {
+		respondWithError(ctx, "Cookie required")
+		return
 	}
-	c.JSON(200, journal)
+	tokenString := cookie.Value
+	username, err := auth.JWTAuthService().ParseUser(tokenString)
+	if err != nil {
+		respondWithError(ctx, "Invalid API token")
+		return
+	}
+
+	current_user, err := users.Get(username)
+	if err != nil {
+		respondWithError(ctx, "Could not find user")
+		return
+	}
+
+	current_user.Currency = currency.Currency
+
+	if err := users.Save(current_user); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	ctx.JSON(200, currency)
+}
+
+func DefaultLocale(ctx *gin.Context) {
+	var locale m.PostLocaleCommand
+
+	if err := ctx.BindJSON(&locale); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	cookie, err := ctx.Request.Cookie("access_token")
+	if err != nil {
+		respondWithError(ctx, "Cookie required")
+		return
+	}
+	tokenString := cookie.Value
+	username, err := auth.JWTAuthService().ParseUser(tokenString)
+	if err != nil {
+		respondWithError(ctx, "Invalid API token")
+		return
+	}
+
+	current_user, err := users.Get(username)
+	if err != nil {
+		respondWithError(ctx, "Could not find user")
+		return
+	}
+
+	current_user.DateLocale = locale.Locale
+
+	if err := users.Save(current_user); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	ctx.JSON(200, locale)
 }

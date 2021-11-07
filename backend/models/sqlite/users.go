@@ -8,6 +8,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/sirupsen/logrus"
+
+	"github.com/darcys22/godbledger-web/backend/models"
 )
 
 var log = logrus.WithField("prefix", "SqliteUsers")
@@ -30,7 +32,10 @@ func New(path string) UserModel {
     email VARCHAR(255) UNIQUE NOT NULL,
     hashed_password CHAR(60) NOT NULL,
     created DATETIME NOT NULL,
-    active BOOLEAN NOT NULL DEFAULT TRUE
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+		currency VARCHAR(10) NOT NULL DEFAULT "USD",
+		locale VARCHAR(5) NOT NULL DEFAULT "en-AU",
+		role VARCHAR(10) NOT NULL DEFAULT "standard"
   );
 	`)
 	if err != nil {
@@ -115,4 +120,26 @@ func (m *UserModel) NewUser(email, password string) (int, error) {
 	}
 	// Otherwise, the password is correct. Return the user ID.
 	return id, nil
+}
+
+// We'll use the Get method to fetch details for a specific user based on their email/name
+func (m *UserModel) Get(name string) (*models.User, error) {
+	var user models.User 
+	stmt := "SELECT * FROM users WHERE email = ? AND active = TRUE"
+	row := m.DB.QueryRow(stmt, name)
+	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.HashedPassword, &user.Created, &user.Active, &user.Currency, &user.DateLocale, &user.Role)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil 
+}
+
+func (m *UserModel) Save(user *models.User) (error) {
+	stmt := "UPDATE users SET currency = ?, locale = ? WHERE email = ? AND active = TRUE"
+	_, err := m.DB.Exec(stmt, user.Currency, user.DateLocale, user.Email)
+	log.Info("Users Saved: ", user)
+	if err != nil {
+		return err
+	}
+	return nil
 }

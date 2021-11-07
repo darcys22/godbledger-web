@@ -11,4 +11,30 @@ type User struct {
 	HashedPassword []byte
 	Created        time.Time
 	Active         bool
+	Currency			 string
+	DateLocale		 string
+	Role           string
+}
+
+type PostCurrencyCommand struct {
+	Currency string `json:"currency" binding:"required"`
+}
+
+type PostLocaleCommand struct {
+	Locale string `json:"locale" binding:"required"`
+}
+
+type UserSettingsResponse struct {
+	// Simply the username/email will be displayed in client
+	Name            string `json:"name"`
+	// Admin or Regular user, will allow for hiding admin screens but server side will also check
+	Role            string `json:"role"`
+	// Used for date parsing - https://sugarjs.com/docs/#/DateLocales
+	DateLocale      string `json:"datelocale"`
+	// USD - will be used by client for all currency items
+	DefaultCurrency string `json:"defaultcurrency"`
+}
+
+func (u *User) Settings() UserSettingsResponse {
+	return UserSettingsResponse{u.Name, u.Currency, u.DateLocale, u.Role}
 }

@@ -78,6 +78,7 @@ func register(r *gin.Engine) {
 	r.GET("/api/user/settings", AuthorizeJWT(), GetUserSettings)
 	r.POST("/api/user/changepassword", AuthorizeJWT(), ChangePassword)
 	r.POST("/api/user/defaultcurrency", AuthorizeJWT(), DefaultCurrency)
+	r.POST("/api/user/defaultlocale", AuthorizeJWT(), DefaultLocale)
 
 	// Admin Page
 	r.GET("/admin", AuthorizeJWT(), Admin)

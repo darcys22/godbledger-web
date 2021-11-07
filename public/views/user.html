@@ -42,9 +42,9 @@
                 <div class="card-body">
                     <h5 class="card-title">Default Currency</h5>
                     <div>
-                        <form class="validate-form" id="changedefaultcurrency">
+                        <form class="validate-form" action="/api/user/defaultcurrency" method="post" id="changedefaultcurrency">
                             <div class="input-group flex-nowrap m-1">
-                                <input type="text" class="form-control" placeholder="USD" aria-label="Default Currency" aria-describedby="addon-wrapping">
+                                <input type="text" name="currency" class="form-control" placeholder="USD" aria-label="Default Currency" aria-describedby="addon-wrapping">
                             </div>
                             <button type="submit" class="btn btn-primary m-1">Change Default Currency</button>
                         </form>
@@ -56,20 +56,13 @@
             <div class="card m-5" style="width: 18rem;">
                 <div class="card-body">
                     <h5 class="card-title">Default Date Locale</h5>
-                    <div>
-                        <form class="validate-form" id="changedefaultcurrency">
-                            <div class="dropdown show">
-                                <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Dropdown link
-      </a>
-
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                                    <a class="dropdown-item" href="#">AUS - DD/MM/YYYY</a>
-                                    <a class="dropdown-item" href="#">USA - MM/DD/YYYY</a>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary m-1">Change Default Currency</button>
-                        </form>
+                    <div class="dropdown show">
+                        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+Dropdown link </a>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                            <a class="dropdown-item" href="#" data-value="en-AU">en-AU - DD/MM/YYYY</a>
+                            <a class="dropdown-item" href="#" data-value="en-US">en-US - MM/DD/YYYY</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -99,6 +92,60 @@
                 console.log("lol fail")
             });
         });
+
+        $( "#changedefaultcurrency" ).submit(function( event ) {
+            event.preventDefault();
+            
+            var $form = $(this)
+            url = $form.attr('action');
+            console.log("sean remove this")
+        
+            var currency = $('input[name = currency]').val()
+            console.log(currency)
+            if (currency.length > 0) {
+                fetch(url,{
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        currency: currency,
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => console.error(error))
+            }
+        });
+
+        $(".dropdown-menu a").click(function(){
+            locale = $(this).data('value')
+            $("#dropdownMenuLink").html(locale);
+            fetch("api/user/defaultlocale",{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    locale: locale,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (typeof Date.setLocale !== 'undefined') {
+                    Date.setLocale(data.locale);
+                    user.datelocale = data.locale
+                }
+            })
+            .catch(error => console.error(error))
+        });
+
+        setTimeout(function(){
+            $("#dropdownMenuLink").html(user.datelocale);
+        }, 1000);
 
     </script>
 <!--Embed the footer.html template at this location-->
