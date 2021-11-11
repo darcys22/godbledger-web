@@ -7,15 +7,38 @@ import (
 )
 
 func NewUser(c *gin.Context) {
-	var journal m.PostJournalCommand
+	var new_user m.PostNewUserCommand
 
-	if err := c.BindJSON(&journal); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := ctx.BindJSON(&new_user); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := journal.Save(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	cookie, err := ctx.Request.Cookie("access_token")
+	if err != nil {
+		respondWithError(ctx, "Cookie required")
+		return
 	}
-	c.JSON(200, journal)
+	tokenString := cookie.Value
+	username, err := auth.JWTAuthService().ParseUser(tokenString)
+	if err != nil {
+		respondWithError(ctx, "Invalid API token")
+		return
+	}
+
+	current_user, err := users.Get(username)
+	if err != nil {
+		respondWithError(ctx, "Could not find user")
+		return
+	}
+
+	if current_user.Role != "admin" {
+		respondWithError(ctx, "Unauthorised")
+		return
+	}
+
+	if err := users.Insert(new_user.Username, new_user.Email, new_user.Password); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }

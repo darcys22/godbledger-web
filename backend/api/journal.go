@@ -13,7 +13,7 @@ func GetJournals(c *gin.Context) {
 		log.Errorf("Could not get journal listing (%v)", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
-	c.JSON(200, journalsModel)
+	c.JSON(http.StatusOK, journalsModel)
 }
 
 func PostJournal(c *gin.Context) {
@@ -27,7 +27,7 @@ func PostJournal(c *gin.Context) {
 	if err := journal.Save(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
-	c.JSON(200, journal)
+	c.JSON(http.StatusOK, journal)
 }
 
 func DeleteJournal(c *gin.Context) {
@@ -47,7 +47,7 @@ func GetJournal(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	c.JSON(200, journal)
+	c.JSON(http.StatusOK, journal)
 }
 
 func EditJournal(c *gin.Context) {
@@ -67,5 +67,5 @@ func EditJournal(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	c.JSON(200, journal)
+	c.JSON(http.StatusOK, journal)
 }

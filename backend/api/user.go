@@ -68,21 +68,50 @@ func GetUserSettings(ctx *gin.Context) {
 			return
 		}
 
-		ctx.JSON(200, current_user.Settings())
+		ctx.JSON(http.StatusOK, current_user.Settings())
 }
 
 func ChangePassword(ctx *gin.Context) {
-	var journal m.PostJournalCommand
+	var password_change m.PostPasswordChangeCommand
 
-	if err := ctx.BindJSON(&journal); err != nil {
+	if err := ctx.BindJSON(&password_change); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := journal.Save(); err != nil {
+	if password_change.NewPassword != password_change.ConfirmNewPassword {
+		respondWithError(ctx, "Confirmed Password does not match")
+		return
+	}
+
+	cookie, err := ctx.Request.Cookie("access_token")
+	if err != nil {
+		respondWithError(ctx, "Cookie required")
+		return
+	}
+	tokenString := cookie.Value
+	username, err := auth.JWTAuthService().ParseUser(tokenString)
+	if err != nil {
+		respondWithError(ctx, "Invalid API token")
+		return
+	}
+
+	current_user, err := users.Get(username)
+	if err != nil {
+		respondWithError(ctx, "Could not find user")
+		return
+	}
+
+	_, err = users.Authenticate(current_user.Email, password_change.Password)
+	if err != nil {
+		respondWithError(ctx, "Invalid Password")
+		return
+	}
+
+	if err := users.ChangePassword(current_user, password_change.NewPassword); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
-	ctx.JSON(200, journal)
+	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
 func DefaultCurrency(ctx *gin.Context) {
@@ -116,7 +145,7 @@ func DefaultCurrency(ctx *gin.Context) {
 	if err := users.Save(current_user); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
-	ctx.JSON(200, currency)
+	ctx.JSON(http.StatusOK, currency)
 }
 
 func DefaultLocale(ctx *gin.Context) {
@@ -150,5 +179,5 @@ func DefaultLocale(ctx *gin.Context) {
 	if err := users.Save(current_user); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
-	ctx.JSON(200, locale)
+	ctx.JSON(http.StatusOK, locale)
 }

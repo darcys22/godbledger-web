@@ -8,12 +8,18 @@
 				<div class="card-body">
 					<h5 class="card-title">Create New User</h5>
 					<div>
-							<form class="validate-form" action="/newuser" method="post" id="changepassform">
+							<form class="validate-form" action="/api/admin/newuser" method="post" id="newuserform">
+							<div class="input-group flex-nowrap m-1">
+								<div class="input-group-prepend">
+										<span class="input-group-text lnr lnr-user"></span>
+								</div>
+								<input type="text" class="form-control" name="username", placeholder="Username" aria-label="Username" aria-describedby="addon-wrapping">
+							</div>
 							<div class="input-group flex-nowrap m-1">
 								<div class="input-group-prepend">
 										<span class="input-group-text lnr lnr-envelope"></span>
 								</div>
-								<input type="text" class="form-control" placeholder="Email" aria-label="Username" aria-describedby="addon-wrapping">
+								<input type="text" class="form-control" name="email", placeholder="Email" aria-label="Email" aria-describedby="addon-wrapping">
 							</div>
 							<div class="input-group flex-nowrap m-1">
 								<div class="input-group-prepend">
@@ -40,23 +46,27 @@
 
 <script>
 
-$( "#changepassform" ).submit(function( event ) {
-	event.preventDefault();
-
-	var $form = $(this),
+$("newuserform").submit(function( event ) {
+		event.preventDefault();
+		
+		var $form = $(this)
 		url = $form.attr('action');
-
-	var posting = $.post(url, {
-		email: $('input[name = email]').val(),
-		password: $('input[name = password]').val()
-	});
-
-	posting.done(function(data) {
-		window.location.replace("/");
-	});
-	posting.fail(function() {
-		console.log("lol fail")
-	});
+		fetch(url,{
+				method: 'POST',
+				headers: {
+						'Content-Type': 'application/json;charset=utf-8'
+				},
+				body: JSON.stringify({
+						username: $('input[name = username]').val(),
+						email: $('input[name = email]').val(),
+						password: $('input[name = password]').val(),
+				})
+		})
+		.then(response => response.json())
+		.then(data => {
+				console.log(data);
+		})
+		.catch(error => console.error(error))
 });
 
 </script>

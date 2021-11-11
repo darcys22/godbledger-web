@@ -143,3 +143,18 @@ func (m *UserModel) Save(user *models.User) (error) {
 	}
 	return nil
 }
+
+func (m *UserModel) ChangePassword(user *models.User, password string) (error) {
+	// Create a bcrypt hash of the plain-text password.
+	log.Infof("Updating user password, Name: %s Email: %s", user.Name , user.Email)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return err
+	}
+	stmt := `UPDATE users SET hashed_password = ? WHERE email = ? AND active = TRUE`
+	_, err = m.DB.Exec(stmt, hashedPassword, user.Email)
+	if err != nil {
+		return err
+	}
+	return nil
+}

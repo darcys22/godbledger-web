@@ -20,7 +20,7 @@ func GetAccounts(c *gin.Context) {
 		log.Errorf("Could not get journal listing (%v)", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
-	c.JSON(200, accountsModel)
+	c.JSON(http.StatusOK, accountsModel)
 }
 
 func PostAccount(c *gin.Context) {
@@ -34,7 +34,7 @@ func PostAccount(c *gin.Context) {
 	if err := account.Save(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
-	c.JSON(200, account)
+	c.JSON(http.StatusOK, account)
 }
 
 func DeleteAccount(c *gin.Context) {
@@ -54,7 +54,7 @@ func GetAccount(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	c.JSON(200, account)
+	c.JSON(http.StatusOK, account)
 }
 
 func PostAccountTag(c *gin.Context) {
@@ -68,7 +68,7 @@ func PostAccountTag(c *gin.Context) {
 	//if err := account_tag.Save(); err != nil {
 		//c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	//}
-	//c.JSON(200, account_tag)
+	//c.JSON(http.StatusOK, account_tag)
 }
 
 func DeleteAccountTag(c *gin.Context) {

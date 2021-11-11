@@ -82,7 +82,7 @@ func register(r *gin.Engine) {
 
 	// Admin Page
 	r.GET("/admin", AuthorizeJWT(), Admin)
-	r.POST("/api/newuser", AuthorizeJWT(), NewUser)
+	r.POST("/api/admin/newuser", AuthorizeJWT(), NewUser)
 
 }
 

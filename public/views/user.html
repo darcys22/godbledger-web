@@ -10,24 +10,24 @@
                 <div class="card-body">
                     <h5 class="card-title">Change Password</h5>
                     <div>
-                        <form class="validate-form" action="/changepassword" method="post" id="changepassform">
+                        <form class="validate-form" action="/api/user/changepassword" method="post" id="changepassform">
                             <div class="input-group flex-nowrap m-1">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text lnr lnr-lock"></span>
                                 </div>
-                                <input type="password" class="form-control" name="previouspassword" placeholder="Previous Password" style="" autocomplete="off">
+                                <input type="password" class="form-control" name="password" placeholder="Previous Password" style="" autocomplete="off">
                             </div>
                             <div class="input-group flex-nowrap m-1">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text lnr lnr-lock"></span>
                                 </div>
-                                <input type="password" class="form-control" name="newpassword" placeholder="New Password" style="" autocomplete="off">
+                                <input type="password" class="form-control" name="new_password" placeholder="New Password" style="" autocomplete="off">
                             </div>
                             <div class="input-group flex-nowrap m-1">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text lnr lnr-lock"></span>
                                 </div>
-                                <input type="password" class="form-control" name="repeatpassword" placeholder="Repeat Password" style="" autocomplete="off">
+                                <input type="password" class="form-control" name="confirm_new_password" placeholder="Repeat Password" style="" autocomplete="off">
                             </div>
                             <div>
                                 <button type="submit" class="btn btn-primary m-1">Create User</button>
@@ -78,19 +78,22 @@ Dropdown link </a>
             
             var $form = $(this)
             url = $form.attr('action');
-        
-            var posting = $.post(url, {
-                password: $('input[name = password]').val(),
-                newpassword: $('input[name = new_password]').val(),
-                confirmpassword: $('input[name = confirm_new_password]').val(),
-            });
-        
-            posting.done(function(data) {
-                window.location.replace("/");
-            });
-            posting.fail(function() {
-                console.log("lol fail")
-            });
+            fetch(url,{
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    password: $('input[name = password]').val(),
+                    new_password: $('input[name = new_password]').val(),
+                    confirm_new_password: $('input[name = confirm_new_password]').val(),
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => console.error(error))
         });
 
         $( "#changedefaultcurrency" ).submit(function( event ) {

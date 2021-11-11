@@ -98,7 +98,6 @@ func (service *jwtServices) ValidateToken(encodedToken string) (*jwt.Token, erro
 
 }
 
-//type authCustomClaims struct {
 func (service *jwtServices) ParseUser(encodedToken string) (string, error) {
 	token, err := jwt.ParseWithClaims(encodedToken, &authCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, isvalid := token.Method.(*jwt.SigningMethodHMAC); !isvalid {

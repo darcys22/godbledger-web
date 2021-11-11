@@ -24,6 +24,18 @@ type PostLocaleCommand struct {
 	Locale string `json:"locale" binding:"required"`
 }
 
+type PostPasswordChangeCommand struct {
+	Password string `json:"password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required"`
+	ConfirmNewPassword string `json:"confirm_new_password" binding:"required"`
+}
+
+type PostNewUserCommand struct {
+	Username string `json:"username" binding:"required"`
+	Email string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
 type UserSettingsResponse struct {
 	// Simply the username/email will be displayed in client
 	Name            string `json:"name"`
