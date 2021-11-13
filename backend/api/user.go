@@ -7,6 +7,7 @@ import (
 	"github.com/darcys22/godbledger-web/backend/auth"
 	m "github.com/darcys22/godbledger-web/backend/models"
 	"github.com/darcys22/godbledger-web/backend/models/sqlite"
+	"github.com/darcys22/godbledger-web/backend/setting"
 
 	"github.com/gin-gonic/gin"
 	"github.com/dgrijalva/jwt-go"
@@ -14,8 +15,12 @@ import (
 )
 
 var (
-	users sqlite.UserModel = sqlite.New("sqlite.db")
+	users sqlite.UserModel
 )
+
+func InitUsersDatabase() {
+	users = sqlite.New("sqlite.db", setting.GetConfig())
+}
 
 func respondWithError(ctx *gin.Context, message interface{}) {
 	log.Debugf("Error processing JWT: %v", message)

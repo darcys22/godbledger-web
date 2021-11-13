@@ -6,12 +6,13 @@ import (
 	"net/url"
 
 	"github.com/darcys22/godbledger-web/backend/auth"
+	"github.com/darcys22/godbledger-web/backend/setting"
 )
 
 var (
-	loginService auth.LoginService     = auth.StaticLoginService()
-	jwtService   auth.JWTService       = auth.JWTAuthService()
-	loginController  LoginController   = LoginHandler(loginService, jwtService)
+	loginService auth.LoginService
+	jwtService   auth.JWTService
+	loginController  LoginController
 )
 
 type LoginController struct {
@@ -19,9 +20,10 @@ type LoginController struct {
 	jwtService   auth.JWTService
 }
 
-func LoginHandler(loginService auth.LoginService,
-	jwtService auth.JWTService) LoginController {
-	return LoginController{
+func InitLoginHandler() {
+	loginService = auth.StaticLoginService(setting.GetConfig())
+	jwtService = auth.JWTAuthService()
+	loginController = LoginController{
 		loginService: loginService,
 		jwtService:   jwtService,
 	}
@@ -44,24 +46,6 @@ func (controller *LoginController) Login(ctx *gin.Context) string {
 
 	}
 	return ""
-}
-
-func (controller *LoginController) NewUser(ctx *gin.Context) string {
-	var credential LoginCredentials
-	err := ctx.ShouldBind(&credential)
-	if err != nil {
-		return "no data found"
-	}
-	//isUserAuthenticated := controller.loginService.NewUser(credential.Email, credential.Password)
-	//if isUserAuthenticated {
-		//return controller.jwtService.GenerateToken(credential.Email, true)
-
-	//}
-	return ""
-}
-
-func LoginView(ctx *gin.Context) {
-	ctx.HTML(http.StatusOK, "login.view.html", nil)
 }
 
 func Login(ctx *gin.Context) {

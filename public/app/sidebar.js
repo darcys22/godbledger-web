@@ -22,6 +22,10 @@ function menuBtnChange() {
  }
 }
 
+$('.adminonly').each(function(i, obj) {
+  obj.hidden = true;
+})
+
 fetch('/api/user/settings', {
   method: 'GET',
   headers: {
@@ -33,10 +37,16 @@ fetch('/api/user/settings', {
   let name = document.querySelector(".name");
   let role = document.querySelector(".job");
   window.user = data
-  name.innerText = data.name
-  role.innerText = data.role
+  name.innerText = data.name[0].toUpperCase() + data.name.slice(1);
+  role.innerText = data.role[0].toUpperCase() + data.role.slice(1);
   if (typeof Date.setLocale !== 'undefined') {
     Date.setLocale(data.datelocale);
+  }
+
+  if (data.role == "admin") {
+    $('.adminonly').each(function(i, obj) {
+      obj.hidden = false;
+    })
   }
 })
 

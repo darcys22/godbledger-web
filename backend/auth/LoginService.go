@@ -7,6 +7,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/darcys22/godbledger-web/backend/models/sqlite"
+	"github.com/darcys22/godbledger-web/backend/setting"
 )
 
 type LoginService interface {
@@ -16,8 +17,8 @@ type loginInformation struct {
 	users *sqlite.UserModel
 }
 
-func StaticLoginService() LoginService {
-	database := sqlite.New("sqlite.db")
+func StaticLoginService(cfg *setting.Cfg) LoginService {
+	database := sqlite.New("sqlite.db", cfg)
 
 	return &loginInformation{users: &database}
 }
@@ -27,14 +28,6 @@ func (info *loginInformation) LoginUser(email string, password string) bool {
 	if err != nil {
 		return false
 	}
-	return true
-}
-
-func (info *loginInformation) NewUser(email string, password string) bool {
-	//_, err := info.users.New(email, password)
-	//if err != nil {
-		//return false
-	//}
 	return true
 }
 

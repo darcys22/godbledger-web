@@ -13,7 +13,10 @@ import (
 	ini "gopkg.in/ini.v1"
 )
 
-var log = logrus.WithField("prefix", "setting")
+var (
+	log = logrus.WithField("prefix", "setting")
+	globalcfg *Cfg
+)
 
 type Scheme string
 
@@ -79,6 +82,11 @@ type Cfg struct {
 	BuildBranch  string
 	BuildStamp   int64
 	IsEnterprise bool
+
+	// security
+	DisableInitialAdminCreation bool
+	AdminUser string
+	AdminPassword string
 
 }
 
@@ -316,6 +324,10 @@ func setHomePath(args *CommandLineArgs) {
 	}
 }
 
+func GetConfig() *Cfg {
+	return globalcfg
+}
+
 func NewCfg() *Cfg {
 	return &Cfg{
 		Raw: ini.Empty(),
@@ -350,9 +362,14 @@ func (cfg *Cfg) Load(args *CommandLineArgs) error {
 	if err := readServerSettings(iniFile, cfg); err != nil {
 		return err
 	}
+	if err := readSecuritySettings(iniFile, cfg); err != nil {
+		return err
+	}
 
 
 	cfg.Protocol = Protocol
+
+	globalcfg = cfg
 
 	return nil
 }
@@ -397,6 +414,25 @@ func readServerSettings(iniFile *ini.File, cfg *Cfg) error {
 	}
 	StaticRootPath = makeAbsolute(staticRoot, HomePath)
 	cfg.StaticRootPath = StaticRootPath
+
+	return nil
+}
+
+func readSecuritySettings(iniFile *ini.File, cfg *Cfg) error {
+	server := iniFile.Section("security")
+	var err error
+
+	cfg.DisableInitialAdminCreation = server.Key("disable_initial_admin_creation").MustBool(false)
+
+	cfg.AdminUser, err = valueAsString(server, "admin_user", "test@godbledger.com")
+	if err != nil {
+		return err
+	}
+
+	cfg.AdminPassword, err = valueAsString(server, "admin_password", "password")
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/darcys22/godbledger-web/backend/models"
+	"github.com/darcys22/godbledger-web/backend/setting"
 )
 
 var log = logrus.WithField("prefix", "SqliteUsers")
@@ -18,12 +19,11 @@ var ErrNoRows = errors.New("sql: no rows in result set")
 
 type UserModel struct {
 	DB *sql.DB
+	Cfg *setting.Cfg
 }
 
-func New(path string) UserModel {
+func New(path string, cfg *setting.Cfg) UserModel {
 	database, _ := sql.Open("sqlite3", path)
-
-	log.Info("Users database at path: ", path)
 
 	statement, err := database.Prepare(`
   CREATE TABLE IF NOT EXISTS users (
@@ -42,30 +42,48 @@ func New(path string) UserModel {
 		log.Error("Error in prepare statement: ", err)
 	}
 	statement.Exec()
-	usersdb := UserModel{DB: database}
+	usersdb := UserModel{DB: database, Cfg: cfg}
 
-	//TODO this should be conditionally run from config
-	defaultUserID := 0
-	err = database.QueryRow(`SELECT id FROM users WHERE email = ? LIMIT 1`, "test@godbledger.com").Scan(&defaultUserID)
-	if err != nil {
-		if err.Error() == ErrNoRows.Error() {
-			log.Info("Inserting default user into users table")
-			err = usersdb.Insert("defaultuser", "test@godbledger.com", "password")
-			if err != nil {
-				log.Error("Error in adding default user: ", err)
-			}
-
-		} else {
-			log.Error("Error in searching for default user: ", err)
+	if !cfg.DisableInitialAdminCreation {
+		err = usersdb.CreateDefaultUser(cfg.AdminUser, cfg.AdminPassword)
+		if err != nil {
+			log.Error("Error creating default user: ", err)
 		}
 	}
 
 	return usersdb
 }
 
+func (m *UserModel) CreateDefaultUser(email, password string) error {
+	defaultUserID := 0
+	err := m.DB.QueryRow(`SELECT id FROM users WHERE email = ? LIMIT 1`, email).Scan(&defaultUserID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			if err.Error() == ErrNoRows.Error() {
+				err = m.Insert("defaultuser", email , password)
+				if err != nil {
+					return err
+				}
+				defaultUser, err := m.Get(email)
+				if err != nil {
+					return err
+				}
+				err = m.ChangePermissions(defaultUser, "admin")
+				if err != nil {
+					return err
+				}
+
+			} else {
+				return err
+			}
+			log.Info("Created default user")
+		}
+	}
+	return nil
+}
+
 func (m *UserModel) Insert(name, email, password string) error {
 	// Create a bcrypt hash of the plain-text password.
-	log.Infof("Inserting user into users table, Name: %s Email: %s", name, email)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
 		return err
@@ -75,6 +93,7 @@ func (m *UserModel) Insert(name, email, password string) error {
 	if err != nil {
 		return err
 	}
+	log.Infof("Inserted user into users table, Name: %s Email: %s", name, email)
 	return nil
 }
 
@@ -123,10 +142,10 @@ func (m *UserModel) NewUser(email, password string) (int, error) {
 }
 
 // We'll use the Get method to fetch details for a specific user based on their email/name
-func (m *UserModel) Get(name string) (*models.User, error) {
+func (m *UserModel) Get(email string) (*models.User, error) {
 	var user models.User 
 	stmt := "SELECT * FROM users WHERE email = ? AND active = TRUE"
-	row := m.DB.QueryRow(stmt, name)
+	row := m.DB.QueryRow(stmt, email)
 	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.HashedPassword, &user.Created, &user.Active, &user.Currency, &user.DateLocale, &user.Role)
 	if err != nil {
 		return nil, err
@@ -137,7 +156,17 @@ func (m *UserModel) Get(name string) (*models.User, error) {
 func (m *UserModel) Save(user *models.User) (error) {
 	stmt := "UPDATE users SET currency = ?, locale = ? WHERE email = ? AND active = TRUE"
 	_, err := m.DB.Exec(stmt, user.Currency, user.DateLocale, user.Email)
+	if err != nil {
+		return err
+	}
 	log.Info("Users Saved: ", user)
+	return nil
+}
+
+func (m *UserModel) ChangePermissions(user *models.User, role string) (error) {
+	stmt := "UPDATE users SET role = ? WHERE email = ? AND active = TRUE"
+	_, err := m.DB.Exec(stmt, role, user.Email)
+	log.Info("Users Permissions Updated: ", user)
 	if err != nil {
 		return err
 	}
@@ -146,7 +175,6 @@ func (m *UserModel) Save(user *models.User) (error) {
 
 func (m *UserModel) ChangePassword(user *models.User, password string) (error) {
 	// Create a bcrypt hash of the plain-text password.
-	log.Infof("Updating user password, Name: %s Email: %s", user.Name , user.Email)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
 		return err
@@ -156,5 +184,6 @@ func (m *UserModel) ChangePassword(user *models.User, password string) (error) {
 	if err != nil {
 		return err
 	}
+	log.Infof("Updated user password, Name: %s Email: %s", user.Name , user.Email)
 	return nil
 }

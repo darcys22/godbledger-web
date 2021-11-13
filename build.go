@@ -115,6 +115,11 @@ func main() {
 				doBuild(binary, "./backend/cmd/"+binary, []string{})
 			}
 
+		case "debug":
+			for _, binary := range binaries {
+				doBuild(binary, "./backend/cmd/"+binary, []string{"-gcflags=all='-N -l'"})
+			}
+
 		case "build-frontend":
 			grunt(gruntBuildArg("build")...)
 

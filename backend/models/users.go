@@ -48,5 +48,5 @@ type UserSettingsResponse struct {
 }
 
 func (u *User) Settings() UserSettingsResponse {
-	return UserSettingsResponse{u.Name, u.Currency, u.DateLocale, u.Role}
+	return UserSettingsResponse{u.Name, u.Role, u.DateLocale, u.Currency}
 }

@@ -15,7 +15,13 @@ build-go: ## Build all Go binaries.
 	@echo "build go files"
 	$(GO) run build.go build
 
+build-debug-go: ## Build all Go binaries.
+	@echo "build debug go files"
+	$(GO) run build.go debug 
+
 build: build-go 
+
+debug: build-debug-go
 
 run: ## Run Server
 	@GO111MODULE=on ./bin/linux-amd64/godbledger-web

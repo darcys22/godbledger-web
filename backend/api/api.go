@@ -15,17 +15,17 @@ var log = logrus.WithField("prefix", "API")
 
 func mapStatic(m *gin.Engine, dir string, prefix string) {
 	headers := func() gin.HandlerFunc {
-		return func(c *gin.Context) {
-			c.Writer.Header().Set("Cache-Control", "public, max-age=3600")
-			c.Next()
+		return func(ctx *gin.Context) {
+			ctx.Writer.Header().Set("Cache-Control", "public, max-age=3600")
+			ctx.Next()
 		}
 	}
 
 	if setting.Env == setting.DEV {
 		headers = func() gin.HandlerFunc {
-			return func(c *gin.Context) {
-				c.Writer.Header().Set("Cache-Control", "max-age=0, must-revalidate, no-cache")
-				c.Next()
+			return func(ctx *gin.Context) {
+				ctx.Writer.Header().Set("Cache-Control", "max-age=0, must-revalidate, no-cache")
+				ctx.Next()
 			}
 		}
 	}
@@ -102,6 +102,8 @@ func NewGin() *gin.Engine {
 
 	m.LoadHTMLGlob(path.Join(setting.StaticRootPath, "views/*.html"))
 
+	InitLoginHandler()
+	InitUsersDatabase()
 	register(m)
 
 	return m

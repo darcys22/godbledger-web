@@ -46,8 +46,9 @@
 
 <script>
 
-$("newuserform").submit(function( event ) {
+$("#newuserform").submit(function( event ) {
 		event.preventDefault();
+		console.log("something")
 		
 		var $form = $(this)
 		url = $form.attr('action');

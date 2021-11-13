@@ -7,22 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetExternalAccountListing(c *gin.Context) {
-	m.GetExternalAccountListing(c)
+func GetExternalAccountListing(ctx *gin.Context) {
+	m.GetExternalAccountListing(ctx)
 }
 
-func GetUnreconciledTransactions(c *gin.Context) {
+func GetUnreconciledTransactions(ctx *gin.Context) {
 	var request m.UnreconciledTransactionsRequest
 
-	if err := c.BindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := ctx.BindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	err, unreconciledTransactionsResult := m.UnreconciledTransactions(request)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	}
 
-	c.JSON(http.StatusOK, unreconciledTransactionsResult)
+	ctx.JSON(http.StatusOK, unreconciledTransactionsResult)
 }

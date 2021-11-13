@@ -2,11 +2,12 @@ package api
 
 import (
 	m "github.com/darcys22/godbledger-web/backend/models"
+	"github.com/darcys22/godbledger-web/backend/auth"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func NewUser(c *gin.Context) {
+func NewUser(ctx *gin.Context) {
 	var new_user m.PostNewUserCommand
 
 	if err := ctx.BindJSON(&new_user); err != nil {
