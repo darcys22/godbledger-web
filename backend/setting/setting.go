@@ -88,6 +88,10 @@ type Cfg struct {
 	AdminUser string
 	AdminPassword string
 
+  // backend godbledger info
+  DatabaseType string
+  DatabaseLocation string
+
 }
 
 type CommandLineArgs struct {
@@ -365,6 +369,9 @@ func (cfg *Cfg) Load(args *CommandLineArgs) error {
 	if err := readSecuritySettings(iniFile, cfg); err != nil {
 		return err
 	}
+	if err := readBackendSettings(iniFile, cfg); err != nil {
+		return err
+	}
 
 
 	cfg.Protocol = Protocol
@@ -430,6 +437,24 @@ func readSecuritySettings(iniFile *ini.File, cfg *Cfg) error {
 	}
 
 	cfg.AdminPassword, err = valueAsString(server, "admin_password", "password")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func readBackendSettings(iniFile *ini.File, cfg *Cfg) error {
+	server := iniFile.Section("backend")
+	var err error
+
+
+	cfg.DatabaseType, err = valueAsString(server, "database_type", "sqlite")
+	if err != nil {
+		return err
+	}
+
+	cfg.DatabaseLocation, err = valueAsString(server, "database_location", "~/.ledger/ledgerdata/sqlite.db")
 	if err != nil {
 		return err
 	}

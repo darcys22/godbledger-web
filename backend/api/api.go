@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/darcys22/godbledger-web/backend/setting"
+	"github.com/darcys22/godbledger-web/backend/models/backend"
 	
 	"github.com/sirupsen/logrus"
 )
@@ -104,6 +105,7 @@ func NewGin() *gin.Engine {
 
 	InitLoginHandler()
 	InitUsersDatabase()
+  _ = backend.InitBackendConnection()
 	register(m)
 
 	return m
