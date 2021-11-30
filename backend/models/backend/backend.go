@@ -65,6 +65,7 @@ func InitBackendConnection() error {
     }
     backend = GodbledgerBackendModel{DB: MySQLDB, Cfg: cfg}
 	default:
+		log.Fatal(cfg.DatabaseType)
 		log.Fatal("No implementation available for that database.")
 	}
 
@@ -113,4 +114,8 @@ func ValidateConnectionString(dsn string) (string, error) {
 func redactPassword(rawDSNString string) string {
 	cleanedDSNString := dsnRegex.ReplaceAll([]byte(rawDSNString), []byte(":**REDACTED**@"))
 	return string(cleanedDSNString)
+}
+
+func GetConnection() *sql.DB {
+  return backend.DB
 }

@@ -91,6 +91,11 @@ type Cfg struct {
   // backend godbledger info
   DatabaseType string
   DatabaseLocation string
+  GoDBLedgerHost string
+  GoDBLedgerPort string
+  GoDBLedgerCACert string
+  GoDBLedgerCert string
+  GoDBLedgerKey string
 
 }
 
@@ -449,12 +454,37 @@ func readBackendSettings(iniFile *ini.File, cfg *Cfg) error {
 	var err error
 
 
-	cfg.DatabaseType, err = valueAsString(server, "database_type", "sqlite")
+	cfg.DatabaseType, err = valueAsString(server, "database_type", "sqlite3")
 	if err != nil {
 		return err
 	}
 
-	cfg.DatabaseLocation, err = valueAsString(server, "database_location", "~/.ledger/ledgerdata/sqlite.db")
+	cfg.DatabaseLocation, err = valueAsString(server, "database_location", "~/.ledger/ledgerdata/ledger.db")
+	if err != nil {
+		return err
+	}
+  
+	cfg.GoDBLedgerHost, err = valueAsString(server, "godbledger_host", "127.0.0.1")
+	if err != nil {
+		return err
+	}
+
+	cfg.GoDBLedgerPort, err = valueAsString(server, "godbledger_port", "50051")
+	if err != nil {
+		return err
+	}
+
+	cfg.GoDBLedgerCACert, err = valueAsString(server, "godbledger_cacert", "")
+	if err != nil {
+		return err
+	}
+
+	cfg.GoDBLedgerCert, err = valueAsString(server, "godbledger_cert", "")
+	if err != nil {
+		return err
+	}
+
+	cfg.GoDBLedgerKey, err = valueAsString(server, "godbledger_key", "")
 	if err != nil {
 		return err
 	}

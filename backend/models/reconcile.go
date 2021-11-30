@@ -1,14 +1,11 @@
 package models
 
 import (
-	"flag"
 	"fmt"
 
-	"github.com/darcys22/godbledger/godbledger/cmd"
-	"github.com/darcys22/godbledger/godbledger/ledger"
+	"github.com/darcys22/godbledger-web/backend/models/backend"
 
 	"github.com/gin-gonic/gin"
-	"github.com/urfave/cli/v2"
 )
 
 type ExternalAccountsResult struct {
@@ -16,21 +13,7 @@ type ExternalAccountsResult struct {
 }
 
 func GetExternalAccountListing(c *gin.Context) {
-
-	set := flag.NewFlagSet("getExternalAccountListing", 0)
-	set.String("config", "", "doc")
-
-	ctx := cli.NewContext(nil, set, nil)
-	err, cfg := cmd.MakeConfig(ctx)
-	if err != nil {
-		log.Errorf("Could not make config (%v)", err)
-	}
-
-	ledger, err := ledger.New(ctx, cfg)
-	if err != nil {
-		log.Errorf("Could not make new ledger (%v)", err)
-	}
-
+  db := backend.GetConnection()
 	queryDB := `
 		select
 			a.name
@@ -43,7 +26,7 @@ func GetExternalAccountListing(c *gin.Context) {
 	;`
 
 	log.Debug("Querying Database")
-	rows, err := ledger.LedgerDb.Query(queryDB)
+	rows, err := db.Query(queryDB)
 	if err != nil {
 		log.Errorf("Could not query database (%v)", err)
 	}
@@ -107,20 +90,7 @@ var testresults = []UnreconciledTransactionLine{
 }
 
 func UnreconciledTransactions(req UnreconciledTransactionsRequest) (error, *ReconcileResult) {
-	set := flag.NewFlagSet("UnreconciledTransactionsRequest", 0)
-	set.String("config", "", "doc")
-
-	ctx := cli.NewContext(nil, set, nil)
-	err, cfg := cmd.MakeConfig(ctx)
-	if err != nil {
-		return fmt.Errorf("Could not make config (%v)", err), nil
-	}
-
-	ledger, err := ledger.New(ctx, cfg)
-	if err != nil {
-		return fmt.Errorf("Could not make new ledger (%v)", err), nil
-	}
-
+  db := backend.GetConnection()
 	queryDB := `
 	select
 		s.description
@@ -139,7 +109,7 @@ func UnreconciledTransactions(req UnreconciledTransactionsRequest) (error, *Reco
 	;`
 
 	log.Debug("Querying Database")
-	rows, err := ledger.LedgerDb.Query(queryDB, req.Options.Account)
+	rows, err := db.Query(queryDB, req.Options.Account)
 	if err != nil {
 		return fmt.Errorf("Could not query database (%v)", err), nil
 	}

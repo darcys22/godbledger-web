@@ -1,15 +1,12 @@
 package trialbalance
 
 import (
-	"flag"
 	"fmt"
 	"strings"
 
 	"github.com/darcys22/godbledger-web/backend/models/reports"
-	"github.com/darcys22/godbledger/godbledger/cmd"
-	"github.com/darcys22/godbledger/godbledger/ledger"
+	"github.com/darcys22/godbledger-web/backend/models/backend"
 
-	"github.com/urfave/cli/v2"
 	"github.com/sirupsen/logrus"
 )
 
@@ -24,20 +21,7 @@ var trialBalanceColumns = map[string]string{
 }
 
 func TrialBalanceReport(req reports.ReportsRequest) (error, *reports.ReportResult) {
-	set := flag.NewFlagSet("getJournalListing", 0)
-	set.String("config", "", "doc")
-
-	ctx := cli.NewContext(nil, set, nil)
-	err, cfg := cmd.MakeConfig(ctx)
-	if err != nil {
-		return fmt.Errorf("Could not make config (%v)", err), nil
-	}
-
-	ledger, err := ledger.New(ctx, cfg)
-	if err != nil {
-		return fmt.Errorf("Could not make new ledger (%v)", err), nil
-	}
-
+  db := backend.GetConnection()
 	queryDateStart, err := reports.ProcessDate(req.Reports[0].Options.StartDate)
 	if err != nil {
 		return fmt.Errorf("Could not process start date (%v)", err), nil
@@ -78,7 +62,7 @@ GROUP  BY split_accounts.account_id, splits.currency
 
 	log.Debug("Querying Database")
 	log.Trace(queryDB.String())
-	rows, err := ledger.LedgerDb.Query(queryDB.String(), queryDateStart, queryDateEnd)
+	rows, err := db.Query(queryDB.String(), queryDateStart, queryDateEnd)
 
 	var r reports.ReportResult
 	r.Options = req.Reports[0].Options
@@ -98,7 +82,7 @@ GROUP  BY split_accounts.account_id, splits.currency
 		if err := rows.Scan(pointers...); err != nil {
 			return fmt.Errorf("Could not scan rows of query (%v)", err), nil
 		}
-		err, processedRow := reports.ProcessRows(ledger, req.Reports[0].Columns, t)
+		err, processedRow := reports.ProcessRows(db, req.Reports[0].Columns, t)
 		if err != nil {
 			return fmt.Errorf("Could not process rows of query (%v)", err), nil
 		}

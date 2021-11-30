@@ -4,22 +4,22 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"math"
 	"strconv"
 	"time"
 
-	"github.com/darcys22/godbledger/godbledger/cmd"
-	"github.com/darcys22/godbledger/godbledger/ledger"
+	"github.com/darcys22/godbledger-web/backend/models/backend"
+	"github.com/darcys22/godbledger-web/backend/setting"
+
 	pb "github.com/darcys22/godbledger/proto/transaction"
+
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
 )
 
 var log = logrus.WithField("prefix", "Model")
@@ -53,19 +53,7 @@ func (j *GetJournals) SearchJournals() error {
 	log.Trace("Calling Search Journals function")
 	j.Journals = []LineItem{}
 
-	set := flag.NewFlagSet("getJournalListing", 0)
-	set.String("config", "", "doc")
-
-	ctx := cli.NewContext(nil, set, nil)
-	err, cfg := cmd.MakeConfig(ctx)
-	if err != nil {
-		return fmt.Errorf("Could not make config (%v)", err)
-	}
-
-	ledger, err := ledger.New(ctx, cfg)
-	if err != nil {
-		return fmt.Errorf("Could not make new ledger (%v)", err)
-	}
+  db := backend.GetConnection()
 
 	queryDateStart := time.Now().Add(time.Hour * 24 * 365 * -100)
 	queryDateEnd := time.Now().Add(time.Hour * 24 * 365 * 100)
@@ -101,7 +89,7 @@ func (j *GetJournals) SearchJournals() error {
 	;`
 
 	log.Debug("Querying Database")
-	rows, err := ledger.LedgerDb.Query(queryDB, queryDateStart, queryDateEnd)
+	rows, err := db.Query(queryDB, queryDateStart, queryDateEnd)
 
 	if err != nil {
 		return fmt.Errorf("Could not query database (%v)", err)
@@ -134,20 +122,13 @@ var currenciesDecimals = map[string]int{
 
 func (j *PostJournalCommand) Save() error {
 	log.Trace("Calling Save Journal function")
-	set := flag.NewFlagSet("PostJournal", 0)
-	set.String("config", "", "doc")
 
-	ctx := cli.NewContext(nil, set, nil)
-	err, cfg := cmd.MakeConfig(ctx)
-	if err != nil {
-		return fmt.Errorf("Could not make config (%v)", err)
-	}
-
-	address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
+  cfg := setting.GetConfig()
+	address := fmt.Sprintf("%s:%s", cfg.GoDBLedgerHost, cfg.GoDBLedgerPort)
 	log.WithField("address", address).Info("GRPC Dialing on port")
 	opts := []grpc.DialOption{}
 
-	if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
+	if cfg.GoDBLedgerCACert != "" && cfg.GoDBLedgerCert != "" && cfg.GoDBLedgerKey != "" {
 		tlsCredentials, err := loadTLSCredentials(cfg)
 		if err != nil {
 			return fmt.Errorf("Could not load TLS credentials (%v)", err)
@@ -207,20 +188,13 @@ func (j *PostJournalCommand) Save() error {
 
 func DeleteJournalCommand(id string) error {
 	log.Trace("Calling Delete Journal function")
-	set := flag.NewFlagSet("DeleteJournal", 0)
-	set.String("config", "", "doc")
 
-	ctx := cli.NewContext(nil, set, nil)
-	err, cfg := cmd.MakeConfig(ctx)
-	if err != nil {
-		return fmt.Errorf("Could not make config (%v)", err)
-	}
-
-	address := fmt.Sprintf("%s:%s", cfg.Host, cfg.RPCPort)
+  cfg := setting.GetConfig()
+	address := fmt.Sprintf("%s:%s", cfg.GoDBLedgerHost, cfg.GoDBLedgerPort)
 	log.WithField("address", address).Info("GRPC Dialing on port")
 	opts := []grpc.DialOption{}
 
-	if cfg.CACert != "" && cfg.Cert != "" && cfg.Key != "" {
+	if cfg.GoDBLedgerCACert != "" && cfg.GoDBLedgerCert != "" && cfg.GoDBLedgerKey != "" {
 		tlsCredentials, err := loadTLSCredentials(cfg)
 		if err != nil {
 			return fmt.Errorf("Could not load TLS credentials (%v)", err)
@@ -257,19 +231,7 @@ func GetJournalCommand(id string) (PostJournalCommand, error) {
 	j := PostJournalCommand{}
 	j.LineItems = []LineItem{}
 
-	set := flag.NewFlagSet("getJournal", 0)
-	set.String("config", "", "doc")
-
-	ctx := cli.NewContext(nil, set, nil)
-	err, cfg := cmd.MakeConfig(ctx)
-	if err != nil {
-		return j, fmt.Errorf("Could not make config (%v)", err)
-	}
-
-	ledger, err := ledger.New(ctx, cfg)
-	if err != nil {
-		return j, fmt.Errorf("Could not make new ledger (%v)", err)
-	}
+  db := backend.GetConnection()
 
 	queryDB := `
 		SELECT
@@ -292,7 +254,7 @@ func GetJournalCommand(id string) (PostJournalCommand, error) {
 	;`
 
 	log.Debug("Querying Database")
-	rows, err := ledger.LedgerDb.Query(queryDB, id)
+	rows, err := db.Query(queryDB, id)
 
 	if err != nil {
 		return j, fmt.Errorf("Could not query database (%v)", err)
@@ -323,9 +285,9 @@ func GetJournalCommand(id string) (PostJournalCommand, error) {
 	return j, nil
 }
 
-func loadTLSCredentials(cfg *cmd.LedgerConfig) (credentials.TransportCredentials, error) {
+func loadTLSCredentials(cfg *setting.Cfg) (credentials.TransportCredentials, error) {
 	// Load certificate of the CA who signed server's certificate
-	pemServerCA, err := ioutil.ReadFile(cfg.CACert)
+	pemServerCA, err := ioutil.ReadFile(cfg.GoDBLedgerCACert)
 	if err != nil {
 		return nil, err
 	}
@@ -336,7 +298,7 @@ func loadTLSCredentials(cfg *cmd.LedgerConfig) (credentials.TransportCredentials
 	}
 
 	// Load client's certificate and private key
-	clientCert, err := tls.LoadX509KeyPair(cfg.Cert, cfg.Key)
+	clientCert, err := tls.LoadX509KeyPair(cfg.GoDBLedgerCert, cfg.GoDBLedgerKey)
 	if err != nil {
 		return nil, err
 	}

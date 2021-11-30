@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"time"
 	"strings"
-
-	"github.com/darcys22/godbledger/godbledger/ledger"
+  "database/sql"
 
 	"github.com/sirupsen/logrus"
 )
@@ -47,7 +46,7 @@ type ReportProcessor struct {
 	Decimals int
 }
 
-func ProcessRows(ledger *ledger.Ledger, columns []string, inputs []string) (error, []string) {
+func ProcessRows(db *sql.DB, columns []string, inputs []string) (error, []string) {
 	var rowProcessor = ReportProcessor{columns,map[string]string{},0}
 	for i, column := range columns {
 
@@ -60,7 +59,7 @@ func ProcessRows(ledger *ledger.Ledger, columns []string, inputs []string) (erro
 			} else {
 				log.Debug("not found currency ", inputs[i])
 				querycurrency := "SELECT decimals FROM currencies where name = ?"
-				rows, err := ledger.LedgerDb.Query(querycurrency, inputs[i])
+				rows, err := db.Query(querycurrency, inputs[i])
 				if err != nil {
 					return fmt.Errorf("Could not query database (%v)", err), nil
 				}
