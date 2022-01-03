@@ -3,7 +3,6 @@ package backend
 import (
   "database/sql"
   "fmt"
-  "path"
   "regexp"
   "strings"
   "errors"
@@ -33,14 +32,13 @@ func InitBackendConnection() error {
   cfg := setting.GetConfig()
 	switch strings.ToLower(cfg.DatabaseType) {
 	case "sqlite3", "memorydb":
-
 		log.Debug("Using Sqlite3")
 		mode := "rwc"
 		if strings.ToLower(cfg.DatabaseType) == "memorydb" {
 			log.Debug("In Memory only Mode")
 			mode = "memory"
 		}
-    datafile := path.Join(cfg.DatabaseLocation, fmt.Sprintf("%s?_foreign_keys=true&parseTime=true&mode=%s", cfg.DatabaseType, mode))
+    datafile := fmt.Sprintf("%s?_foreign_keys=true&parseTime=true&mode=%s", cfg.DatabaseLocation, mode)
     if mode == "memory" {
       datafile = fmt.Sprintf("%s?_foreign_keys=true&parseTime=true&mode=%s", ":memory:", mode)
     }

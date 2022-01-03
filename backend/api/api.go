@@ -105,7 +105,10 @@ func NewGin() *gin.Engine {
 
 	InitLoginHandler()
 	InitUsersDatabase()
-  _ = backend.InitBackendConnection()
+  err := backend.InitBackendConnection()
+  if err != nil {
+		log.Errorf("Could not Initialise Backend Connection (%v)", err)
+  }
 	register(m)
 
 	return m

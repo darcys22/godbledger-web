@@ -1,16 +1,17 @@
 package setting
 
 import (
-	"fmt"
-	"net/url"
-	"os"
-	"path"
-	"path/filepath"
-	"runtime"
-	"strings"
+  "fmt"
+  "net/url"
+  "os"
+  "os/user"
+  "path"
+  "path/filepath"
+  "runtime"
+  "strings"
 
-	"github.com/sirupsen/logrus"
-	ini "gopkg.in/ini.v1"
+  "github.com/sirupsen/logrus"
+  ini "gopkg.in/ini.v1"
 )
 
 var (
@@ -449,17 +450,44 @@ func readSecuritySettings(iniFile *ini.File, cfg *Cfg) error {
 	return nil
 }
 
+func homeDir() string {
+  if home := os.Getenv("HOME"); home != "" {
+    return home
+  }
+  if usr, err := user.Current(); err == nil {
+    return usr.HomeDir
+  }
+  return ""
+}
+
+// DefaultDataDir is the default data directory to use for the databases and other
+// persistence requirements.
+func DefaultGoDBLedgerDataDir() string {
+  // Try to place the data folder in the user's home dir
+  home := homeDir()
+  if home != "" {
+    if runtime.GOOS == "darwin" {
+      return filepath.Join(home, "Library", "ledger")
+    } else if runtime.GOOS == "windows" {
+      return filepath.Join(home, "AppData", "Roaming", "ledger")
+    } else {
+      return filepath.Join(home, ".ledger")
+    }
+  }
+  // As we cannot guess a stable location, return empty and handle later
+  return ""
+}
+
 func readBackendSettings(iniFile *ini.File, cfg *Cfg) error {
 	server := iniFile.Section("backend")
 	var err error
-
 
 	cfg.DatabaseType, err = valueAsString(server, "database_type", "sqlite3")
 	if err != nil {
 		return err
 	}
 
-	cfg.DatabaseLocation, err = valueAsString(server, "database_location", "~/.ledger/ledgerdata/ledger.db")
+	cfg.DatabaseLocation, err = valueAsString(server, "database_location", fmt.Sprintf("%s/ledgerdata/ledger.db", DefaultGoDBLedgerDataDir()))
 	if err != nil {
 		return err
 	}
