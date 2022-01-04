@@ -35,6 +35,11 @@ ENV GDBL_CONFIG_FILE ~/.ledger/config.docker.toml
 COPY --from=builder /go/src/github.com/darcys22/godbledger-web/bin/linux-amd64/* ./
 COPY --from=builder /go/src/github.com/darcys22/godbledger-web/conf/* ./conf/
 
+RUN echo '[backend]' >> ./conf/defaults.ini
+RUN echo 'database_type= mysql' >> ./conf/defaults.ini
+RUN echo 'database_location= godbledger:password@tcp(db:3306)/ledger?charset=utf8mb4,utf8' >> ./conf/defaults.ini
+RUN echo 'godbledger_host= app' >> ./conf/defaults.ini
+
 RUN mkdir -p public && \
   mkdir -p public/app && \
   mkdir -p public/css && \

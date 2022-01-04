@@ -28,7 +28,7 @@ func main() {
 	logrus.SetFormatter(customFormatter)
 	var (
 		configFile = flag.String("config", "", "path to config file")
-		homePath   = flag.String("homepath", "", "path to grafana install/home path, defaults to working directory")
+		homePath   = flag.String("homepath", "", "path to godbledger install/home path, defaults to working directory")
 		pidFile    = flag.String("pidfile", "", "path to pid file")
 
 		v = flag.Bool("v", false, "prints current version and exits")
