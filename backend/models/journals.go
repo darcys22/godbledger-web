@@ -55,6 +55,8 @@ func (j *GetJournals) SearchJournals() error {
 
   db := backend.GetConnection()
 
+  log.Infof("backend info: %v", db)
+
 	queryDateStart := time.Now().Add(time.Hour * 24 * 365 * -100)
 	queryDateEnd := time.Now().Add(time.Hour * 24 * 365 * 100)
 
