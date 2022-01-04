@@ -92,7 +92,7 @@ func (j *GetJournals) SearchJournals() error {
 	rows, err := db.Query(queryDB, queryDateStart, queryDateEnd)
 
 	if err != nil {
-		return fmt.Errorf("Could not query database (%v)", err)
+		return fmt.Errorf("Could not query database for SearchJournals (%v)", err)
 	}
 	defer rows.Close()
 
@@ -257,7 +257,7 @@ func GetJournalCommand(id string) (PostJournalCommand, error) {
 	rows, err := db.Query(queryDB, id)
 
 	if err != nil {
-		return j, fmt.Errorf("Could not query database (%v)", err)
+		return j, fmt.Errorf("Could not query database for GetJournalCommand (%v)", err)
 	}
 	defer rows.Close()
 
