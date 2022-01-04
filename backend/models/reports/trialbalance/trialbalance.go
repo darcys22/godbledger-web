@@ -22,6 +22,7 @@ var trialBalanceColumns = map[string]string{
 
 func TrialBalanceReport(req reports.ReportsRequest) (error, *reports.ReportResult) {
   db := backend.GetConnection()
+  log.Infof("TODO sean remove this backend info: %v", db)
 	queryDateStart, err := reports.ProcessDate(req.Reports[0].Options.StartDate)
 	if err != nil {
 		return fmt.Errorf("Could not process start date (%v)", err), nil
