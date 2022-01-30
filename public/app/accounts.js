@@ -56,7 +56,7 @@ function getAccounts() {
                     editBtn.className = 'btn btn-info btn-rounded btn-sm m-2 editBtn';
                     editBtn.setAttribute('data-param',row[1]);
                     editBtn.innerHTML = "Edit";
-                    //span.appendChild(editBtn)
+                    span.appendChild(editBtn)
                     var deleteBtn = document.createElement('button');
                     deleteBtn.className = 'btn btn-danger btn-rounded btn-sm m-2 deleteBtn';
                     deleteBtn.setAttribute('data-param',row[1]);
@@ -68,11 +68,11 @@ function getAccounts() {
             }
         ]
       });
+      //TODO sean remove this
       $(".editBtn").on('click', function(event){
           event.stopPropagation();
           event.stopImmediatePropagation();
-          console.log("testsing1 edit");
-          console.log(this.getAttribute('data-param'));
+          editAccount(this.getAttribute('data-param'));
       });
 
       $(".deleteBtn").on('click', function(event){
@@ -99,6 +99,34 @@ function getAccounts() {
           })
           .catch(error => console.error(error))
       });
+    })
+    .catch(error => console.error(error))
+  } catch { error => console.error(error)
+  }
+
+}
+
+function editAccount(id) {  
+  console.log(id);
+  try {
+    fetch('/api/accounts/'+id)
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      //$('#editAccounts')[0].reset();
+      //TODO sean this needs to populate the edit Account modal
+      //account = new Account();
+      //clearAccountModal();
+      //clearAccountTags();
+      //account._tagCount = 0;
+      //account.setID(id);
+      //document.getElementsByName("code")[0].value = data._code;
+      //document.getElementsByName("name")[0].value = data._name;
+      //for (var tag in data._tags) {
+        //account.addNewTag();
+        //document.getElementsByName("line-item[" +(journal._lineItemCount)+ "][narration]")[0].value = data._lineItems[lineItem]._description;
+      //}
+      $("#accountsModal").modal() 
     })
     .catch(error => console.error(error))
   } catch { error => console.error(error)
