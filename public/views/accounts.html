@@ -23,6 +23,18 @@
 			</div>
 		</section>
     <div class="messagealert" id="alert_container"></div>
+    <div class="container mb-5 text-right" id="actionButtonsContainer">
+      <div class = "btn-group">
+         <button type = "button" class = "btn btn-primary dropdown-toggle" data-toggle = "dropdown">
+            Import Accounts
+            <span class = "caret"></span>
+         </button>
+         <div class="dropdown-menu dropdown-menu-right">
+          <a class="dropdown-item" href="#" id="importDefaultAccounts">Import Default Chart of Accounts</a>
+          <!--<a class="dropdown-item" href="#">Import from weblink</a>-->
+        </div>
+      </div>
+    </div>
     <div class="container" id="maincontainer">Loading Chart of Accounts...</div>
     <div class="modal fade" id="accountsModal" tabindex="-1" role="dialog" aria-labelledby="accountsModal">
       <div class="modal-dialog modal-lg" role="document">
@@ -34,14 +46,13 @@
             </button>
           </div>
           <div class = "modal-body">
-            <form class="well form-horizontal" role="form" id="addAccount">
+            <form class="well form-horizontal" role="form" id="editAccount">
               <fieldset>
                 <!-- Text input-->
                 <div class="form-group">
                   <label class="col-md-2 control-label">Code</label>  
-                  <div class="col-md-3 inputGroupContainer">
+                  <div class="col-md-5 inputGroupContainer">
                     <div class="input-group">
-                      <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
                       <input name="code" placeholder="" class="form-control" type="text" tabindex="1">
                       <div class="help-block with-errors"></div>
                     </div>
@@ -50,31 +61,34 @@
                 <!-- Text input-->
                 <div class="form-group">
                   <label class="col-md-2 control-label">Name</label>  
-                  <div class="col-md-10 inputGroupContainer">
+                  <div class="col-md-5 inputGroupContainer">
                     <div class="input-group">
-                      <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-                      <textarea name="narration" placeholder="" class="form-control"  type="text" tabindex="2"></textarea>
+                      <input name="name" placeholder="" class="form-control" type="text" tabindex="1">
                     </div>
                   </div>
                 </div>
                 <br>
                 <div class="inputGroupContainer">
                   <div class="input-group">
-                  <table id="journal" class="table table-bordered table-condensed">
-                    <tr><th>#</th><th>Tag</th><th></th></tr>
+                  <table id="tags" class="table table-bordered table-condensed">
+                    <tr><th class="text-center">#</th><th>Tag</th><th></th></tr>
 
                 </table>
                 </div>
                 </div>
 
-                <div class="totals">
-
-                  <button class="btn btn-primary" id="addNewTagButton" onclick="" tabindex="-1"><span class="text" data-automationid="Add a new tag-button" tabindex="-1">Add a new tag</span></button>
+                <div class="form-group">
+                  <div class="col-md-4 mb-2">
+                    <input name="newtag" placeholder="" id="newTagName" class="form-control" type="text" tabindex="1">
+                  </div>
+                  <div class="col-md-3 mb-2">
+                    <button class="btn btn-primary" id="addNewTagButton" onclick="" tabindex="-1"><span class="text" data-automationid="Add a new tag-button" tabindex="-1">Add a new tag</span></button>
+                  </div>
                 </div>
                 <div class="actions text-right">
                   <div class="right">
                     <button class="btn btn-light btn-sm"  data-dismiss="modal" tabindex="-1"><span class="text" data-automationid="Cancel-button" tabindex="-1">Cancel</span></button>
-                    <button type="submit" class="btn btn-success" id="saveAccountButton" tabindex="-1"><span class="text" data-automationid="Save-button" tabindex="-1">Post Journal</span></button>
+                    <button type="submit" class="btn btn-success" id="saveAccountButton" tabindex="-1"><span class="text" data-automationid="Save-button" tabindex="-1">Update Account</span></button>
                   </div>
                 </div>
           </fieldset>

@@ -1,16 +1,11 @@
 package api
 
 import (
-	//"flag"
 	"net/http"
-
-	//"github.com/darcys22/godbledger/godbledger/cmd"
-	//"github.com/darcys22/godbledger/godbledger/ledger"
 
 	m "github.com/darcys22/godbledger-web/backend/models"
 
 	"github.com/gin-gonic/gin"
-	//"github.com/urfave/cli/v2"
 )
 
 func GetAccounts(c *gin.Context) {
@@ -19,6 +14,7 @@ func GetAccounts(c *gin.Context) {
 	if err != nil {
 		log.Errorf("Could not get journal listing (%v)", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+    return
 	}
 	c.JSON(http.StatusOK, accountsModel)
 }
@@ -33,15 +29,16 @@ func PostAccount(c *gin.Context) {
 
 	if err := account.Save(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+    return
 	}
 	c.JSON(http.StatusOK, account)
 }
 
 func DeleteAccount(c *gin.Context) {
 	id := c.Params.ByName("id")
-
 	if err := m.DeleteAccountCommand(id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+    return
 	}
 	c.String(http.StatusOK, "Success")
 }
@@ -52,6 +49,7 @@ func GetAccount(c *gin.Context) {
 	account, err := m.GetAccountCommand(id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+    return
 	}
 
 	c.JSON(http.StatusOK, account)
@@ -72,11 +70,27 @@ func PostAccountTag(c *gin.Context) {
 }
 
 func DeleteAccountTag(c *gin.Context) {
-	//account := c.Params.ByName("account")
-	//tag := c.Params.ByName("tag")
+  account := c.Params.ByName("account")
+  tag := c.Params.ByName("tag")
+  if err := m.DeleteAccountTagCommand(account, tag); err != nil {
+    c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+    return
+  }
+  c.String(http.StatusOK, "Success")
+}
 
-	//if err := m.DeleteAccountTagCommand(account, tag); err != nil {
-		//c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	//}
-	//c.String(http.StatusOK, "Success")
+type importAccounts struct{
+    Name string `json:"name" binding:"required"`
+}
+
+func PostImportAccounts(c *gin.Context) {
+  var postimportaccounts importAccounts
+  c.BindJSON(&postimportaccounts)
+
+	err := m.ImportAccountsCommand(postimportaccounts.Name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+    return
+	}
+	c.JSON(http.StatusOK, "Success")
 }

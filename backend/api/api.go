@@ -60,7 +60,8 @@ func register(r *gin.Engine) {
 	r.GET("/api/accounts/:id", AuthorizeJWT(), GetAccount)
 	r.DELETE("/api/accounts/:id", AuthorizeJWT(), DeleteAccount)
 	r.POST("/api/accounttags", AuthorizeJWT(), PostAccountTag)
-	r.DELETE("/api/accounttags/:account/:tagid", AuthorizeJWT(), DeleteAccountTag)
+	r.DELETE("/api/accounttags/deletetag/:account/:tag", AuthorizeJWT(), DeleteAccountTag)
+	r.POST("/api/accounts/import", AuthorizeJWT(), PostImportAccounts)
 
 	// Reconciliation Page
 	r.GET("/reconcile", AuthorizeJWT(), Reconcile)
