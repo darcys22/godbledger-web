@@ -9,6 +9,21 @@ $(document).ready(function() {
     });
 });
 
+//TODO sean i brought this in here to make a click on button but probably dont need it yet
+//const refreshButton = document.getElementById('refresh');
+
+//refreshButton.addEventListener('click', async _ => {
+  //try {
+    //fetch('/api/journals/')
+    //.then(response => response.json())
+    //.then(data => {
+      //window.transactions = data.Journals;
+      //tableCreate()
+    //})
+    //.catch(error => console.error(error))
+//} catch { error => console.error(error)
+//}});
+
 $('.selectaccount').on("select2:select", function(event) {
   var value = $(event.currentTarget).find("option:selected").text();
   getTransactions(value);

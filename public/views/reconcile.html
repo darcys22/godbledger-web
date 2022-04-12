@@ -5,7 +5,7 @@
 				<h2>Unreconciled Transactions</h2>
         <div class="container">
           <div class="row justify-content-md-center">
-            <div class="col-12 col-md-3"></div>
+            <div class="col-11 col-md-3"></div>
             <div class="col-sm">
               <select class="selectaccount" style="width: 100%, height: 100%"></select>
             </div>
@@ -14,12 +14,100 @@
                 Refresh Table
               </button>
             </div>
+            <div class="col-sm">
+              <button type="button" id="import" class="btn btn-primary my-w" data-toggle="modal" data-target="#journalModal" title="Import new transactions into the account" >
+                Import
+              </button>
+            </div>
             <div class="col-12 col-md-3"></div>
           </div>
         </div>
 			</div>
 		</section>
     <div class="container" id="maincontainer">Select an account to view unreconciled transactions</div>
+
+
+<!--Modal for importing transactions-->
+<div class="modal fade" id="journalModal" tabindex="-1" role="dialog" aria-labelledby="importModal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Import Transactions</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" tabindex="-1">
+          <span aria-hidden="true" tabindex="-1">&times;</span>
+        </button>
+      </div>
+      <div class = "modal-body">
+        <form class="well form-horizontal" role="form" id="addJournal">
+          <fieldset>
+            <div class="row">
+              <div class="col-md-3">
+                <!-- Number input-->
+                <div class="form-group">
+                  <label class="col-md-3 control-label">Number of Columns</label>  
+                  <div class="col-md-3 inputGroupContainer">
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                      <input name="numberColumns" placeholder="# columns" class="form-control" type="number" tabindex="1">
+                      <div class="help-block with-errors"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <!-- Number input-->
+                <div class="form-group">
+                  <label class="col-md-3 control-label">First Row</label>  
+                  <div class="col-md-3 inputGroupContainer">
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                      <input name="startRow" placeholder="first row" class="form-control" type="number" tabindex="1">
+                      <div class="help-block with-errors"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <!-- Number input-->
+                <div class="form-group">
+                  <label class="col-md-3 control-label">Last Row</label>  
+                  <div class="col-md-3 inputGroupContainer">
+                    <div class="input-group">
+                      <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                      <input name="lastRow" placeholder="last row" class="form-control" type="number" tabindex="1">
+                      <div class="help-block with-errors"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <br>
+            <div class="inputGroupContainer">
+              <div class="input-group">
+              <table id="importColumns" class="table table-bordered table-condensed">
+                <tr><th>#</th><th>Description</th></tr>
+            </table>
+            </div>
+            </div>
+
+            <div class="file">
+
+              <button class="btn btn-primary" id="addCSVButton" onclick="" tabindex="-1"><span class="text" data-automationid="import-csv-button" tabindex="-1">Choose CSV</span></button>
+            </div>
+            <div class="actions text-right">
+              <div class="right">
+                <button class="btn btn-light btn-sm"  data-dismiss="modal" tabindex="-1"><span class="text" data-automationid="Cancel-button" tabindex="-1">Cancel</span></button>
+                <button type="submit" class="btn btn-success" id="saveCSVButton" tabindex="-1"><span class="text" data-automationid="Save-button" tabindex="-1">Post CSV Transactions</span></button>
+              </div>
+            </div>
+      </fieldset>
+    </form>
+  </div>
+</div>
+</div>
+</div>
+<!-- End Modal for importing transactions-->
+
 
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/b-print-1.7.1/fh-3.1.9/datatables.min.css"/>
     <link rel='shortcut icon' type='image/x-icon' href='img/favicon.ico'/>
