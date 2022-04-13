@@ -9,21 +9,6 @@ $(document).ready(function() {
     });
 });
 
-//TODO sean i brought this in here to make a click on button but probably dont need it yet
-//const refreshButton = document.getElementById('refresh');
-
-//refreshButton.addEventListener('click', async _ => {
-  //try {
-    //fetch('/api/journals/')
-    //.then(response => response.json())
-    //.then(data => {
-      //window.transactions = data.Journals;
-      //tableCreate()
-    //})
-    //.catch(error => console.error(error))
-//} catch { error => console.error(error)
-//}});
-
 $('.selectaccount').on("select2:select", function(event) {
   var value = $(event.currentTarget).find("option:selected").text();
   getTransactions(value);
@@ -101,6 +86,41 @@ function getTransactions(account) {
 
 function clearMain() {
   $(document.getElementById("maincontainer")).empty();;
+}
+
+function clearCSVColumns() {
+  var rows = $('#importColumns > tr');
+  rows.each(function(idx, li) {
+    var csvcolumn = $(li);
+    csvcolumn.remove();
+  });
+}
+
+function addCSVColumns(index) {
+  var tbdy = document.getElementById('importColumns');
+  var tr = document.createElement('tr');
+  var td = document.createElement('td');
+
+  //ID of the Journal
+  td.appendChild(document.createTextNode(index));
+  tr.appendChild(td);
+
+  //Select element for Description of column
+  var td = document.createElement('td');
+  var select = document.createElement('select');
+  select.className = 'js-example-basic-single form-control';
+  select.name = `csv-description[${index}][description]`;
+  td.appendChild(select);
+  tr.appendChild(td);
+
+  //Append the Row to the Table
+  tbdy.appendChild(tr);
+
+  $(`select[name ="csv-description[${index}][description]"]`).select2({
+    theme: "bootstrap",
+    placeholder: "Select Description",
+    data: window.CSVColumnTypes,
+  })
 }
 
 function createConfigWellAndTransactionsTable(config) {
@@ -214,3 +234,35 @@ function createConfigWellAndTransactionsTable(config) {
   table.classList.add("m-3")
   container.appendChild(table);
 }
+
+window.CSVColumnTypes = [
+    {
+        id: 0,
+        text: 'date'
+    },
+    {
+        id: 1,
+        text: 'description'
+    },
+    {
+        id: 2,
+        text: 'amount'
+    },
+    {
+        id: 3,
+        text: 'debit'
+    },
+    {
+        id: 4,
+        text: 'credit'
+    }
+];
+
+function main() {
+  clearCSVColumns();
+  window.csvColumns = 5;
+  for (let i = 0; i < window.csvColumns; i++) {
+    addCSVColumns(i);
+  }
+}
+main();

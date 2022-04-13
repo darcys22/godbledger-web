@@ -41,11 +41,11 @@
         <form class="well form-horizontal" role="form" id="addJournal">
           <fieldset>
             <div class="row">
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <!-- Number input-->
                 <div class="form-group">
-                  <label class="col-md-3 control-label">Number of Columns</label>  
-                  <div class="col-md-3 inputGroupContainer">
+                  <label class="control-label">Number Columns</label>
+                  <div class="inputGroupContainer">
                     <div class="input-group">
                       <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
                       <input name="numberColumns" placeholder="# columns" class="form-control" type="number" tabindex="1">
@@ -54,11 +54,11 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <!-- Number input-->
                 <div class="form-group">
-                  <label class="col-md-3 control-label">First Row</label>  
-                  <div class="col-md-3 inputGroupContainer">
+                  <label class="control-label">First Row</label>
+                  <div class="inputGroupContainer">
                     <div class="input-group">
                       <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
                       <input name="startRow" placeholder="first row" class="form-control" type="number" tabindex="1">
@@ -67,11 +67,11 @@
                   </div>
                 </div>
               </div>
-              <div class="col-md-3">
+              <div class="col-md-4">
                 <!-- Number input-->
                 <div class="form-group">
-                  <label class="col-md-3 control-label">Last Row</label>  
-                  <div class="col-md-3 inputGroupContainer">
+                  <label class="control-label">Last Row</label>
+                  <div class="inputGroupContainer">
                     <div class="input-group">
                       <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
                       <input name="lastRow" placeholder="last row" class="form-control" type="number" tabindex="1">
@@ -82,6 +82,7 @@
               </div>
             </div>
             <br>
+            <h5> Column Descriptions </h5>
             <div class="inputGroupContainer">
               <div class="input-group">
               <table id="importColumns" class="table table-bordered table-condensed">
@@ -89,11 +90,23 @@
             </table>
             </div>
             </div>
-
             <div class="file">
 
-              <button class="btn btn-primary" id="addCSVButton" onclick="" tabindex="-1"><span class="text" data-automationid="import-csv-button" tabindex="-1">Choose CSV</span></button>
+              <div class="container">
+                <div class="input-group">
+                  <div class="custom-file">
+                    <input type="file" id="addCSVButton" name="addCSVButton" class="custom-file-input">
+                    <label class="custom-file-label" for="customFileINput">Select Source Transactions CSV</label>
+                  </div>
+                  <div class="input-group-append">
+                    <button class="btn btn-primary" type="button" id="customFileInput">Upload CSV</button>
+                  </div>
+                </div>
+              </div>
+
+
             </div>
+            <br>
             <div class="actions text-right">
               <div class="right">
                 <button class="btn btn-light btn-sm"  data-dismiss="modal" tabindex="-1"><span class="text" data-automationid="Cancel-button" tabindex="-1">Cancel</span></button>
