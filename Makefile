@@ -32,7 +32,7 @@ run: ## Run Server
 build-docker: docker-build
 
 docker-build:
-	docker build -t godbledger-web:$(VERSION) -t godbledger-web:latest -f ./utils/Dockerfile.build-web .
+	docker build --platform linux/amd64 -t godbledger-web:$(VERSION) -t godbledger-web:latest -f ./utils/Dockerfile.build-web .
 
 docker-login:
 	@$(if $(strip $(shell docker ps | grep godbledger-web)), @docker exec -it godbledger-web /bin/ash || 0, @docker run -it --rm --entrypoint /bin/ash godbledger-web:$(VERSION) )
