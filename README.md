@@ -20,7 +20,12 @@ This will open a webserver over port :3000 that you can navigate to with your we
 
 Godbledger comes with a `docker-compose.yml` file and some make targets to help build the `godbledger` server and the `godbledger-web` server into a docker container and launch it with a mysql backend, configuring both to store state inside the host's default DATA_DIR so that state persists by default across restarts of the containers.
 
-1. Build the container image
+
+1. Build the `godbledger` server image
+
+    - follow the "Build the container image" step here https://github.com/darcys22/godbledger#running-in-docker or the steps described in the [Deploy GUI Web Server using Docker](https://github.com/darcys22/godbledger/wiki/Deploy-GUI-Web-Server-using-Docker) wiki page.
+
+1. Build the `godbledger-web` container image
 
     ```
     make docker-build
