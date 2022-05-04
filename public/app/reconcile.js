@@ -43,12 +43,10 @@ function getTransactions(account) {
     .then(data => {
       //Clear the page and create a table
       clearMain();
-      console.log(data);
       createConfigWellAndTransactionsTable(data.options);
       cols = data.columns.map((item) => ({ title: item , className: "dt-right"}))
       cols.push({title:"", className: "dt-right"})
       dta = data.result.map((item) => (item.row))
-      console.log(dta)
       var table = $('#transactionstable')
       table.DataTable({
         dom: 'Bfrtip',
@@ -89,7 +87,7 @@ function clearMain() {
 }
 
 function clearCSVColumns() {
-  var rows = $('#importColumns > tr');
+  var rows = $('#importColumns > tbody > tr');
   rows.each(function(idx, li) {
     var csvcolumn = $(li);
     csvcolumn.remove();
@@ -97,7 +95,7 @@ function clearCSVColumns() {
 }
 
 function addCSVColumns(index) {
-  var tbdy = document.getElementById('importColumns');
+  var tbdy = document.getElementById('importColumns').children[0];
   var tr = document.createElement('tr');
   var td = document.createElement('td');
 
@@ -120,7 +118,33 @@ function addCSVColumns(index) {
     theme: "bootstrap",
     placeholder: "Select Description",
     data: window.CSVColumnTypes,
+    width: 'auto',
   })
+}
+
+function deleteCSVColumns(index) {
+  $('#importColumns > tbody > tr').eq(Number(index)).remove();
+}
+
+function processCSVColumns() {
+  var rowCount = $('#importColumns > tbody > tr').length;
+  if (rowCount < window.csvColumns) {
+    for (let i = rowCount; i < window.csvColumns; i++) {
+      addCSVColumns(i);
+    }
+  } else {
+    for (let i = rowCount; i >= window.csvColumns; i--) {
+      deleteCSVColumns(i);
+    }
+  }
+}
+
+function updateCSVInput() {
+  if ($('input[name=numberColumns]').val() > 0)
+  {
+    window.csvColumns = Number($('input[name=numberColumns]').val());
+    processCSVColumns();
+  }
 }
 
 function createConfigWellAndTransactionsTable(config) {
@@ -235,6 +259,7 @@ function createConfigWellAndTransactionsTable(config) {
   container.appendChild(table);
 }
 
+
 window.CSVColumnTypes = [
     {
         id: 0,
@@ -260,9 +285,8 @@ window.CSVColumnTypes = [
 
 function main() {
   clearCSVColumns();
+  $('input[name=numberColumns]').val("5");
   window.csvColumns = 5;
-  for (let i = 0; i < window.csvColumns; i++) {
-    addCSVColumns(i);
-  }
+  processCSVColumns();
 }
 main();

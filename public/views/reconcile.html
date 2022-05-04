@@ -48,7 +48,7 @@
                   <div class="inputGroupContainer">
                     <div class="input-group">
                       <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-                      <input name="numberColumns" placeholder="# columns" class="form-control" type="number" tabindex="1">
+                      <input name="numberColumns" placeholder="# columns" class="form-control" type="number" tabindex="1" onchange="updateCSVInput();">
                       <div class="help-block with-errors"></div>
                     </div>
                   </div>
@@ -96,7 +96,7 @@
                 <div class="input-group">
                   <div class="custom-file">
                     <input type="file" id="addCSVButton" name="addCSVButton" class="custom-file-input">
-                    <label class="custom-file-label" for="customFileINput">Select Source Transactions CSV</label>
+                    <label class="custom-file-label" for="custom-file-input">Select Source Transactions CSV</label>
                   </div>
                   <div class="input-group-append">
                     <button class="btn btn-primary" type="button" id="customFileInput">Upload CSV</button>
