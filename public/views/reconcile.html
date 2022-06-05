@@ -119,6 +119,72 @@
 </div>
 </div>
 </div>
+<div class="modal fade" id="reconcileModal" tabindex="-1" role="dialog" aria-labelledby="reconcileModal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reconcile Entry</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" tabindex="-1">
+          <span aria-hidden="true" tabindex="-1">&times;</span>
+        </button>
+      </div>
+      <div class = "modal-body">
+        <form class="well form-horizontal" role="form" id="addJournal">
+          <fieldset>
+            <!-- Text input-->
+            <div class="form-group">
+              <label class="col-md-2 control-label">Date</label>  
+              <div class="col-md-3 inputGroupContainer">
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                  <input name="date" placeholder="YYYY-MM-DD" class="form-control" pattern="^\d{4}-\d{1,2}-\d{1,2}$" type="text" tabindex="1">
+                  <div class="help-block with-errors"></div>
+                </div>
+              </div>
+            </div>
+            <!-- Text input-->
+            <div class="form-group">
+              <label class="col-md-2 control-label">Narration</label>  
+              <div class="col-md-10 inputGroupContainer">
+                <div class="input-group">
+                  <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                  <textarea name="narration" placeholder="Journal Narration" class="form-control"  type="text" tabindex="2"></textarea>
+                </div>
+              </div>
+            </div>
+            <br>
+            <div class="inputGroupContainer">
+              <div class="input-group">
+              <table id="journal" class="table table-bordered table-condensed">
+                <tr><th>#</th><th>Description</th><th>Account</th><th>Debit</th><th>Credit</th></tr>
+                <tfoot class="hiddenfooter">
+                    <td class="hiddenfooter"></td>
+                    <td class="hiddenfooter"></td>
+                    <td class="hiddenfooter"></td>
+                    <td class="hiddenfooter"><span><input type="text" id="invoiceTotalDebit" readonly class="totalField money" value="0.00" tabindex="-1"></span></td>
+                    <td class="hiddenfooter"><span><input type="text" id="invoiceTotalCredit" readonly class="totalField money" value="0.00" tabindex="-1"></span></td>
+                </tfoot>
+
+            </table>
+            </div>
+            </div>
+
+            <div class="totals">
+
+              <button class="btn btn-primary" id="addNewLineItemButton" onclick="" tabindex="-1"><span class="text" data-automationid="Add a new line-button" tabindex="-1">Add a new line</span></button>
+            </div>
+            <div class="actions text-right">
+              <div class="right">
+                <button class="btn btn-light btn-sm"  data-dismiss="modal" tabindex="-1"><span class="text" data-automationid="Cancel-button" tabindex="-1">Cancel</span></button>
+                <button type="submit" class="btn btn-success" id="saveJournalButton" tabindex="-1"><span class="text" data-automationid="Save-button" tabindex="-1">Post Journal</span></button>
+              </div>
+            </div>
+      </fieldset>
+    </form>
+  </div>
+</div>
+</div>
+</div>
 <!-- End Modal for importing transactions-->
 
 
@@ -130,6 +196,9 @@
     <script type="text/javascript" src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.25/b-1.7.1/b-html5-1.7.1/b-print-1.7.1/fh-3.1.9/datatables.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+    <script src="app/moment-with-locales.js"></script> 
+    <script type="text/javascript" src="app/utils.js"></script> 
+    <script type="text/javascript" src="app/journal.js"></script> 
     <script type="text/javascript" src="app/reconcile.js"></script> 
 <!--Embed the footer.html template at this location-->
 {{ template "footer.html" .}}

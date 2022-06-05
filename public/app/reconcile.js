@@ -61,7 +61,7 @@ function getTransactions(account) {
                 "render": function ( data, type, row ) {
                     return `
                       <div class="btn-group">
-                        <button type="button" class="btn btn-info btn-sm">New Journal</button>
+                        <button type="button" class="btn btn-info btn-sm" onclick="editJournal(1,1)">New Journal</button>
                         <button type="button" class="btn btn-info btn-sm dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                           <span class="sr-only">Toggle Dropdown</span>
                         </button>
@@ -79,6 +79,7 @@ function getTransactions(account) {
     .catch(error => console.error(error))
   } catch { error => console.error(error)
   }
+  //TODO sean the editJournal funct in onclick above needs to actually pass in some parameters
 
 }
 
@@ -259,7 +260,6 @@ function createConfigWellAndTransactionsTable(config) {
   container.appendChild(table);
 }
 
-
 window.CSVColumnTypes = [
     {
         id: 0,
@@ -282,6 +282,75 @@ window.CSVColumnTypes = [
         text: 'credit'
     }
 ];
+
+function editJournal(index,id) {  
+  try {
+    fetch('/api/journals/'+id)
+    .then(response => response.json())
+    .then(data => {
+      $('#addJournal')[0].reset();
+      journal = new Journal();
+      clearJournalDateDescription();
+      clearJournalLineItems();
+      journal._lineItemCount = 0;
+      journal.setID(id);
+      document.getElementsByName("date")[0].value = formatformaldate(data._date);
+      document.getElementsByName("narration")[0].value = data._narration;
+      for (var lineItem in data._lineItems) {
+        journal.addNewLineItem();
+        document.getElementsByName("line-item[" +(journal._lineItemCount)+ "][narration]")[0].value = data._lineItems[lineItem]._description;
+        var amount = parseInt(data._lineItems[lineItem]._amount);
+        if (amount > 0) {
+          document.getElementsByName("line-item[" +journal._lineItemCount+ "][debit]")[0].value = amount;
+        } else {
+          document.getElementsByName("line-item[" +journal._lineItemCount+ "][credit]")[0].value = -amount;
+        }
+        var account = data._lineItems[lineItem]._account;
+        var accountSelect = $(`select[name ="line-item[${journal._lineItemCount}][account]"]`);
+        var option = new Option(account, '0', true, true);
+        accountSelect.append(option).trigger('change');
+      }
+      updateTotal();
+      $("#reconcileModal").modal() 
+    })
+    .catch(error => console.error(error))
+  } catch { error => console.error(error)
+  }
+}
+
+$('#reconcileModal').on('shown.bs.modal', function () {
+  $('input[name=date').trigger('focus');
+})
+
+$('#reconcileModal').on('hidden.bs.modal', function () {
+  clearJournalDateDescription();
+  clearJournalLineItems();
+  journal = new Journal();
+  $('#addJournal')[0].reset();
+  updateTotal()
+  $('#saveJournalButton').prop('disabled', true);
+  window.now = moment();
+})
+
+var journal = new Journal();
+
+// ...and hook up the add new line item button
+var newLineItemButton = document.getElementById("addNewLineItemButton");
+if (newLineItemButton.addEventListener) {
+    newLineItemButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        journal.addNewLineItem();
+    }, false);
+}
+else if (newLineItemButton.attachEvent) {
+    newLineItemButton.attachEvent('onclick', function(e) {
+        e.preventDefault();
+        journal.addNewLineItem();
+    });
+}
+else {
+    // Very old browser, complain
+}
 
 function main() {
   clearCSVColumns();
