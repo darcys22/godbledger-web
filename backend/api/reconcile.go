@@ -26,3 +26,19 @@ func GetUnreconciledTransactions(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, unreconciledTransactionsResult)
 }
+
+func UploadCSV(ctx *gin.Context) {
+	var request m.UploadCSVRequest
+
+	if err := ctx.BindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err, uploadCSVResult := m.UploadCSV(request)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+
+	ctx.JSON(http.StatusOK, uploadCSVResult)
+}

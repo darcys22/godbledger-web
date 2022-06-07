@@ -26,7 +26,7 @@ func mapStatic(m *gin.Engine, dir string, prefix string) {
 		headers = func() gin.HandlerFunc {
 			return func(ctx *gin.Context) {
 				ctx.Writer.Header().Set("Cache-Control", "max-age=0, must-revalidate, no-cache")
-				ctx.Next()
+        ctx.Next()
 			}
 		}
 	}
@@ -67,6 +67,7 @@ func register(r *gin.Engine) {
 	r.GET("/reconcile", AuthorizeJWT(), Reconcile)
 	r.GET("/api/reconcile/listexternalaccounts", AuthorizeJWT(), GetExternalAccountListing)
 	r.POST("/api/reconcile/listunreconciledtransactions", AuthorizeJWT(), GetUnreconciledTransactions)
+	r.POST("/api/reconcile/UploadCSV", AuthorizeJWT(), UploadCSV)
 
 	// Reports Page
 	r.GET("/reports", AuthorizeJWT(), Reports)

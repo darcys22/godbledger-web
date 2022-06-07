@@ -95,11 +95,11 @@
               <div class="container">
                 <div class="input-group">
                   <div class="custom-file">
-                    <input type="file" id="addCSVButton" name="addCSVButton" class="custom-file-input">
-                    <label class="custom-file-label" for="custom-file-input">Select Source Transactions CSV</label>
+                    <input type="file" id="addCSVButton" name="addCSVButton" class="custom-file-input" onchange="handleFiles(event)">
+                    <label class="custom-file-label" for="addCSVButton" id="CSVLabel">Select Source Transactions CSV</label>
                   </div>
                   <div class="input-group-append">
-                    <button class="btn btn-primary" type="button" id="customFileInput">Upload CSV</button>
+                    <button class="btn btn-primary" type="button" id="saveCSVButton">Upload CSV</button>
                   </div>
                 </div>
               </div>
@@ -110,7 +110,7 @@
             <div class="actions text-right">
               <div class="right">
                 <button class="btn btn-light btn-sm"  data-dismiss="modal" tabindex="-1"><span class="text" data-automationid="Cancel-button" tabindex="-1">Cancel</span></button>
-                <button type="submit" class="btn btn-success" id="saveCSVButton" tabindex="-1"><span class="text" data-automationid="Save-button" tabindex="-1">Post CSV Transactions</span></button>
+                <button type="submit" class="btn btn-success" id="postCSVButton" tabindex="-1"><span class="text" data-automationid="Save-button" tabindex="-1">Post CSV Transactions</span></button>
               </div>
             </div>
       </fieldset>

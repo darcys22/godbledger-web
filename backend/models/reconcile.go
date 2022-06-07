@@ -2,9 +2,9 @@ package models
 
 import (
 	"fmt"
+  "mime/multipart"
 
 	"github.com/darcys22/godbledger-web/backend/models/backend"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -75,6 +75,22 @@ type ReconcileResult struct {
 	Result  []UnreconciledTransactionLine  `json:"result"`
 }
 
+type UploadCSVOptions struct {
+	Account   string `json:"account"`
+	StartDate string `json:"startdate"`
+	EndDate   string `json:"enddate"`
+}
+
+type UploadCSVRequest struct {
+  Options UploadCSVOptions   `json:"options" binding:"required"`
+  Columns []string           `json:"columns" binding:"required"`
+  File *multipart.FileHeader `json:"file" binding:"required"`
+}
+
+type UploadCSVResult struct {
+  Something string
+}
+
 var testresults = []UnreconciledTransactionLine{
 	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
 	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
@@ -135,5 +151,12 @@ func UnreconciledTransactions(req UnreconciledTransactionsRequest) (error, *Reco
 		return fmt.Errorf("rows errored with (%v)", rows.Err()), &r
 	}
 
+	return nil, &r
+}
+
+func UploadCSV(req UploadCSVRequest) (error, *UploadCSVResult) {
+	var r UploadCSVResult
+  log.Info("Querying Database: %V", req.File)
+  r.Something = "Blah blah"
 	return nil, &r
 }

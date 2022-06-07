@@ -263,22 +263,26 @@ function createConfigWellAndTransactionsTable(config) {
 window.CSVColumnTypes = [
     {
         id: 0,
-        text: 'date'
+        text: 'empty'
     },
     {
         id: 1,
-        text: 'description'
+        text: 'date'
     },
     {
         id: 2,
-        text: 'amount'
+        text: 'description'
     },
     {
         id: 3,
-        text: 'debit'
+        text: 'amount'
     },
     {
         id: 4,
+        text: 'debit'
+    },
+    {
+        id: 5,
         text: 'credit'
     }
 ];
@@ -350,6 +354,72 @@ else if (newLineItemButton.attachEvent) {
 }
 else {
     // Very old browser, complain
+}
+
+function handleFiles(event) {
+  window.csvupload = event.target.files[0];
+  var csvlabel = document.getElementById("CSVLabel");
+  csvlabel.innerHTML = window.csvupload.name;
+}
+
+var csvcheckbutton = document.getElementById("saveCSVButton");
+if (csvcheckbutton.addEventListener) {
+    csvcheckbutton.addEventListener('click', function(e) {
+        e.preventDefault();
+        submitUpload();
+    }, false);
+}
+else if (csvcheckbutton.attachEvent) {
+    csvcheckbutton.attachEvent('onclick', function(e) {
+        e.preventDefault();
+        submitUpload();
+    });
+}
+else {
+    // Very old browser, complain
+}
+
+function submitUpload() {
+  var columns = [];
+  $('#importColumns > tbody > tr').each(function(index, tr) { 
+    columns.push($(tr).find('select :selected').text() || '');
+  });
+
+  var startRow = 0
+  if ($('input[name=startRow]').val() > 0)
+    startRow = Number($('input[name=startRow]').val());
+
+  var lastRow = 0
+  if ($('input[name=lastRow]').val() > 0)
+    lastRow = Number($('input[name=lastRow]').val());
+
+  const CSVRequest = {
+    options: {
+      startRow,
+      lastRow
+    },
+    columns,
+    file: window.csvupload
+  }
+
+  console.log(CSVRequest);
+
+  try {
+    fetch('/api/reconcile/UploadCSV',{
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+      body: JSON.stringify(CSVRequest)
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Successfull send to backend")
+    })
+    .catch(error => console.error(error))
+  } catch { error => console.error(error) }
+  // TODO sean step 4 submit for review
+  // TODO show a success/reject and proceed
 }
 
 function main() {
