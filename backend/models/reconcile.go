@@ -29,7 +29,7 @@ func GetExternalAccountListing(c *gin.Context) {
 			JOIN account_tag as at on at.account_id = a.account_id
 			JOIN tags as t ON t.tag_id = at.tag_id
 		WHERE
-			t.tag_name = "feed"
+			t.tag_name = "external"
 	;`
 
 	log.Debug("Querying Database")
@@ -99,29 +99,20 @@ type UploadCSVResult struct {
   Something string
 }
 
-var testresults = []UnreconciledTransactionLine{
-	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
-	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
-	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
-	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
-	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
-	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
-	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
-	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
-	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
-	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
-	UnreconciledTransactionLine{[]string{"date", "description", "amount", "AUD"}},
-}
-
 func UnreconciledTransactions(req UnreconciledTransactionsRequest) (error, *ReconcileResult) {
   db := backend.GetConnection()
 	queryDB := `
 	select
-		s.description
+		s.split_date,
+		s.description,
+		s.amount,
+    a.currency,
+    c.decimals
 	from
 		splits as s
 		join split_accounts as sa on s.split_id = sa.split_id
 		join accounts as a on sa.account_id = a.account_id
+		join currencies as c on a.currency = c.name
 	where
 		a.name = ?
 		and s.split_id not in (
@@ -132,9 +123,10 @@ func UnreconciledTransactions(req UnreconciledTransactionsRequest) (error, *Reco
 		)
 	;`
 
-	log.Debug("Querying Database")
+	log.Info("Querying Database for unreconciled transactions on account ", req.Options.Account)
 	rows, err := db.Query(queryDB, req.Options.Account)
 	if err != nil {
+    log.Info("Could not query database ", err)
 		return fmt.Errorf("Could not query database (%v)", err), nil
 	}
 	defer rows.Close()
@@ -143,17 +135,24 @@ func UnreconciledTransactions(req UnreconciledTransactionsRequest) (error, *Reco
 	r.Options = req.Options
 	r.Columns = req.Columns
 
+  var date time.time
+  description := ""
+  amount := 0
+  currency := ""
+  decimals := 0
+  amount_str := ""
 	for rows.Next() {
 		var utl UnreconciledTransactionLine
-		description := ""
-		if err := rows.Scan(&description); err != nil {
+		if err := rows.Scan(&date, &description, &amount, &currency, &decimals); err != nil {
 			return fmt.Errorf("Could not scan rows of query (%v)", err), &r
 		}
+    amount_str = fmt.Sprintf("%.2f", float64(amount)/math.Pow(10, float64(decimals)))
+		utl.Row = append(utl.Row, date)
 		utl.Row = append(utl.Row, description)
+		utl.Row = append(utl.Row, amount_str)
+		utl.Row = append(utl.Row, currency)
 		r.Result = append(r.Result, utl)
 	}
-	//TODO sean remove this
-	r.Result = testresults
 
 	if rows.Err() != nil {
 		return fmt.Errorf("rows errored with (%v)", rows.Err()), &r
