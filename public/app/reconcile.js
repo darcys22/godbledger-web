@@ -12,6 +12,7 @@ $(document).ready(function() {
 $('.selectaccount').on("select2:select", function(event) {
   var value = $(event.currentTarget).find("option:selected").text();
   getTransactions(value);
+  window.reconcile_account = value;
 });
 
 function UnreconciledTransactionsRequest(account)  {
@@ -393,33 +394,41 @@ function submitUpload() {
   if ($('input[name=lastRow]').val() > 0)
     lastRow = Number($('input[name=lastRow]').val());
 
-  const CSVRequest = {
-    options: {
-      startRow,
-      lastRow
-    },
-    columns,
-    file: window.csvupload
-  }
-
-  console.log(CSVRequest);
-
-  try {
-    fetch('/api/reconcile/UploadCSV',{
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json;charset=utf-8'
+  var reader = new FileReader();
+  reader.readAsDataURL(window.csvupload);
+  reader.onload = function () {
+    const CSVRequest = {
+      options: {
+        columns,
+        startRow,
+        lastRow
       },
-      body: JSON.stringify(CSVRequest)
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log("Successfull send to backend")
-    })
-    .catch(error => console.error(error))
-  } catch { error => console.error(error) }
-  // TODO sean step 4 submit for review
-  // TODO show a success/reject and proceed
+      account: window.reconcile_account,
+      filename: window.csvupload.name,
+      file: reader.result
+    }
+
+    try {
+      fetch('/api/reconcile/UploadCSV',{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(CSVRequest)
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log("Successfull send to backend")
+      })
+        .catch(error => console.error(error))
+    } catch { error => console.error(error) }
+    // TODO sean step 4 submit for review
+    // TODO show a success/reject and proceed
+  };
+  reader.onerror = function (error) {
+   console.error(error);
+  };
+
 }
 
 function main() {

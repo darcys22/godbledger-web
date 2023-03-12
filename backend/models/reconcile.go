@@ -2,10 +2,17 @@ package models
 
 import (
 	"fmt"
-  "mime/multipart"
+	"context"
+	"time"
+	"math"
 
 	"github.com/darcys22/godbledger-web/backend/models/backend"
+	"github.com/darcys22/godbledger-web/backend/setting"
+	"github.com/darcys22/godbledger-web/backend/models/feeds"
 	"github.com/gin-gonic/gin"
+
+	pb "github.com/darcys22/godbledger/proto/transaction"
+	"google.golang.org/grpc"
 )
 
 type ExternalAccountsResult struct {
@@ -22,7 +29,7 @@ func GetExternalAccountListing(c *gin.Context) {
 			JOIN account_tag as at on at.account_id = a.account_id
 			JOIN tags as t ON t.tag_id = at.tag_id
 		WHERE
-			t.tag_name = "external"
+			t.tag_name = "feed"
 	;`
 
 	log.Debug("Querying Database")
@@ -76,15 +83,16 @@ type ReconcileResult struct {
 }
 
 type UploadCSVOptions struct {
-	Account   string `json:"account"`
-	StartDate string `json:"startdate"`
-	EndDate   string `json:"enddate"`
+  Columns   []string           `json:"columns" binding:"required"`
+	StartRow int                 `json:"startRow"`
+	EndRow   int                 `json:"endRow"`
 }
 
 type UploadCSVRequest struct {
+  Account string             `json:"account" binding:"required"`
   Options UploadCSVOptions   `json:"options" binding:"required"`
-  Columns []string           `json:"columns" binding:"required"`
-  File *multipart.FileHeader `json:"file" binding:"required"`
+  Filename string            `json:"filename" binding:"required"`
+  File string                `json:"file" binding:"required"`
 }
 
 type UploadCSVResult struct {
@@ -156,7 +164,63 @@ func UnreconciledTransactions(req UnreconciledTransactionsRequest) (error, *Reco
 
 func UploadCSV(req UploadCSVRequest) (error, *UploadCSVResult) {
 	var r UploadCSVResult
-  log.Info("Querying Database: %V", req.File)
-  r.Something = "Blah blah"
+  rows, err := feeds.ReadCSVBankStatement(req.File, req.Options.Columns, req.Options.StartRow, req.Options.EndRow)
+	if err != nil {
+    log.Info(err)
+		return err, nil
+	}
+  log.Info(rows)
+  cfg := setting.GetConfig()
+	address := fmt.Sprintf("%s:%s", cfg.GoDBLedgerHost, cfg.GoDBLedgerPort)
+	log.WithField("address", address).Info("GRPC Dialing on port")
+	opts := []grpc.DialOption{}
+
+	if cfg.GoDBLedgerCACert != "" && cfg.GoDBLedgerCert != "" && cfg.GoDBLedgerKey != "" {
+		tlsCredentials, err := loadTLSCredentials(cfg)
+		if err != nil {
+			return fmt.Errorf("Could not load TLS credentials (%v)", err), &r
+		}
+		opts = append(opts, grpc.WithTransportCredentials(tlsCredentials))
+	} else {
+		opts = append(opts, grpc.WithInsecure())
+	}
+
+	conn, err := grpc.Dial(address, opts...)
+	if err != nil {
+		return fmt.Errorf("Could not connect to GRPC (%v)", err), &r
+	}
+	defer conn.Close()
+	client := pb.NewTransactorClient(conn)
+
+	ctxTimeout, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	transactionLines := make([]*pb.TransactionFeedLine, len(rows))
+
+	for i, feedtransaction := range rows {
+		//TODO sean get this from somewhere
+		decimals := float64(currenciesDecimals["USD"])
+		if err != nil {
+			return fmt.Errorf("Could not process the amount as a float (%v)", err), &r
+		}
+		amount := int64(feedtransaction.Amount * math.Pow(10, decimals))
+		transactionLines[i] = &pb.TransactionFeedLine{
+      Date:        feedtransaction.Date.Format("2006-01-02"),
+			Description: feedtransaction.Description,
+			Hash:        feedtransaction.Hash,
+			Amount:      amount,
+		}
+	}
+
+	grpc_req := &pb.TransactionFeedRequest{
+    Account:     req.Account,
+		Lines:       transactionLines,
+	}
+	grpc_resp, err := client.AddTransactionFeed(ctxTimeout, grpc_req)
+	if err != nil {
+		return fmt.Errorf("Could not call Add Transaction FeedMethod (%v)", err), &r
+	}
+  r.Something = grpc_resp.GetMessage()
+	log.Infof("Add Transaction Feed Response: %s", r.Something)
 	return nil, &r
 }

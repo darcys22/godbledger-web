@@ -4,7 +4,8 @@ go 1.13
 
 require (
 	github.com/Songmu/retry v0.1.0
-	github.com/darcys22/godbledger v0.7.2
+	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
+	github.com/darcys22/godbledger v0.7.9-0.20230312051516-8878f261ce9c
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/autotls v0.0.3
 	github.com/gin-gonic/contrib v0.0.0-20201101042839-6a891bf89f19
@@ -25,4 +26,5 @@ require (
 	google.golang.org/genproto v0.0.0-20220602131408-e326c6e8e9c8 // indirect
 	google.golang.org/grpc v1.47.0
 	gopkg.in/ini.v1 v1.66.6
+	src.techknowlogick.com/xgo v1.4.1-0.20220106204436-795b29d5ed5b // indirect
 )
